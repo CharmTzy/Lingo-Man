@@ -1,15 +1,16 @@
-package io.github.some_example_name.save;
+package io.github.some_example_name.managers;
+
+import io.github.some_example_name.save.ISaveable;
+import io.github.some_example_name.save.SaveData;
 
 import java.util.HashMap;
 import java.util.Map;
 
+public class SaveManager {
 
-public abstract class AbstractSaveManager {
-
-    /* Store saveables by their ID. */
     private final Map<String, ISaveable> saveables;
 
-    protected AbstractSaveManager() {
+    public SaveManager() {
         this.saveables = new HashMap<>();
     }
 
@@ -48,10 +49,15 @@ public abstract class AbstractSaveManager {
         deleteFile(fileName);
     }
 
+    protected void writeToFile(String fileName, Map<String, SaveData> dataMap) {
+        throw new UnsupportedOperationException("writeToFile must be implemented by a subclass.");
+    }
 
-    protected abstract void writeToFile(String fileName, Map<String, SaveData> dataMap);
+    protected Map<String, SaveData> readFromFile(String fileName) {
+        throw new UnsupportedOperationException("readFromFile must be implemented by a subclass.");
+    }
 
-    protected abstract Map<String, SaveData> readFromFile(String fileName);
-
-    protected abstract void deleteFile(String fileName);
+    protected void deleteFile(String fileName) {
+        throw new UnsupportedOperationException("deleteFile must be implemented by a subclass.");
+    }
 }

@@ -1,16 +1,18 @@
-package io.github.some_example_name.behaviour;
+package io.github.some_example_name.managers;
+
+import io.github.some_example_name.behaviour.IBehaviour;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class AbstractBehaviourManager {
+public class BehaviourManager {
 
     private final Map<String, IBehaviour> behaviours;
 
     private IBehaviour activeBehaviour;
 
-    protected AbstractBehaviourManager() {
+    public BehaviourManager() {
         this.behaviours = new HashMap<>();
     }
 
@@ -60,5 +62,6 @@ public abstract class AbstractBehaviourManager {
         return Collections.unmodifiableMap(behaviours);
     }
 
-    protected abstract void evaluate(float deltaTime);
+    protected void evaluate(float deltaTime) {
+    }
 }
