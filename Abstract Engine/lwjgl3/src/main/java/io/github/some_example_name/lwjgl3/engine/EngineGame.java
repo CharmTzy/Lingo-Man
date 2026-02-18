@@ -17,8 +17,8 @@ public class EngineGame extends ApplicationAdapter {
         batch = new SpriteBatch();
         sceneManager = new SceneManager();
 
-        // For Part 1: empty scene
-        sceneManager.setScene(new EmptyScene());
+        sceneManager.setScene(new io.github.some_example_name.lwjgl3.engine.scene.TestScene());
+
     }
 
     @Override
@@ -43,11 +43,5 @@ public class EngineGame extends ApplicationAdapter {
         batch.dispose();
     }
 
-    // Temporary scene for Part 1
-    private static class EmptyScene implements IScene {
-        @Override public void onEnter() {}
-        @Override public void onExit() {}
-        @Override public void update(float dt) {}
-        @Override public void render(com.badlogic.gdx.graphics.g2d.Batch batch) {}
-    }
+    
 }
