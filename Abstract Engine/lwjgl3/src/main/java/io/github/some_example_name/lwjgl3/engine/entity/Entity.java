@@ -1,25 +1,20 @@
 package io.github.some_example_name.lwjgl3.engine.entity;
 
-import java.util.concurrent.atomic.AtomicLong;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.math.Rectangle;
 
-public abstract class Entity implements IEntity {
-    private static final AtomicLong NEXT_ID = new AtomicLong(1);
+public abstract class Entity {
 
-    private final long id = NEXT_ID.getAndIncrement();
-    private boolean active = true;
+  public float x, y;
+  public float vx, vy;
+  public float width = 32, height = 32;
 
-    @Override
-    public long getId() {
-        return id;
-    }
+  public boolean active = true;
 
-    @Override
-    public boolean isActive() {
-        return active;
-    }
+  public void update(float dt) {}
+  public void render(Batch batch) {}
 
-    @Override
-    public void setActive(boolean active) {
-        this.active = active;
-    }
+  public void onCollision(Entity other) {}
+
+  public Rectangle bounds() { return new Rectangle(x, y, width, height); }
 }
