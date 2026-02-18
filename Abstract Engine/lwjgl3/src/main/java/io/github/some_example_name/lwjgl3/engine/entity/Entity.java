@@ -4,7 +4,13 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Rectangle;
 
 public abstract class Entity {
-
+  private final String id;
+  protected Entity(String id) {
+      this.id = id;
+  }
+  public String getId() {
+      return id;
+  }
   public float x, y;
   public float vx, vy;
   public float width = 32, height = 32;
