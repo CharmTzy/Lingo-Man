@@ -1,4 +1,4 @@
-package io.github.some_example_name.systems;
+package io.github.some_example_name;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -23,8 +23,14 @@ public class Main extends ApplicationAdapter {
     @Override
     public void render() {
         float deltaTime = Gdx.graphics.getDeltaTime();
+        
+        // 1. Update logic
         context.getSceneManager().update(deltaTime);
+        
+        // 2. Render logic (Must begin and end the batch here)
+        context.getOutputManager().begin();
         context.getSceneManager().render();
+        context.getOutputManager().end();
     }
 
     @Override
