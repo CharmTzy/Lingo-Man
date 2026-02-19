@@ -3,6 +3,7 @@ package io.github.some_example_name.entity;
 import java.util.ArrayList;
 import java.util.List;
 import io.github.some_example_name.managers.OutputManager;
+import java.util.Collections;
 
 public final class EntityManager {
 
@@ -12,7 +13,9 @@ public final class EntityManager {
 
   public void remove(Entity e) { entities.remove(e); }
 
-  public List<Entity> getAll() { return entities; }
+public List<Entity> getAll() {
+    return Collections.unmodifiableList(entities);
+}
 
   public void clear() { entities.clear(); }
 
