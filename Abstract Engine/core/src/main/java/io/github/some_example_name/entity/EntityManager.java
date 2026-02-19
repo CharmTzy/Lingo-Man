@@ -1,41 +1,93 @@
 package io.github.some_example_name.entity;
 
-import java.util.ArrayList;
-import java.util.List;
 import io.github.some_example_name.managers.OutputManager;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public final class EntityManager {
 
   private final List<Entity> entities = new ArrayList<>();
+  private final List<Entity> pendingAdd = new ArrayList<>();
+  private final List<Entity> pendingRemove = new ArrayList<>();
+  private boolean locked = false;
 
-  public void add(Entity e) { entities.add(e); }
-
-  public void remove(Entity e) { entities.remove(e); }
-
-public List<Entity> getAll() {
-    return Collections.unmodifiableList(entities);
-}
-
-  public void clear() { entities.clear(); }
-
-  // Added loop to update all active entities
-  public void update(float dt) {
-      for (int i = 0; i < entities.size(); i++) {
-          Entity e = entities.get(i);
-          if (e.isActive()) {
-              e.update(dt);
-          }
-      }
+  public void add(Entity e) {
+    if (e == null)
+      return;
+    if (locked)
+      pendingAdd.add(e);
+    else
+      entities.add(e);
   }
 
-  // Added loop to render all active entities using the OutputManager
+  public void remove(Entity e) {
+    if (e == null)
+      return;
+    if (locked)
+      pendingRemove.add(e);
+    else
+      entities.remove(e);
+  }
+
+  public List<Entity> getAll() {
+    return Collections.unmodifiableList(entities);
+  }
+
+  public void clear() {
+    if (locked) {
+      pendingRemove.addAll(entities);
+      pendingAdd.clear();
+      return;
+    }
+    entities.clear();
+    pendingAdd.clear();
+    pendingRemove.clear();
+  }
+
+  public void update(float dt) {
+    locked = true;
+
+    for (int i = 0; i < entities.size(); i++) {
+      Entity e = entities.get(i);
+      if (e.isActive())
+        e.update(dt);
+    }
+
+    locked = false;
+    flushQueues();
+
+    entities.removeIf(e -> !e.isActive());
+  }
+
   public void render(OutputManager out) {
-      for (int i = 0; i < entities.size(); i++) {
-          Entity e = entities.get(i);
-          if (e.isActive()) {
-              e.render(out);
-          }
-      }
+    locked = true;
+
+    for (int i = 0; i < entities.size(); i++) {
+      Entity e = entities.get(i);
+      if (e.isActive())
+        e.render(out);
+    }
+
+    locked = false;
+    flushQueues();
+  }
+
+  private void flushQueues() {
+    if (!pendingRemove.isEmpty()) {
+      entities.removeAll(pendingRemove);
+      pendingRemove.clear();
+    }
+    if (!pendingAdd.isEmpty()) {
+      entities.addAll(pendingAdd);
+      pendingAdd.clear();
+    }
+  }
+  public Entity getById(String id) {
+    for (Entity e : entities) {
+      if (e.getId().equals(id))
+        return e;
+    }
+    return null;
   }
 }
