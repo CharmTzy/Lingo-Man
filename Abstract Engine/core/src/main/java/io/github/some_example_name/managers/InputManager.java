@@ -32,9 +32,19 @@ public class InputManager {
         return Gdx.input.isKeyPressed(keyUp) || Gdx.input.isKeyPressed(Input.Keys.W);
     }
 
+    /** Returns true only on the frame the UP action key is pressed. */
+    public boolean isUpJustPressed() {
+        return Gdx.input.isKeyJustPressed(keyUp) || Gdx.input.isKeyJustPressed(Input.Keys.W);
+    }
+
     /** Returns true if the DOWN action key is being held down. */
     public boolean isDown() {
         return Gdx.input.isKeyPressed(keyDown) || Gdx.input.isKeyPressed(Input.Keys.S);
+    }
+
+    /** Returns true only on the frame the DOWN action key is pressed. */
+    public boolean isDownJustPressed() {
+        return Gdx.input.isKeyJustPressed(keyDown) || Gdx.input.isKeyJustPressed(Input.Keys.S);
     }
 
     /** Returns true if the LEFT action key is being held down. */

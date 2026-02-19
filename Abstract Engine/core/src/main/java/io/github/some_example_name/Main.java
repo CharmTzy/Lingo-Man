@@ -34,12 +34,27 @@ public class Main extends ApplicationAdapter {
     }
 
     @Override
+    public void pause() {
+        if (context != null) {
+            context.getAudioManager().pauseMusic();
+        }
+    }
+
+    @Override
+    public void resume() {
+        if (context != null) {
+            context.getAudioManager().resumeMusic();
+        }
+    }
+
+    @Override
     public void dispose() {
         if (context == null) {
             return;
         }
 
         context.getSceneManager().dispose();
+        context.getAudioManager().dispose();
         context.getOutputManager().dispose();
     }
 

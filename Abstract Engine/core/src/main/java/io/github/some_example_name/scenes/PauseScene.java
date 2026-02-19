@@ -1,6 +1,7 @@
 package io.github.some_example_name.scenes;
 
 import io.github.some_example_name.EngineContext;
+import io.github.some_example_name.managers.AudioManager;
 
 public class PauseScene implements Scene {
 
@@ -13,6 +14,7 @@ public class PauseScene implements Scene {
 
     @Override
     public void enter() {
+        context.getAudioManager().playMusic(AudioManager.BGM_PAUSE, true);
         System.out.println("[PauseScene] Game paused - ESC to resume, M for menu");
     }
 
@@ -24,9 +26,11 @@ public class PauseScene implements Scene {
     @Override
     public void handleInput() {
         if (context.getInputManager().isPauseJustPressed()) {
+            context.getAudioManager().playSound(AudioManager.SFX_MENU_NAVIGATE, false);
             context.getSceneManager().setActiveScene(SceneId.GAME);
         }
         if (context.getInputManager().isMenuJustPressed()) {
+            context.getAudioManager().playSound(AudioManager.SFX_MENU_NAVIGATE, false);
             context.getSceneManager().setActiveScene(SceneId.MENU);
         }
     }

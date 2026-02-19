@@ -1,10 +1,15 @@
 package io.github.some_example_name.scenes;
 
+import com.badlogic.gdx.Gdx;
+
 import io.github.some_example_name.EngineContext;
+import io.github.some_example_name.managers.AudioManager;
 
 public class MenuScene implements Scene {
 
     private EngineContext context;
+    private final String[] menuOptions = { "Start Game", "Quit" };
+    private int selectedIndex = 0;
 
     @Override
     public void initialize(EngineContext context) {
@@ -13,7 +18,8 @@ public class MenuScene implements Scene {
 
     @Override
     public void enter() {
-        System.out.println("[MenuScene] Entered - Press ENTER to start game");
+        context.getAudioManager().playMusic(AudioManager.BGM_MENU, true);
+        System.out.println("[MenuScene] Entered - Use UP/DOWN and ENTER");
     }
 
     @Override
@@ -23,8 +29,23 @@ public class MenuScene implements Scene {
 
     @Override
     public void handleInput() {
+        if (context.getInputManager().isUpJustPressed()) {
+            selectedIndex = (selectedIndex - 1 + menuOptions.length) % menuOptions.length;
+            context.getAudioManager().playSound(AudioManager.SFX_MENU_NAVIGATE, false);
+        }
+
+        if (context.getInputManager().isDownJustPressed()) {
+            selectedIndex = (selectedIndex + 1) % menuOptions.length;
+            context.getAudioManager().playSound(AudioManager.SFX_MENU_NAVIGATE, false);
+        }
+
         if (context.getInputManager().isEnterJustPressed()) {
-            context.getSceneManager().setActiveScene(SceneId.GAME);
+            context.getAudioManager().playSound(AudioManager.SFX_MENU_NAVIGATE, false);
+            if (selectedIndex == 0) {
+                context.getSceneManager().setActiveScene(SceneId.GAME);
+            } else {
+                Gdx.app.exit();
+            }
         }
     }
 
@@ -35,6 +56,13 @@ public class MenuScene implements Scene {
     @Override
     public void render() {
         context.getOutputManager().clearScreen(0.10f, 0.10f, 0.15f, 1f);
+        context.getOutputManager().drawText("PAC-MAN OOP", 230f, 420f);
+        context.getOutputManager().drawText("Use UP / DOWN + ENTER", 190f, 360f);
+
+        for (int i = 0; i < menuOptions.length; i++) {
+            String prefix = (i == selectedIndex) ? "> " : "  ";
+            context.getOutputManager().drawText(prefix + menuOptions[i], 240f, 300f - (i * 40f));
+        }
     }
 
     @Override
