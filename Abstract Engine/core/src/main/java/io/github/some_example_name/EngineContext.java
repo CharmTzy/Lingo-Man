@@ -1,4 +1,4 @@
-package io.github.some_example_name;
+package io.github.some_example_name.systems;
 
 import io.github.some_example_name.managers.BehaviourManager;
 import io.github.some_example_name.managers.InputManager;
