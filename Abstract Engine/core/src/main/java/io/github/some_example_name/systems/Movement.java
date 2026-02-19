@@ -1,17 +1,17 @@
-package io.github.some_example_name.lwjgl3.engine.systems;
+package io.github.some_example_name.systems;
 
-import io.github.some_example_name.lwjgl3.engine.entity.Entity;
-import io.github.some_example_name.lwjgl3.engine.entity.EntityManager;
+import io.github.some_example_name.entity.Entity;
+import io.github.some_example_name.entity.EntityManager;
 
 public final class Movement {
 
   public static void update(EntityManager manager, float dt) {
     for (Entity e : manager.getAll()) {
-      if (!e.active)
+      if (!e.isActive())
         continue;
 
-      e.x += e.vx * dt;
-      e.y += e.vy * dt;
+      e.setX(e.getX() + e.getVx() * dt);
+      e.setY(e.getY() + e.getVy() * dt);
     }
   }
 }

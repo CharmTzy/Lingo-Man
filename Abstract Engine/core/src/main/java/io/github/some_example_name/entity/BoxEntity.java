@@ -12,27 +12,27 @@ public class BoxEntity extends Entity {
   public BoxEntity(Texture tex, float x, float y) {
     super("box");
     this.tex = tex;
-    this.x = x;
-    this.y = y;
-    this.width = 32;
-    this.height = 32;
-    this.vx = 120f; // move right
-    this.vy = 0f;
+    setX(x);
+    setY(y);
+    setWidth(32);
+    setHeight(32);
+    setVx(120f); // move right
+    setVy(0f);
   }
 
   // 3. Changed: Replaced Batch with OutputManager
   @Override
   public void render(OutputManager outputManager) {
     // 4. Changed: Use the OutputManager to draw instead of Batch
-    outputManager.draw(tex, x, y, width, height);
+    outputManager.draw(tex, getX(), getY(), getWidth(), getHeight());
   }
 
   @Override
   public void update(float dt) {
     // bounce in 640 width window
-    if (x < 0)
-      vx = Math.abs(vx);
-    if (x > 640 - width)
-      vx = -Math.abs(vx);
+    if (getX() < 0)
+      setVx(Math.abs(getVx()));
+    if (getX() > 640 - getWidth())
+      setVx(-Math.abs(getVx()));
   }
 }

@@ -14,11 +14,11 @@ public abstract class Entity {
       return id;
   }
   
-  public float x, y;
-  public float vx, vy;
-  public float width = 32, height = 32;
+  private float x, y;
+  private float vx, vy;
+  private float width = 32, height = 32;
 
-  public boolean active = true;
+  private boolean active = true;
 
   public void update(float dt) {}
   
@@ -27,5 +27,27 @@ public abstract class Entity {
 
   public void onCollision(Entity other) {}
 
-  public Rectangle bounds() { return new Rectangle(x, y, width, height); }
+  public Rectangle bounds() { return new Rectangle(getX(), getY(), getWidth(), getHeight()); }
+
+  // Convenience getters/setters for subclasses
+  public float getX() { return x; }
+  public void setX(float x) { this.x = x; }
+
+  public float getY() { return y; }
+  public void setY(float y) { this.y = y; }
+
+  public float getVx() { return vx; }
+  public void setVx(float vx) { this.vx = vx; }
+
+  public float getVy() { return vy; }
+  public void setVy(float vy) { this.vy = vy; }
+
+  public float getWidth() { return width; }
+  public void setWidth(float width) { this.width = width; }
+
+  public float getHeight() { return height; }
+  public void setHeight(float height) { this.height = height; }
+
+  public boolean isActive() { return active; }
+  public void setActive(boolean active) { this.active = active; }
 }

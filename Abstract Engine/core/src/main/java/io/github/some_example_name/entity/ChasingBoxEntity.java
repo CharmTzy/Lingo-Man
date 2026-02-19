@@ -1,71 +1,37 @@
-package io.github.some_example_name.lwjgl3.engine.entity;
+package io.github.some_example_name.entity; // FIXED PACKAGE
 
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Batch;
+import io.github.some_example_name.managers.OutputManager;
 
 public class ChasingBoxEntity extends Entity {
+    private final Texture tex;
+    private final Entity target;
 
-  private final Texture tex;
-  private final Entity target;
-  private final float speed;
-
-  // choose direction every few frames to avoid jitter
-  private float decisionTimer = 0f;
-  private final float decisionInterval = 0.15f;
-
-  public ChasingBoxEntity(Texture tex, float x, float y, float speed,
-                          Entity target) {
-    super("chasing_box");
-    this.tex = tex;
-    this.x = x;
-    this.y = y;
-    this.speed = speed;
-    this.target = target;
-    this.width = 32;
-    this.height = 32;
-  }
-
-  @Override
-  public void update(float dt) {
-    decisionTimer -= dt;
-
-    if (decisionTimer <= 0f) {
-      decisionTimer = decisionInterval;
-
-      float dx = target.x - x;
-      float dy = target.y - y;
-
-      // move on one axis only (pac-man style)
-      if (Math.abs(dx) > Math.abs(dy)) {
-        vx = (dx >= 0) ? speed : -speed;
-        vy = 0;
-      } else {
-        vy = (dy >= 0) ? speed : -speed;
-        vx = 0;
-      }
+    public ChasingBoxEntity(Texture tex, Entity target, float x, float y) {
+        super("chasing_box");
+        this.tex = tex;
+        this.target = target;
+        setX(x);
+        setY(y);
+        setWidth(32);
+        setHeight(32);
+        setVx(80f); // chasing speed
+        setVy(80f);
     }
 
-    // keep inside window
-    if (x < 0) {
-      x = 0;
-      vx = Math.abs(vx);
-    }
-    if (y < 0) {
-      y = 0;
-      vy = Math.abs(vy);
-    }
-    if (x > 640 - width) {
-      x = 640 - width;
-      vx = -Math.abs(vx);
-    }
-    if (y > 480 - height) {
-      y = 480 - height;
-      vy = -Math.abs(vy);
-    }
-  }
+    @Override
+    public void update(float dt) {
+        if (target == null) return;
 
-  @Override
-  public void render(Batch batch) {
-    batch.draw(tex, x, y, width, height);
-  }
+        // Simple chase logic using your encapsulated getters/setters
+        if (getX() < target.getX()) setX(getX() + getVx() * dt);
+        if (getX() > target.getX()) setX(getX() - getVx() * dt);
+        if (getY() < target.getY()) setY(getY() + getVy() * dt);
+        if (getY() > target.getY()) setY(getY() - getVy() * dt);
+    }
+
+    @Override
+    public void render(OutputManager outputManager) {
+        outputManager.draw(tex, getX(), getY(), getWidth(), getHeight());
+    }
 }

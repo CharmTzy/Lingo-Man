@@ -1,44 +1,36 @@
-package io.github.some_example_name.lwjgl3.engine.entity;
+package io.github.some_example_name.entity; // FIXED PACKAGE
 
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Batch;
-import io.github.some_example_name.lwjgl3.engine.input.InputManager;
+import io.github.some_example_name.managers.InputManager;
+import io.github.some_example_name.managers.OutputManager;
 
 public class ControlledBoxEntity extends Entity {
+    private final Texture tex;
+    private final InputManager input;
 
-  private final Texture tex;
-  private final float speed;
+    public ControlledBoxEntity(Texture tex, InputManager input, float x, float y) {
+        super("controlled_box");
+        this.tex = tex;
+        this.input = input;
+        setX(x);
+        setY(y);
+        setWidth(32);
+        setHeight(32);
+        setVx(150f); // speed
+        setVy(150f);
+    }
 
-  public ControlledBoxEntity(Texture tex, float x, float y, float speed) {
-    super("controlled_box");
-    this.tex = tex;
-    this.x = x;
-    this.y = y;
-    this.speed = speed;
-    this.width = 32;
-    this.height = 32;
-  }
+    @Override
+    public void update(float dt) {
+        // Use your abstracted InputManager
+        if (input.isLeft()) setX(getX() - getVx() * dt);
+        if (input.isRight()) setX(getX() + getVx() * dt);
+        if (input.isUp()) setY(getY() + getVy() * dt);
+        if (input.isDown()) setY(getY() - getVy() * dt);
+    }
 
-  @Override
-  public void update(float dt) {
-    vx = 0;
-    vy = 0;
-
-    // no diagonal (pac-man style)
-    if (InputManager.left()) vx = -speed;
-    else if (InputManager.right()) vx = speed;
-    else if (InputManager.up()) vy = speed;
-    else if (InputManager.down()) vy = -speed;
-
-    // keep inside window (640x480)
-    if (x < 0) x = 0;
-    if (y < 0) y = 0;
-    if (x > 640 - width) x = 640 - width;
-    if (y > 480 - height) y = 480 - height;
-  }
-
-  @Override
-  public void render(Batch batch) {
-    batch.draw(tex, x, y, width, height);
-  }
+    @Override
+    public void render(OutputManager outputManager) {
+        outputManager.draw(tex, getX(), getY(), getWidth(), getHeight());
+    }
 }

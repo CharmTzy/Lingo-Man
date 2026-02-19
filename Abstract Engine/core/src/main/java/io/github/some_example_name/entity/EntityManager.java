@@ -20,7 +20,7 @@ public final class EntityManager {
   public void update(float dt) {
       for (int i = 0; i < entities.size(); i++) {
           Entity e = entities.get(i);
-          if (e.active) {
+          if (e.isActive()) {
               e.update(dt);
           }
       }
@@ -30,7 +30,7 @@ public final class EntityManager {
   public void render(OutputManager out) {
       for (int i = 0; i < entities.size(); i++) {
           Entity e = entities.get(i);
-          if (e.active) {
+          if (e.isActive()) {
               e.render(out);
           }
       }
