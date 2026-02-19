@@ -1,0 +1,189 @@
+package io.github.some_example_name.managers;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.utils.Disposable;
+
+public class AudioManager implements Disposable {
+
+    public static final String SFX_MENU_NAVIGATE = "sfx_menu_navigate";
+    public static final String SFX_BORDER_COLLISION = "sfx_border_collision";
+    public static final String SFX_PLAYER_COLLISION = "sfx_player_collision";
+
+    public static final String BGM_MENU = "bgm_menu";
+    public static final String BGM_GAME = "bgm_game";
+    public static final String BGM_PAUSE = "bgm_pause";
+    public static final String BGM_GAME_OVER = "bgm_game_over";
+
+    public static final String PATH_SFX_MENU_NAVIGATE = "audio/menu_navigate.ogg";
+    public static final String PATH_SFX_BORDER_COLLISION = "audio/border_collision.ogg";
+    public static final String PATH_SFX_PLAYER_COLLISION = "audio/player_collision.ogg";
+    public static final String PATH_BGM_MENU = "audio/menu_bgm.ogg";
+    public static final String PATH_BGM_GAME = "audio/game_bgm.ogg";
+    public static final String PATH_BGM_PAUSE = "audio/pause_bgm.ogg";
+    public static final String PATH_BGM_GAME_OVER = "audio/game_over_bgm.ogg";
+
+    private final Map<String, Sound> soundEffects = new HashMap<>();
+    private final Map<String, Music> musicTracks = new HashMap<>();
+    private final Map<String, Float> soundVolumes = new HashMap<>();
+
+    private float masterVolume = 1f;
+    private boolean muted = false;
+    private Music currentMusic;
+
+    public void loadDefaultAudio() {
+        loadSound(SFX_MENU_NAVIGATE, PATH_SFX_MENU_NAVIGATE);
+        loadSound(SFX_BORDER_COLLISION, PATH_SFX_BORDER_COLLISION);
+        loadSound(SFX_PLAYER_COLLISION, PATH_SFX_PLAYER_COLLISION);
+
+        loadMusic(BGM_MENU, PATH_BGM_MENU);
+        loadMusic(BGM_GAME, PATH_BGM_GAME);
+        loadMusic(BGM_PAUSE, PATH_BGM_PAUSE);
+        loadMusic(BGM_GAME_OVER, PATH_BGM_GAME_OVER);
+    }
+
+    public void loadSound(String id, String path) {
+        validateIdAndPath(id, path);
+        if (!Gdx.files.internal(path).exists()) {
+            logMissingAsset("sound", id, path);
+            return;
+        }
+
+        Sound previous = soundEffects.put(id, Gdx.audio.newSound(Gdx.files.internal(path)));
+        if (previous != null) {
+            previous.dispose();
+        }
+        soundVolumes.putIfAbsent(id, 1f);
+    }
+
+    public void loadMusic(String id, String path) {
+        validateIdAndPath(id, path);
+        if (!Gdx.files.internal(path).exists()) {
+            logMissingAsset("music", id, path);
+            return;
+        }
+
+        Music previous = musicTracks.put(id, Gdx.audio.newMusic(Gdx.files.internal(path)));
+        if (previous != null) {
+            if (currentMusic == previous) {
+                currentMusic = null;
+            }
+            previous.dispose();
+        }
+    }
+
+    public void playSound(String id, boolean loop) {
+        Sound sound = soundEffects.get(id);
+        if (sound == null) {
+            return;
+        }
+
+        float volume = muted ? 0f : MathUtils.clamp(soundVolumes.getOrDefault(id, 1f) * masterVolume, 0f, 1f);
+        long instanceId = sound.play(volume);
+        if (loop) {
+            sound.setLooping(instanceId, true);
+        }
+    }
+
+    public void playMusic(String id, boolean loop) {
+        Music nextMusic = musicTracks.get(id);
+        if (nextMusic == null) {
+            return;
+        }
+
+        if (currentMusic != null && currentMusic != nextMusic) {
+            currentMusic.stop();
+        }
+
+        currentMusic = nextMusic;
+        currentMusic.setLooping(loop);
+        currentMusic.setVolume(muted ? 0f : masterVolume);
+        currentMusic.play();
+    }
+
+    public void stopMusic() {
+        if (currentMusic != null) {
+            currentMusic.stop();
+        }
+    }
+
+    public void setMusicVolume(float volume) {
+        masterVolume = MathUtils.clamp(volume, 0f, 1f);
+        if (currentMusic != null) {
+            currentMusic.setVolume(muted ? 0f : masterVolume);
+        }
+    }
+
+    public void pauseMusic() {
+        if (currentMusic != null) {
+            currentMusic.pause();
+        }
+    }
+
+    public void resumeMusic() {
+        if (currentMusic != null) {
+            currentMusic.play();
+        }
+    }
+
+    public void setSoundVolume(String id, float volume) {
+        if (id == null || id.isBlank()) {
+            return;
+        }
+        soundVolumes.put(id, MathUtils.clamp(volume, 0f, 1f));
+    }
+
+    public void setMuted(boolean muted) {
+        this.muted = muted;
+        if (currentMusic != null) {
+            currentMusic.setVolume(muted ? 0f : masterVolume);
+        }
+    }
+
+    public boolean isMuted() {
+        return muted;
+    }
+
+    @Override
+    public void dispose() {
+        Set<Sound> sounds = new HashSet<>(soundEffects.values());
+        for (Sound sound : sounds) {
+            if (sound != null) {
+                sound.dispose();
+            }
+        }
+        soundEffects.clear();
+        soundVolumes.clear();
+
+        Set<Music> music = new HashSet<>(musicTracks.values());
+        for (Music track : music) {
+            if (track != null) {
+                track.dispose();
+            }
+        }
+        musicTracks.clear();
+        currentMusic = null;
+    }
+
+    private void validateIdAndPath(String id, String path) {
+        if (id == null || id.isBlank()) {
+            throw new IllegalArgumentException("Audio id cannot be null or blank.");
+        }
+        if (path == null || path.isBlank()) {
+            throw new IllegalArgumentException("Audio path cannot be null or blank.");
+        }
+    }
+
+    private void logMissingAsset(String type, String id, String path) {
+        if (Gdx.app != null) {
+            Gdx.app.log("AudioManager", "Skipping missing " + type + " [" + id + "] at path: " + path);
+        }
+    }
+}

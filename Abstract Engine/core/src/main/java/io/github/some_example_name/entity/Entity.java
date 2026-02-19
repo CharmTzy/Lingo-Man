@@ -1,0 +1,53 @@
+package io.github.some_example_name.entity;
+
+import com.badlogic.gdx.math.Rectangle;
+import io.github.some_example_name.managers.OutputManager;
+
+public abstract class Entity {
+  private final String id;
+  
+  protected Entity(String id) {
+      this.id = id;
+  }
+  
+  public String getId() {
+      return id;
+  }
+  
+  private float x, y;
+  private float vx, vy;
+  private float width = 32, height = 32;
+
+  private boolean active = true;
+
+  public void update(float dt) {}
+  
+  // Replaced Batch with OutputManager
+  public void render(OutputManager outputManager) {}
+
+  public void onCollision(Entity other) {}
+
+  public Rectangle bounds() { return new Rectangle(getX(), getY(), getWidth(), getHeight()); }
+
+  // Convenience getters/setters for subclasses
+  public float getX() { return x; }
+  public void setX(float x) { this.x = x; }
+
+  public float getY() { return y; }
+  public void setY(float y) { this.y = y; }
+
+  public float getVx() { return vx; }
+  public void setVx(float vx) { this.vx = vx; }
+
+  public float getVy() { return vy; }
+  public void setVy(float vy) { this.vy = vy; }
+
+  public float getWidth() { return width; }
+  public void setWidth(float width) { this.width = width; }
+
+  public float getHeight() { return height; }
+  public void setHeight(float height) { this.height = height; }
+
+  public boolean isActive() { return active; }
+  public void setActive(boolean active) { this.active = active; }
+}

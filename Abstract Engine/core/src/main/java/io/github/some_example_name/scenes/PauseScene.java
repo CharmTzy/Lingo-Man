@@ -1,10 +1,7 @@
 package io.github.some_example_name.scenes;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.utils.ScreenUtils;
-
 import io.github.some_example_name.EngineContext;
+import io.github.some_example_name.managers.AudioManager;
 
 public class PauseScene implements Scene {
 
@@ -15,25 +12,40 @@ public class PauseScene implements Scene {
         this.context = context;
     }
 
-    @Override public void enter() {}
-    @Override public void exit()  {}
+    @Override
+    public void enter() {
+        context.getAudioManager().playMusic(AudioManager.BGM_PAUSE, true);
+        System.out.println("[PauseScene] Game paused - ESC to resume, M for menu");
+    }
+
+    @Override
+    public void exit() {
+        System.out.println("[PauseScene] Unpausing");
+    }
 
     @Override
     public void handleInput() {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+        if (context.getInputManager().isPauseJustPressed()) {
+            context.getAudioManager().playSound(AudioManager.SFX_MENU_NAVIGATE, false);
             context.getSceneManager().setActiveScene(SceneId.GAME);
         }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.M)) {
+        if (context.getInputManager().isMenuJustPressed()) {
+            context.getAudioManager().playSound(AudioManager.SFX_MENU_NAVIGATE, false);
             context.getSceneManager().setActiveScene(SceneId.MENU);
         }
     }
 
-    @Override public void update(float deltaTime) {}
+    @Override
+    public void update(float deltaTime) {
+    }
 
     @Override
     public void render() {
-        ScreenUtils.clear(0.15f, 0.10f, 0.05f, 1f);
+        context.getOutputManager().clearScreen(0.15f, 0.10f, 0.05f, 1f);
     }
 
-    @Override public void dispose() {}
+    @Override
+    public void dispose() {
+        System.out.println("[PauseScene] Resources disposed");
+    }
 }
