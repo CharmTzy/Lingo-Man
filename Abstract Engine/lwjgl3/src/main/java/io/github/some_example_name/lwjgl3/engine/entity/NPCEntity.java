@@ -1,4 +1,4 @@
-package io.github.some_example_name.entities;
+package io.github.some_example_name.lwjgl3.engine.entity;
 
 /**
  * A concrete, engine-generic NPC entity.

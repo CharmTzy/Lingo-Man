@@ -1,4 +1,4 @@
-package io.github.some_example_name.entities;
+package io.github.some_example_name.lwjgl3.engine.entity;
 
 import com.badlogic.gdx.math.Vector2;
 

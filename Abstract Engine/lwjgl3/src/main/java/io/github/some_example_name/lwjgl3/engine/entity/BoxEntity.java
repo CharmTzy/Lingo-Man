@@ -8,6 +8,7 @@ public class BoxEntity extends Entity {
   private final Texture tex;
 
   public BoxEntity(Texture tex, float x, float y) {
+    super("box");
     this.tex = tex;
     this.x = x;
     this.y = y;
