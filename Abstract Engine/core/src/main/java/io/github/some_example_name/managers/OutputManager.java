@@ -1,6 +1,7 @@
 package io.github.some_example_name.managers;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Disposable;
@@ -56,6 +57,21 @@ public class OutputManager implements Disposable {
     }
 
     /**
+     * Draws a texture with specified size and tint color.
+     * Useful for debug overlays (hitboxes, bounding boxes, etc.).
+     */
+    public void drawTinted(Texture texture, float x, float y, float width, float height, Color tint) {
+        if (texture == null || tint == null) return;
+
+        Color prev = batch.getColor();
+        float pr = prev.r, pg = prev.g, pb = prev.b, pa = prev.a;
+        batch.setColor(tint);
+        batch.draw(texture, x, y, width, height);
+        batch.setColor(pr, pg, pb, pa);
+
+    }
+
+    /**
      * Draws text to the screen.
      * @param text The string to display
      * @param x X position
@@ -80,4 +96,6 @@ public class OutputManager implements Disposable {
     public SpriteBatch getBatch() {
         return batch;
     }
+
+
 }

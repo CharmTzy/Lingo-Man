@@ -23,6 +23,7 @@ public class InputManager {
     private int keyRestart = Input.Keys.R;
     private int keyMenu = Input.Keys.M;
     private int keyNpcBehaviourToggle = Input.Keys.TAB;
+    private int keyToggleCollisionDebug = Input.Keys.F1;
     private int keySaveSession = Input.Keys.F5;
     private int keyLoadSession = Input.Keys.F9;
     private int keyDeleteSession = Input.Keys.F10;
@@ -115,4 +116,10 @@ public class InputManager {
     public boolean isMouseClicked() {
         return Gdx.input.isButtonJustPressed(Input.Buttons.LEFT);
     }
+
+    /** Returns true only on the frame the collision debug toggle key is pressed. */
+    public boolean isToggleCollisionDebugJustPressed() {
+        return Gdx.input.isKeyJustPressed(keyToggleCollisionDebug);
+    }
+
 }

@@ -12,9 +12,14 @@ import io.github.some_example_name.entity.ControlledBoxEntity;
 import io.github.some_example_name.entity.Entity;
 import io.github.some_example_name.entity.EntityManager;
 import io.github.some_example_name.managers.AudioManager;
+import io.github.some_example_name.managers.CollisionManager;
+import io.github.some_example_name.collision.Collider;
+import io.github.some_example_name.collision.EntityCollisionListenerAdapter;
+import io.github.some_example_name.collision.ICollisionListener;
+import io.github.some_example_name.debug.DebugDraw;
+import io.github.some_example_name.debug.CollisionDebugOverlay;
 import io.github.some_example_name.save.ISaveable;
 import io.github.some_example_name.save.SaveData;
-import io.github.some_example_name.systems.Collision;
 
 public class GameScene implements Scene, ISaveable {
 
@@ -24,13 +29,19 @@ public class GameScene implements Scene, ISaveable {
 
     private EngineContext context;
     private final EntityManager entityManager = new EntityManager();
+    private final CollisionManager collisionManager = new CollisionManager();
     private final Map<Entity, Boolean> borderCollisionStates = new IdentityHashMap<>();
 
     private ControlledBoxEntity player;
     private ChasingBoxEntity enemy;
+    private Collider playerCollider;
+    private Collider enemyCollider;
+    private boolean showCollisionDebug = false;
+    private DebugDraw debugDraw;
+    private CollisionDebugOverlay collisionDebugOverlay;
+
     private Texture playerTexture;
     private Texture enemyTexture;
-    private boolean playerCollisionActive;
 
     @Override
     public void initialize(EngineContext context) {
@@ -43,6 +54,37 @@ public class GameScene implements Scene, ISaveable {
 
         entityManager.add(player);
         entityManager.add(enemy);
+
+        // Collision setup (manager + colliders)
+        playerCollider = new Collider(player, player.getWidth(), player.getHeight());
+        // Use listener callbacks to trigger SFX once on collision enter.
+        playerCollider.setListener(new ICollisionListener() {
+            private final EntityCollisionListenerAdapter base = new EntityCollisionListenerAdapter(player);
+
+            @Override
+            public void onCollisionEnter(Collider other) {
+                context.getAudioManager().playSound(AudioManager.SFX_PLAYER_COLLISION, false);
+                base.onCollisionEnter(other);
+            }
+
+            @Override
+            public void onCollisionStay(Collider other) {
+                base.onCollisionStay(other);
+            }
+
+            @Override
+            public void onCollisionExit(Collider other) {
+                base.onCollisionExit(other);
+            }
+        });
+        
+        debugDraw = new DebugDraw();
+        collisionDebugOverlay = new CollisionDebugOverlay(debugDraw);
+
+        enemyCollider = new Collider(enemy, enemy.getWidth(), enemy.getHeight());
+        enemyCollider.setListener(new EntityCollisionListenerAdapter(enemy));
+        collisionManager.add(playerCollider);
+        collisionManager.add(enemyCollider);
         context.getSaveManager().register(this);
     }
 
@@ -88,12 +130,16 @@ public class GameScene implements Scene, ISaveable {
             context.getSaveManager().delete(SESSION_FILE);
             context.getAudioManager().playSound(AudioManager.SFX_MENU_NAVIGATE, false);
         }
+        if (context.getInputManager().isToggleCollisionDebugJustPressed()) {
+            showCollisionDebug = !showCollisionDebug;
+        }
+
     }
 
     @Override
     public void update(float deltaTime) {
         entityManager.update(deltaTime);
-        Collision.update(entityManager);
+        collisionManager.update();
 
         for (Entity entity : entityManager.getAll()) {
             if (!entity.isActive()) {
@@ -102,27 +148,19 @@ public class GameScene implements Scene, ISaveable {
             handleBorderCollision(entity);
         }
 
-        boolean collidingWithPlayer = false;
-        for (Entity entity : entityManager.getAll()) {
-            if (!entity.isActive() || entity == player) {
-                continue;
-            }
-            if (player.bounds().overlaps(entity.bounds())) {
-                collidingWithPlayer = true;
-                break;
-            }
-        }
-
-        if (collidingWithPlayer && !playerCollisionActive) {
-            context.getAudioManager().playSound(AudioManager.SFX_PLAYER_COLLISION, false);
-        }
-        playerCollisionActive = collidingWithPlayer;
     }
 
     @Override
     public void render() {
         context.getOutputManager().clearScreen(0.05f, 0.15f, 0.07f, 1f);
         entityManager.render(context.getOutputManager());
+
+        if (showCollisionDebug) {
+            collisionDebugOverlay.render(context.getOutputManager(), collisionManager);
+            context.getOutputManager().drawText("Hitboxes: ON (F1)", 16f, 304f);
+        } else {
+            context.getOutputManager().drawText("Hitboxes: OFF (F1)", 16f, 304f);
+        }
         context.getOutputManager().drawText("Move: WASD/Arrows", 16f, 416f);
         context.getOutputManager().drawText("TAB: NPC Mode: " + enemy.getBehaviourModeLabel(), 16f, 388f);
         context.getOutputManager().drawText("ESC: Pause   SPACE: Game Over", 16f, 360f);
@@ -132,12 +170,16 @@ public class GameScene implements Scene, ISaveable {
     @Override
     public void dispose() {
         context.getSaveManager().unregister(getSaveId());
+        
+        if (playerCollider != null) collisionManager.remove(playerCollider);
+        if (enemyCollider != null) collisionManager.remove(enemyCollider);
         if (playerTexture != null) {
             playerTexture.dispose();
         }
         if (enemyTexture != null) {
             enemyTexture.dispose();
         }
+        if (debugDraw != null) debugDraw.dispose();
         System.out.println("[GameScene] Resources disposed");
     }
 
@@ -146,7 +188,6 @@ public class GameScene implements Scene, ISaveable {
         player.setY(80f);
         enemy.setX(500f);
         enemy.setY(360f);
-        playerCollisionActive = false;
         borderCollisionStates.clear();
     }
 
@@ -214,7 +255,6 @@ public class GameScene implements Scene, ISaveable {
         }
 
         borderCollisionStates.clear();
-        playerCollisionActive = false;
         handleBorderCollision(player);
         handleBorderCollision(enemy);
     }
