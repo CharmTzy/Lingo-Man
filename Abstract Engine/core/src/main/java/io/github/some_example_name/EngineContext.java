@@ -1,6 +1,5 @@
 package io.github.some_example_name;
 
-import io.github.some_example_name.managers.BehaviourManager;
 import io.github.some_example_name.managers.AudioManager;
 import io.github.some_example_name.managers.InputManager;
 import io.github.some_example_name.managers.OutputManager;
@@ -10,7 +9,6 @@ import io.github.some_example_name.managers.SceneManager;
 public class EngineContext {
 
     private final SceneManager sceneManager;
-    private final BehaviourManager behaviourManager;
     private final SaveManager saveManager;
     private final InputManager inputManager;
     private final OutputManager outputManager;
@@ -18,7 +16,6 @@ public class EngineContext {
 
     public EngineContext() {
         this.sceneManager = new SceneManager(this);
-        this.behaviourManager = new BehaviourManager();
         this.saveManager = new SaveManager();
         this.inputManager = new InputManager();
         this.outputManager = new OutputManager();
@@ -28,10 +25,6 @@ public class EngineContext {
 
     public SceneManager getSceneManager() {
         return sceneManager;
-    }
-
-    public BehaviourManager getBehaviourManager() {
-        return behaviourManager;
     }
 
     public SaveManager getSaveManager() {
