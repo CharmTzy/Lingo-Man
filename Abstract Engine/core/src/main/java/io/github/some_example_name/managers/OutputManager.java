@@ -65,6 +65,11 @@ public class OutputManager implements Disposable {
         font.draw(batch, text, x, y);
     }
 
+    // Add this method inside your existing OutputManager class
+    public void clearScreen(float r, float g, float b, float a) {
+        com.badlogic.gdx.utils.ScreenUtils.clear(r, g, b, a);
+    }
+
     @Override
     public void dispose() {
         batch.dispose();

@@ -20,11 +20,13 @@ public class GameScene implements Scene {
 
     @Override
     public void handleInput() {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+        // Uses EngineContext instead of LibGDX Gdx.input
+        if (context.getInputManager().isPauseJustPressed()) {
             context.getSceneManager().setActiveScene(SceneId.PAUSE);
         }
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.K)) {
+        // Uses EngineContext Action Key
+        if (context.getInputManager().isActionJustPressed()) {
             context.getSceneManager().setActiveScene(SceneId.GAME_OVER);
         }
     }
@@ -35,8 +37,9 @@ public class GameScene implements Scene {
 
     @Override
     public void render() {
-        ScreenUtils.clear(0.05f, 0.15f, 0.07f, 1f);
+        // Uses OutputManager instead of LibGDX ScreenUtils
+        context.getOutputManager().clearScreen(0.05f, 0.15f, 0.07f, 1f);
     }
-
+    
     @Override public void dispose() {}
 }

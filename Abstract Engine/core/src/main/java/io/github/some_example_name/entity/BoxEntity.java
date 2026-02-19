@@ -1,7 +1,9 @@
 package io.github.some_example_name.entity;
 
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Batch;
+// 1. Removed: import com.badlogic.gdx.graphics.g2d.Batch;
+// 2. Added: Import your custom OutputManager
+import io.github.some_example_name.managers.OutputManager;
 
 public class BoxEntity extends Entity {
 
@@ -18,9 +20,11 @@ public class BoxEntity extends Entity {
     this.vy = 0f;
   }
 
+  // 3. Changed: Replaced Batch with OutputManager
   @Override
-  public void render(Batch batch) {
-    batch.draw(tex, x, y, width, height);
+  public void render(OutputManager outputManager) {
+    // 4. Changed: Use the OutputManager to draw instead of Batch
+    outputManager.draw(tex, x, y, width, height);
   }
 
   @Override
