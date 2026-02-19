@@ -1,9 +1,5 @@
 package io.github.some_example_name.scenes;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.utils.ScreenUtils;
-
 import io.github.some_example_name.EngineContext;
 
 public class GameScene implements Scene {
@@ -15,17 +11,22 @@ public class GameScene implements Scene {
         this.context = context;
     }
 
-    @Override public void enter() {}
-    @Override public void exit()  {}
+    @Override
+    public void enter() {
+        System.out.println("[GameScene] Game started");
+    }
+
+    @Override
+    public void exit() {
+        System.out.println("[GameScene] Game paused/ended");
+    }
 
     @Override
     public void handleInput() {
-        // Uses EngineContext instead of LibGDX Gdx.input
         if (context.getInputManager().isPauseJustPressed()) {
             context.getSceneManager().setActiveScene(SceneId.PAUSE);
         }
 
-        // Uses EngineContext Action Key
         if (context.getInputManager().isActionJustPressed()) {
             context.getSceneManager().setActiveScene(SceneId.GAME_OVER);
         }
@@ -37,9 +38,11 @@ public class GameScene implements Scene {
 
     @Override
     public void render() {
-        // Uses OutputManager instead of LibGDX ScreenUtils
         context.getOutputManager().clearScreen(0.05f, 0.15f, 0.07f, 1f);
     }
     
-    @Override public void dispose() {}
+    @Override
+    public void dispose() {
+        System.out.println("[GameScene] Resources disposed");
+    }
 }

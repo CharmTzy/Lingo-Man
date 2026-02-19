@@ -10,13 +10,18 @@ import com.badlogic.gdx.math.Vector2;
  */
 public class InputManager {
 
-    // You can define custom key bindings here
+    // Movement keys
     private int keyUp = Input.Keys.UP;
     private int keyDown = Input.Keys.DOWN;
     private int keyLeft = Input.Keys.LEFT;
     private int keyRight = Input.Keys.RIGHT;
-    private int keyAction = Input.Keys.SPACE; // For shooting/interaction
+    
+    // Action keys
+    private int keyAction = Input.Keys.SPACE;
     private int keyPause = Input.Keys.ESCAPE;
+    private int keyEnter = Input.Keys.ENTER;
+    private int keyRestart = Input.Keys.R;
+    private int keyMenu = Input.Keys.M;
 
     public InputManager() {
         // Constructor can be used to load custom bindings from a file later
@@ -50,6 +55,21 @@ public class InputManager {
     /** Returns true only on the frame the Pause key is pressed. */
     public boolean isPauseJustPressed() {
         return Gdx.input.isKeyJustPressed(keyPause);
+    }
+
+    /** Returns true only on the frame the Enter key is pressed. */
+    public boolean isEnterJustPressed() {
+        return Gdx.input.isKeyJustPressed(keyEnter);
+    }
+
+    /** Returns true only on the frame the Restart key is pressed. */
+    public boolean isRestartJustPressed() {
+        return Gdx.input.isKeyJustPressed(keyRestart);
+    }
+
+    /** Returns true only on the frame the Menu key is pressed. */
+    public boolean isMenuJustPressed() {
+        return Gdx.input.isKeyJustPressed(keyMenu);
     }
 
     /** Returns the current mouse position in screen coordinates. */
