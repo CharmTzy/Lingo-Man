@@ -22,6 +22,10 @@ public class InputManager {
     private int keyEnter = Input.Keys.ENTER;
     private int keyRestart = Input.Keys.R;
     private int keyMenu = Input.Keys.M;
+    private int keyNpcBehaviourToggle = Input.Keys.TAB;
+    private int keySaveSession = Input.Keys.F5;
+    private int keyLoadSession = Input.Keys.F9;
+    private int keyDeleteSession = Input.Keys.F10;
 
     public InputManager() {
         // Constructor can be used to load custom bindings from a file later
@@ -80,6 +84,26 @@ public class InputManager {
     /** Returns true only on the frame the Menu key is pressed. */
     public boolean isMenuJustPressed() {
         return Gdx.input.isKeyJustPressed(keyMenu);
+    }
+
+    /** Returns true only on the frame the NPC behaviour toggle key is pressed. */
+    public boolean isNpcBehaviourToggleJustPressed() {
+        return Gdx.input.isKeyJustPressed(keyNpcBehaviourToggle);
+    }
+
+    /** Returns true only on the frame the save-session key is pressed. */
+    public boolean isSaveSessionJustPressed() {
+        return Gdx.input.isKeyJustPressed(keySaveSession);
+    }
+
+    /** Returns true only on the frame the load-session key is pressed. */
+    public boolean isLoadSessionJustPressed() {
+        return Gdx.input.isKeyJustPressed(keyLoadSession);
+    }
+
+    /** Returns true only on the frame the delete-session key is pressed. */
+    public boolean isDeleteSessionJustPressed() {
+        return Gdx.input.isKeyJustPressed(keyDeleteSession);
     }
 
     /** Returns the current mouse position in screen coordinates. */

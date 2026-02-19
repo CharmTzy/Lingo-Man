@@ -1,10 +1,10 @@
-package io.github.some_example_name.entity; // FIXED PACKAGE
+package io.github.some_example_name.entity;
 
 import com.badlogic.gdx.graphics.Texture;
 import io.github.some_example_name.managers.InputManager;
 import io.github.some_example_name.managers.OutputManager;
 
-public class ControlledBoxEntity extends Entity {
+public class ControlledBoxEntity extends DynamicEntity {
     private final Texture tex;
     private final InputManager input;
 

@@ -12,8 +12,6 @@ import io.github.some_example_name.movement.behaviour.MovementBehaviour;
  */
 public abstract class DynamicEntity extends Entity implements Movable {
 
-    private Vector2 position = new Vector2();
-    private Vector2 velocity = new Vector2();
     private MovementBehaviour movementBehaviour;
 
     protected DynamicEntity(String id) {
@@ -22,22 +20,34 @@ public abstract class DynamicEntity extends Entity implements Movable {
 
     @Override
     public Vector2 getPosition() {
-        return position;
+        return new Vector2(getX(), getY());
     }
 
     @Override
     public void setPosition(Vector2 position) {
-        this.position = (position == null) ? new Vector2() : position;
+        if (position == null) {
+            setX(0f);
+            setY(0f);
+            return;
+        }
+        setX(position.x);
+        setY(position.y);
     }
 
     @Override
     public Vector2 getVelocity() {
-        return velocity;
+        return new Vector2(getVx(), getVy());
     }
 
     @Override
     public void setVelocity(Vector2 velocity) {
-        this.velocity = (velocity == null) ? new Vector2() : velocity;
+        if (velocity == null) {
+            setVx(0f);
+            setVy(0f);
+            return;
+        }
+        setVx(velocity.x);
+        setVy(velocity.y);
     }
 
     @Override
