@@ -56,7 +56,7 @@ public class MenuScene implements Scene {
     @Override
     public void render() {
         context.getOutputManager().clearScreen(0.10f, 0.10f, 0.15f, 1f);
-        context.getOutputManager().drawText("PAC-MAN OOP", 230f, 420f);
+        context.getOutputManager().drawText("ABSTRACT ENGINE", 230f, 420f);
         context.getOutputManager().drawText("Use UP / DOWN + ENTER", 190f, 360f);
 
         for (int i = 0; i < menuOptions.length; i++) {
