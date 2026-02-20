@@ -1,9 +1,10 @@
 package io.github.some_example_name.entity;
 
 import com.badlogic.gdx.math.Rectangle;
+import io.github.some_example_name.lifecycle.Activatable;
 import io.github.some_example_name.managers.OutputManager;
 
-public abstract class Entity {
+public abstract class Entity implements Activatable {
   private final String id;
   private final Rectangle bounds = new Rectangle();
 

@@ -21,7 +21,15 @@ public class SaveManager {
     }
 
     public void register(ISaveable saveable) {
-        String id = saveable.getSaveId();
+        if (saveable == null) {
+            throw new IllegalArgumentException("saveable cannot be null.");
+        }
+
+        String id = normalizeSaveId(saveable.getSaveId());
+        if (id == null) {
+            throw new IllegalArgumentException("saveable id cannot be null or blank.");
+        }
+
         if (saveables.containsKey(id)) {
             throw new IllegalArgumentException(
                 "A saveable with id '" + id + "' is already registered.");
@@ -30,13 +38,17 @@ public class SaveManager {
     }
 
     public void unregister(String saveId) {
-        saveables.remove(saveId);
+        String id = normalizeSaveId(saveId);
+        if (id == null) {
+            return;
+        }
+        saveables.remove(id);
     }
 
     public void save(String fileName) {
         Map<String, SaveData> dataMap = new HashMap<>();
-        for (ISaveable saveable : saveables.values()) {
-            dataMap.put(saveable.getSaveId(), saveable.writeSaveData());
+        for (Map.Entry<String, ISaveable> entry : saveables.entrySet()) {
+            dataMap.put(entry.getKey(), entry.getValue().writeSaveData());
         }
         writeToFile(fileName, dataMap);
     }
@@ -44,7 +56,12 @@ public class SaveManager {
     public void load(String fileName) {
         Map<String, SaveData> dataMap = readFromFile(fileName);
         for (Map.Entry<String, SaveData> entry : dataMap.entrySet()) {
-            ISaveable saveable = saveables.get(entry.getKey());
+            String saveId = normalizeSaveId(entry.getKey());
+            if (saveId == null) {
+                continue;
+            }
+
+            ISaveable saveable = saveables.get(saveId);
             if (saveable != null) {
                 saveable.readSaveData(entry.getValue());
             }
@@ -96,7 +113,7 @@ public class SaveManager {
         }
 
         for (JsonValue saveNode = payload.child; saveNode != null; saveNode = saveNode.next) {
-            String saveId = saveNode.name;
+            String saveId = normalizeSaveId(saveNode.name);
             if (saveId == null) {
                 continue;
             }
@@ -134,6 +151,13 @@ public class SaveManager {
             normalized += ".json";
         }
         return "saves/" + normalized;
+    }
+
+    private String normalizeSaveId(String saveId) {
+        if (saveId == null || saveId.isBlank()) {
+            return null;
+        }
+        return saveId.trim();
     }
 
     private Object readJsonValue(JsonValue rawNode) {

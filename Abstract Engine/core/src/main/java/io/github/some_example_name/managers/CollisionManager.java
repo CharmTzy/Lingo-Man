@@ -13,7 +13,7 @@ import io.github.some_example_name.collision.Collider;
 import io.github.some_example_name.collision.ICollisionFilter;
 import io.github.some_example_name.collision.ICollisionListener;
 import io.github.some_example_name.collision.ICollisionResolver;
-import io.github.some_example_name.entity.Entity;
+import io.github.some_example_name.lifecycle.Activatable;
 
 /**
  * Detects collisions between registered {@link Collider} instances.
@@ -72,13 +72,11 @@ public class CollisionManager {
         List<Collider> res = new ArrayList<>();
         if (collider == null) return res;
 
-        Entity owner = collider.getOwner();
-        if (owner == null || !owner.isActive()) return res;
+        if (!isUsable(collider)) return res;
 
         for (Collider other : colliders) {
             if (other == null || other == collider) continue;
-            Entity otherOwner = other.getOwner();
-            if (otherOwner == null || !otherOwner.isActive()) continue;
+            if (!isUsable(other)) continue;
 
             if (!filter.canCollide(collider, other)) continue;
             if (collider.getBounds().overlaps(other.getBounds())) {
@@ -150,8 +148,12 @@ public class CollisionManager {
 
     private boolean isUsable(Collider c) {
         if (c == null) return false;
-        Entity owner = c.getOwner();
-        return owner != null && owner.isActive();
+        Object owner = c.getOwner();
+        return owner != null && isActive(owner);
+    }
+
+    private boolean isActive(Object candidate) {
+        return !(candidate instanceof Activatable activatable) || activatable.isActive();
     }
 
     private void fireEnter(Collider self, Collider other) {
