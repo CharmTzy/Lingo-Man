@@ -3,6 +3,8 @@ package io.github.some_example_name.managers;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonReader;
+import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.SerializationException;
 import io.github.some_example_name.save.ISaveable;
 import io.github.some_example_name.save.SaveData;
@@ -53,6 +55,11 @@ public class SaveManager {
         deleteFile(fileName);
     }
 
+    public boolean hasSaveFile(String fileName) {
+        FileHandle file = Gdx.files.local(resolveFilePath(fileName));
+        return file.exists();
+    }
+
     protected void writeToFile(String fileName, Map<String, SaveData> dataMap) {
         FileHandle file = Gdx.files.local(resolveFilePath(fileName));
         file.parent().mkdirs();
@@ -77,33 +84,34 @@ public class SaveManager {
             return result;
         }
 
-        Json json = new Json();
-        Map<String, Object> payload;
+        JsonValue payload;
         try {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> parsed = json.fromJson(HashMap.class, file.readString("UTF-8"));
-            payload = parsed;
+            payload = new JsonReader().parse(file.readString("UTF-8"));
         } catch (SerializationException ex) {
             System.out.println("[SaveManager] Failed to parse save file at " + file.path());
             return result;
         }
-        if (payload == null) {
+        if (payload == null || !payload.isObject()) {
             return result;
         }
 
-        for (Map.Entry<String, Object> entry : payload.entrySet()) {
-            SaveData saveData = new SaveData(entry.getKey());
-            if (entry.getValue() instanceof Map<?, ?> saveNode) {
-                Object entriesObj = saveNode.get("entries");
-                if (entriesObj instanceof Map<?, ?> entriesMap) {
-                    for (Map.Entry<?, ?> saveEntry : entriesMap.entrySet()) {
-                        if (saveEntry.getKey() != null) {
-                            saveData.put(String.valueOf(saveEntry.getKey()), saveEntry.getValue());
-                        }
+        for (JsonValue saveNode = payload.child; saveNode != null; saveNode = saveNode.next) {
+            String saveId = saveNode.name;
+            if (saveId == null) {
+                continue;
+            }
+
+            SaveData saveData = new SaveData(saveId);
+            JsonValue entriesObj = saveNode.get("entries");
+            if (entriesObj != null && entriesObj.isObject()) {
+                for (JsonValue saveEntry = entriesObj.child; saveEntry != null; saveEntry = saveEntry.next) {
+                    String entryKey = saveEntry.name;
+                    if (entryKey != null) {
+                        saveData.put(entryKey, readJsonValue(saveEntry));
                     }
                 }
             }
-            result.put(entry.getKey(), saveData);
+            result.put(saveId, saveData);
         }
 
         System.out.println("[SaveManager] Loaded session from " + file.path());
@@ -126,5 +134,33 @@ public class SaveManager {
             normalized += ".json";
         }
         return "saves/" + normalized;
+    }
+
+    private Object readJsonValue(JsonValue rawNode) {
+        if (rawNode == null) {
+            return null;
+        }
+
+        // Old saves may be wrapped as { class: ..., value: ... }.
+        JsonValue node = rawNode;
+        JsonValue wrappedValue = rawNode.get("value");
+        if (wrappedValue != null) {
+            node = wrappedValue;
+        }
+
+        if (node.isNumber()) {
+            return node.asDouble();
+        }
+        if (node.isBoolean()) {
+            return node.asBoolean();
+        }
+        if (node.isString()) {
+            return node.asString();
+        }
+        if (node.isNull()) {
+            return null;
+        }
+
+        return node.toString();
     }
 }

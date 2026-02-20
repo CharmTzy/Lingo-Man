@@ -26,6 +26,7 @@ public class GameScene implements Scene, ISaveable {
     private static final float WORLD_WIDTH = 640f;
     private static final float WORLD_HEIGHT = 480f;
     private static final String SESSION_FILE = "session.json";
+    private static final float STATUS_MESSAGE_DURATION_SECONDS = 2f;
 
     private EngineContext context;
     private final EntityManager entityManager = new EntityManager();
@@ -39,6 +40,8 @@ public class GameScene implements Scene, ISaveable {
     private boolean showCollisionDebug = false;
     private DebugDraw debugDraw;
     private CollisionDebugOverlay collisionDebugOverlay;
+    private String statusMessage = "";
+    private float statusMessageTimer = 0f;
 
     private Texture playerTexture;
     private Texture enemyTexture;
@@ -92,6 +95,7 @@ public class GameScene implements Scene, ISaveable {
     public void enter() {
         context.getAudioManager().playMusic(AudioManager.BGM_GAME, true);
         resetState();
+        clearStatusMessage();
         System.out.println("[GameScene] Game started");
     }
 
@@ -118,16 +122,21 @@ public class GameScene implements Scene, ISaveable {
 
         if (context.getInputManager().isSaveSessionJustPressed()) {
             context.getSaveManager().save(SESSION_FILE);
+            showStatusMessage("Session saved");
             context.getAudioManager().playSound(AudioManager.SFX_MENU_NAVIGATE, false);
         }
 
         if (context.getInputManager().isLoadSessionJustPressed()) {
+            boolean hasSave = context.getSaveManager().hasSaveFile(SESSION_FILE);
             context.getSaveManager().load(SESSION_FILE);
+            showStatusMessage(hasSave ? "Session loaded" : "No save file to load");
             context.getAudioManager().playSound(AudioManager.SFX_MENU_NAVIGATE, false);
         }
 
         if (context.getInputManager().isDeleteSessionJustPressed()) {
+            boolean hasSave = context.getSaveManager().hasSaveFile(SESSION_FILE);
             context.getSaveManager().delete(SESSION_FILE);
+            showStatusMessage(hasSave ? "Session deleted" : "No save file to delete");
             context.getAudioManager().playSound(AudioManager.SFX_MENU_NAVIGATE, false);
         }
         if (context.getInputManager().isToggleCollisionDebugJustPressed()) {
@@ -138,6 +147,13 @@ public class GameScene implements Scene, ISaveable {
 
     @Override
     public void update(float deltaTime) {
+        if (statusMessageTimer > 0f) {
+            statusMessageTimer = Math.max(0f, statusMessageTimer - deltaTime);
+            if (statusMessageTimer == 0f) {
+                clearStatusMessage();
+            }
+        }
+
         entityManager.update(deltaTime);
         collisionManager.update();
 
@@ -165,6 +181,9 @@ public class GameScene implements Scene, ISaveable {
         context.getOutputManager().drawText("TAB: NPC Mode: " + enemy.getBehaviourModeLabel(), 16f, 388f);
         context.getOutputManager().drawText("ESC: Pause   SPACE: Game Over", 16f, 360f);
         context.getOutputManager().drawText("F5: Save   F9: Load   F10: Delete", 16f, 332f);
+        if (statusMessageTimer > 0f && !statusMessage.isBlank()) {
+            context.getOutputManager().drawText("Status: " + statusMessage, 16f, 276f);
+        }
     }
     
     @Override
@@ -265,5 +284,15 @@ public class GameScene implements Scene, ISaveable {
             return number.floatValue();
         }
         return fallback;
+    }
+
+    private void showStatusMessage(String message) {
+        statusMessage = (message == null) ? "" : message;
+        statusMessageTimer = STATUS_MESSAGE_DURATION_SECONDS;
+    }
+
+    private void clearStatusMessage() {
+        statusMessage = "";
+        statusMessageTimer = 0f;
     }
 }
