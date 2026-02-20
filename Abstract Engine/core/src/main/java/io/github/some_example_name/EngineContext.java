@@ -20,7 +20,6 @@ public class EngineContext {
         this.inputManager = new InputManager();
         this.outputManager = new OutputManager();
         this.audioManager = new AudioManager();
-        this.audioManager.loadDefaultAudio();
     }
 
     public SceneManager getSceneManager() {

@@ -2,12 +2,7 @@ package io.github.some_example_name;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import io.github.some_example_name.managers.SceneManager;
-import io.github.some_example_name.scenes.GameOverScene;
-import io.github.some_example_name.scenes.GameScene;
-import io.github.some_example_name.scenes.MenuScene;
-import io.github.some_example_name.scenes.PauseScene;
-import io.github.some_example_name.scenes.SceneId;
+import io.github.some_example_name.demo.DemoBootstrap;
 
 /** Single runtime entrypoint shared by all launchers. */
 public class Main extends ApplicationAdapter {
@@ -17,7 +12,7 @@ public class Main extends ApplicationAdapter {
     @Override
     public void create() {
         context = new EngineContext();
-        registerScenes(context.getSceneManager());
+        DemoBootstrap.initialize(context);
     }
 
     @Override
@@ -56,13 +51,5 @@ public class Main extends ApplicationAdapter {
         context.getSceneManager().dispose();
         context.getAudioManager().dispose();
         context.getOutputManager().dispose();
-    }
-
-    private void registerScenes(SceneManager sceneManager) {
-        sceneManager.registerScene(SceneId.MENU, new MenuScene());
-        sceneManager.registerScene(SceneId.GAME, new GameScene());
-        sceneManager.registerScene(SceneId.PAUSE, new PauseScene());
-        sceneManager.registerScene(SceneId.GAME_OVER, new GameOverScene());
-        sceneManager.setActiveScene(SceneId.MENU);
     }
 }

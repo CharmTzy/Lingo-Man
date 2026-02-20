@@ -5,6 +5,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.github.some_example_name.entity.Entity;
 import io.github.some_example_name.movement.Movable;
 import io.github.some_example_name.movement.behaviour.MovementBehaviour;
 import io.github.some_example_name.movement.physics.MovementPhysics;
@@ -62,6 +63,7 @@ public class MovementManager {
 
         for (Movable entity : new ArrayList<>(movableEntities)) {
             if (entity == null) continue;
+            if (entity instanceof Entity owner && !owner.isActive()) continue;
 
             MovementBehaviour behaviour = behaviours.get(entity);
             if (behaviour == null) {

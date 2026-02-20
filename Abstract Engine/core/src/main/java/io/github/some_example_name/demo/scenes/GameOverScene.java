@@ -1,7 +1,10 @@
-package io.github.some_example_name.scenes;
+package io.github.some_example_name.demo.scenes;
 
 import io.github.some_example_name.EngineContext;
-import io.github.some_example_name.managers.AudioManager;
+import io.github.some_example_name.demo.DemoAudio;
+import io.github.some_example_name.demo.DemoInputActions;
+import io.github.some_example_name.demo.DemoSceneIds;
+import io.github.some_example_name.scenes.Scene;
 
 public class GameOverScene implements Scene {
 
@@ -14,7 +17,7 @@ public class GameOverScene implements Scene {
 
     @Override
     public void enter() {
-        context.getAudioManager().playMusic(AudioManager.BGM_GAME_OVER, true);
+        context.getAudioManager().playMusic(DemoAudio.BGM_GAME_OVER, true);
         System.out.println("[GameOverScene] Game Over - R to restart, M for menu");
     }
 
@@ -25,13 +28,13 @@ public class GameOverScene implements Scene {
 
     @Override
     public void handleInput() {
-        if (context.getInputManager().isRestartJustPressed()) {
-            context.getAudioManager().playSound(AudioManager.SFX_MENU_NAVIGATE, false);
-            context.getSceneManager().setActiveScene(SceneId.GAME);
+        if (context.getInputManager().isActionJustPressed(DemoInputActions.GAME_RESTART)) {
+            context.getAudioManager().playSound(DemoAudio.SFX_MENU_NAVIGATE, false);
+            context.getSceneManager().setActiveScene(DemoSceneIds.GAME);
         }
-        if (context.getInputManager().isMenuJustPressed()) {
-            context.getAudioManager().playSound(AudioManager.SFX_MENU_NAVIGATE, false);
-            context.getSceneManager().setActiveScene(SceneId.MENU);
+        if (context.getInputManager().isActionJustPressed(DemoInputActions.GAME_MENU)) {
+            context.getAudioManager().playSound(DemoAudio.SFX_MENU_NAVIGATE, false);
+            context.getSceneManager().setActiveScene(DemoSceneIds.MENU);
         }
     }
 
