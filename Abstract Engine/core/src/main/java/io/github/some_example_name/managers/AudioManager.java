@@ -121,6 +121,10 @@ public class AudioManager implements Disposable {
         }
     }
 
+    public float getMusicVolume() {
+        return masterVolume;
+    }
+
     public void pauseMusic() {
         if (currentMusic != null) {
             currentMusic.pause();

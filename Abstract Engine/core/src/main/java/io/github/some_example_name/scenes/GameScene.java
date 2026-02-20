@@ -3,9 +3,6 @@ package io.github.some_example_name.scenes;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
-
 import io.github.some_example_name.EngineContext;
 import io.github.some_example_name.entity.ChasingBoxEntity;
 import io.github.some_example_name.entity.ControlledBoxEntity;
@@ -42,18 +39,12 @@ public class GameScene implements Scene, ISaveable {
     private CollisionDebugOverlay collisionDebugOverlay;
     private String statusMessage = "";
     private float statusMessageTimer = 0f;
-
-    private Texture playerTexture;
-    private Texture enemyTexture;
-
     @Override
     public void initialize(EngineContext context) {
         this.context = context;
-        playerTexture = new Texture(Gdx.files.internal("box.png"));
-        enemyTexture = new Texture(Gdx.files.internal("monster.png"));
 
-        player = new ControlledBoxEntity(playerTexture, context.getInputManager(), 80f, 80f);
-        enemy = new ChasingBoxEntity(enemyTexture, player, 500f, 360f);
+        player = new ControlledBoxEntity(context.getInputManager(), 80f, 80f);
+        enemy = new ChasingBoxEntity(player, 500f, 360f);
 
         entityManager.add(player);
         entityManager.add(enemy);
@@ -170,6 +161,8 @@ public class GameScene implements Scene, ISaveable {
     public void render() {
         context.getOutputManager().clearScreen(0.05f, 0.15f, 0.07f, 1f);
         entityManager.render(context.getOutputManager());
+        float musicVolume = context.getAudioManager().getMusicVolume() * 100f;
+        String musicStatus = context.getAudioManager().isMuted() ? "Muted" : Math.round(musicVolume) + "%";
 
         if (showCollisionDebug) {
             collisionDebugOverlay.render(context.getOutputManager(), collisionManager);
@@ -181,6 +174,7 @@ public class GameScene implements Scene, ISaveable {
         context.getOutputManager().drawText("TAB: NPC Mode: " + enemy.getBehaviourModeLabel(), 16f, 388f);
         context.getOutputManager().drawText("ESC: Pause   SPACE: Game Over", 16f, 360f);
         context.getOutputManager().drawText("F5: Save   F9: Load   F10: Delete", 16f, 332f);
+        context.getOutputManager().drawText("Music: " + musicStatus + "   (-/=) Volume   V Mute", 16f, 248f);
         if (statusMessageTimer > 0f && !statusMessage.isBlank()) {
             context.getOutputManager().drawText("Status: " + statusMessage, 16f, 276f);
         }
@@ -192,12 +186,6 @@ public class GameScene implements Scene, ISaveable {
         
         if (playerCollider != null) collisionManager.remove(playerCollider);
         if (enemyCollider != null) collisionManager.remove(enemyCollider);
-        if (playerTexture != null) {
-            playerTexture.dispose();
-        }
-        if (enemyTexture != null) {
-            enemyTexture.dispose();
-        }
         if (debugDraw != null) debugDraw.dispose();
         System.out.println("[GameScene] Resources disposed");
     }

@@ -9,6 +9,8 @@ import io.github.some_example_name.scenes.SceneId;
 
 public class SceneManager {
 
+    private static final float MUSIC_VOLUME_STEP = 0.1f;
+
     private final EngineContext context;
 
     private final Map<SceneId, Scene> scenes = new EnumMap<>(SceneId.class);
@@ -50,6 +52,8 @@ public class SceneManager {
             pendingSceneId = null;
         }
 
+        handleGlobalInput();
+
         if (activeScene == null) return;
 
         activeScene.handleInput();
@@ -77,5 +81,24 @@ public class SceneManager {
         activeScene = next;
 
         activeScene.enter();
+    }
+
+    private void handleGlobalInput() {
+        InputManager input = context.getInputManager();
+        AudioManager audio = context.getAudioManager();
+
+        if (input.isMusicMuteToggleJustPressed()) {
+            audio.setMuted(!audio.isMuted());
+        }
+
+        if (input.isMusicVolumeUpJustPressed()) {
+            audio.setMuted(false);
+            audio.setMusicVolume(audio.getMusicVolume() + MUSIC_VOLUME_STEP);
+        }
+
+        if (input.isMusicVolumeDownJustPressed()) {
+            audio.setMuted(false);
+            audio.setMusicVolume(audio.getMusicVolume() - MUSIC_VOLUME_STEP);
+        }
     }
 }
