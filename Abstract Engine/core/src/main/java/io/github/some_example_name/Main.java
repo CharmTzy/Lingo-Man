@@ -2,22 +2,32 @@ package io.github.some_example_name;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import io.github.some_example_name.demo.DemoBootstrap;
 
 /** Single runtime entrypoint shared by all launchers. */
 public class Main extends ApplicationAdapter {
 
+    private final EngineBootstrap bootstrap;
     private EngineContext context;
+
+    public Main() {
+        this(EngineBootstrap.NO_OP);
+    }
+
+    public Main(EngineBootstrap bootstrap) {
+        this.bootstrap = bootstrap == null ? EngineBootstrap.NO_OP : bootstrap;
+    }
 
     @Override
     public void create() {
         context = new EngineContext();
-        DemoBootstrap.initialize(context);
+        bootstrap.initialize(context);
     }
 
     @Override
     public void render() {
         float deltaTime = Gdx.graphics.getDeltaTime();
+
+        bootstrap.update(context, deltaTime);
         
         // 1. Update logic
         context.getSceneManager().update(deltaTime);
@@ -48,6 +58,7 @@ public class Main extends ApplicationAdapter {
             return;
         }
 
+        bootstrap.dispose(context);
         context.getSceneManager().dispose();
         context.getAudioManager().dispose();
         context.getOutputManager().dispose();
