@@ -1,22 +1,26 @@
-package io.github.some_example_name.scenes;
+package io.github.some_example_name.demo.scenes;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
 
 import io.github.some_example_name.EngineContext;
-import io.github.some_example_name.entity.ChasingBoxEntity;
-import io.github.some_example_name.entity.ControlledBoxEntity;
-import io.github.some_example_name.entity.Entity;
-import io.github.some_example_name.entity.EntityManager;
-import io.github.some_example_name.managers.AudioManager;
-import io.github.some_example_name.managers.CollisionManager;
 import io.github.some_example_name.collision.Collider;
 import io.github.some_example_name.collision.EntityCollisionListenerAdapter;
 import io.github.some_example_name.collision.ICollisionListener;
-import io.github.some_example_name.debug.DebugDraw;
 import io.github.some_example_name.debug.CollisionDebugOverlay;
+import io.github.some_example_name.debug.DebugDraw;
+import io.github.some_example_name.demo.DemoAudio;
+import io.github.some_example_name.demo.DemoInputActions;
+import io.github.some_example_name.demo.DemoSceneIds;
+import io.github.some_example_name.demo.entity.ChasingBoxEntity;
+import io.github.some_example_name.demo.entity.ControlledBoxEntity;
+import io.github.some_example_name.entity.Entity;
+import io.github.some_example_name.entity.EntityManager;
+import io.github.some_example_name.managers.CollisionManager;
+import io.github.some_example_name.managers.MovementManager;
 import io.github.some_example_name.save.ISaveable;
 import io.github.some_example_name.save.SaveData;
+import io.github.some_example_name.scenes.Scene;
 
 public class GameScene implements Scene, ISaveable {
 
@@ -28,6 +32,7 @@ public class GameScene implements Scene, ISaveable {
     private EngineContext context;
     private final EntityManager entityManager = new EntityManager();
     private final CollisionManager collisionManager = new CollisionManager();
+    private final MovementManager movementManager = new MovementManager();
     private final Map<Entity, Boolean> borderCollisionStates = new IdentityHashMap<>();
 
     private ControlledBoxEntity player;
@@ -39,6 +44,7 @@ public class GameScene implements Scene, ISaveable {
     private CollisionDebugOverlay collisionDebugOverlay;
     private String statusMessage = "";
     private float statusMessageTimer = 0f;
+
     @Override
     public void initialize(EngineContext context) {
         this.context = context;
@@ -48,16 +54,16 @@ public class GameScene implements Scene, ISaveable {
 
         entityManager.add(player);
         entityManager.add(enemy);
+        movementManager.registerEntity(player);
+        movementManager.registerEntity(enemy);
 
-        // Collision setup (manager + colliders)
         playerCollider = new Collider(player, player.getWidth(), player.getHeight());
-        // Use listener callbacks to trigger SFX once on collision enter.
         playerCollider.setListener(new ICollisionListener() {
             private final EntityCollisionListenerAdapter base = new EntityCollisionListenerAdapter(player);
 
             @Override
             public void onCollisionEnter(Collider other) {
-                context.getAudioManager().playSound(AudioManager.SFX_PLAYER_COLLISION, false);
+                context.getAudioManager().playSound(DemoAudio.SFX_PLAYER_COLLISION, false);
                 base.onCollisionEnter(other);
             }
 
@@ -71,7 +77,7 @@ public class GameScene implements Scene, ISaveable {
                 base.onCollisionExit(other);
             }
         });
-        
+
         debugDraw = new DebugDraw();
         collisionDebugOverlay = new CollisionDebugOverlay(debugDraw);
 
@@ -84,7 +90,7 @@ public class GameScene implements Scene, ISaveable {
 
     @Override
     public void enter() {
-        context.getAudioManager().playMusic(AudioManager.BGM_GAME, true);
+        context.getAudioManager().playMusic(DemoAudio.BGM_GAME, true);
         resetState();
         clearStatusMessage();
         System.out.println("[GameScene] Game started");
@@ -97,43 +103,43 @@ public class GameScene implements Scene, ISaveable {
 
     @Override
     public void handleInput() {
-        if (context.getInputManager().isPauseJustPressed()) {
-            context.getAudioManager().playSound(AudioManager.SFX_MENU_NAVIGATE, false);
-            context.getSceneManager().setActiveScene(SceneId.PAUSE);
+        if (context.getInputManager().isActionJustPressed(DemoInputActions.GAME_PAUSE)) {
+            context.getAudioManager().playSound(DemoAudio.SFX_MENU_NAVIGATE, false);
+            context.getSceneManager().setActiveScene(DemoSceneIds.PAUSE);
         }
 
-        if (context.getInputManager().isActionJustPressed()) {
-            context.getSceneManager().setActiveScene(SceneId.GAME_OVER);
+        if (context.getInputManager().isActionJustPressed(DemoInputActions.GAME_ACTION)) {
+            context.getSceneManager().setActiveScene(DemoSceneIds.GAME_OVER);
         }
 
-        if (context.getInputManager().isNpcBehaviourToggleJustPressed()) {
+        if (context.getInputManager().isActionJustPressed(DemoInputActions.GAME_TOGGLE_NPC_MODE)) {
             enemy.cycleBehaviourMode();
-            context.getAudioManager().playSound(AudioManager.SFX_MENU_NAVIGATE, false);
+            context.getAudioManager().playSound(DemoAudio.SFX_MENU_NAVIGATE, false);
         }
 
-        if (context.getInputManager().isSaveSessionJustPressed()) {
+        if (context.getInputManager().isActionJustPressed(DemoInputActions.GAME_SAVE_SESSION)) {
             context.getSaveManager().save(SESSION_FILE);
             showStatusMessage("Session saved");
-            context.getAudioManager().playSound(AudioManager.SFX_MENU_NAVIGATE, false);
+            context.getAudioManager().playSound(DemoAudio.SFX_MENU_NAVIGATE, false);
         }
 
-        if (context.getInputManager().isLoadSessionJustPressed()) {
+        if (context.getInputManager().isActionJustPressed(DemoInputActions.GAME_LOAD_SESSION)) {
             boolean hasSave = context.getSaveManager().hasSaveFile(SESSION_FILE);
             context.getSaveManager().load(SESSION_FILE);
             showStatusMessage(hasSave ? "Session loaded" : "No save file to load");
-            context.getAudioManager().playSound(AudioManager.SFX_MENU_NAVIGATE, false);
+            context.getAudioManager().playSound(DemoAudio.SFX_MENU_NAVIGATE, false);
         }
 
-        if (context.getInputManager().isDeleteSessionJustPressed()) {
+        if (context.getInputManager().isActionJustPressed(DemoInputActions.GAME_DELETE_SESSION)) {
             boolean hasSave = context.getSaveManager().hasSaveFile(SESSION_FILE);
             context.getSaveManager().delete(SESSION_FILE);
             showStatusMessage(hasSave ? "Session deleted" : "No save file to delete");
-            context.getAudioManager().playSound(AudioManager.SFX_MENU_NAVIGATE, false);
-        }
-        if (context.getInputManager().isToggleCollisionDebugJustPressed()) {
-            showCollisionDebug = !showCollisionDebug;
+            context.getAudioManager().playSound(DemoAudio.SFX_MENU_NAVIGATE, false);
         }
 
+        if (context.getInputManager().isActionJustPressed(DemoInputActions.GAME_TOGGLE_COLLISION_DEBUG)) {
+            showCollisionDebug = !showCollisionDebug;
+        }
     }
 
     @Override
@@ -146,6 +152,7 @@ public class GameScene implements Scene, ISaveable {
         }
 
         entityManager.update(deltaTime);
+        movementManager.updateAll(deltaTime);
         collisionManager.update();
 
         for (Entity entity : entityManager.getAll()) {
@@ -154,7 +161,6 @@ public class GameScene implements Scene, ISaveable {
             }
             handleBorderCollision(entity);
         }
-
     }
 
     @Override
@@ -179,11 +185,13 @@ public class GameScene implements Scene, ISaveable {
             context.getOutputManager().drawText("Status: " + statusMessage, 16f, 276f);
         }
     }
-    
+
     @Override
     public void dispose() {
         context.getSaveManager().unregister(getSaveId());
-        
+
+        movementManager.unregisterEntity(player);
+        movementManager.unregisterEntity(enemy);
         if (playerCollider != null) collisionManager.remove(playerCollider);
         if (enemyCollider != null) collisionManager.remove(enemyCollider);
         if (debugDraw != null) debugDraw.dispose();
@@ -193,8 +201,14 @@ public class GameScene implements Scene, ISaveable {
     private void resetState() {
         player.setX(80f);
         player.setY(80f);
+        player.setVx(0f);
+        player.setVy(0f);
+
         enemy.setX(500f);
         enemy.setY(360f);
+        enemy.setVx(0f);
+        enemy.setVy(0f);
+
         borderCollisionStates.clear();
     }
 
@@ -220,7 +234,7 @@ public class GameScene implements Scene, ISaveable {
 
         boolean wasColliding = borderCollisionStates.getOrDefault(entity, false);
         if (collided && !wasColliding) {
-            context.getAudioManager().playSound(AudioManager.SFX_BORDER_COLLISION, false);
+            context.getAudioManager().playSound(DemoAudio.SFX_BORDER_COLLISION, false);
         }
         borderCollisionStates.put(entity, collided);
     }

@@ -1,9 +1,12 @@
-package io.github.some_example_name.scenes;
+package io.github.some_example_name.demo.scenes;
 
 import com.badlogic.gdx.Gdx;
 
 import io.github.some_example_name.EngineContext;
-import io.github.some_example_name.managers.AudioManager;
+import io.github.some_example_name.demo.DemoAudio;
+import io.github.some_example_name.demo.DemoInputActions;
+import io.github.some_example_name.demo.DemoSceneIds;
+import io.github.some_example_name.scenes.Scene;
 
 public class MenuScene implements Scene {
 
@@ -18,7 +21,7 @@ public class MenuScene implements Scene {
 
     @Override
     public void enter() {
-        context.getAudioManager().playMusic(AudioManager.BGM_MENU, true);
+        context.getAudioManager().playMusic(DemoAudio.BGM_MENU, true);
         System.out.println("[MenuScene] Entered - Use UP/DOWN and ENTER");
     }
 
@@ -29,20 +32,20 @@ public class MenuScene implements Scene {
 
     @Override
     public void handleInput() {
-        if (context.getInputManager().isUpJustPressed()) {
+        if (context.getInputManager().isActionJustPressed(DemoInputActions.MENU_UP)) {
             selectedIndex = (selectedIndex - 1 + menuOptions.length) % menuOptions.length;
-            context.getAudioManager().playSound(AudioManager.SFX_MENU_NAVIGATE, false);
+            context.getAudioManager().playSound(DemoAudio.SFX_MENU_NAVIGATE, false);
         }
 
-        if (context.getInputManager().isDownJustPressed()) {
+        if (context.getInputManager().isActionJustPressed(DemoInputActions.MENU_DOWN)) {
             selectedIndex = (selectedIndex + 1) % menuOptions.length;
-            context.getAudioManager().playSound(AudioManager.SFX_MENU_NAVIGATE, false);
+            context.getAudioManager().playSound(DemoAudio.SFX_MENU_NAVIGATE, false);
         }
 
-        if (context.getInputManager().isEnterJustPressed()) {
-            context.getAudioManager().playSound(AudioManager.SFX_MENU_NAVIGATE, false);
+        if (context.getInputManager().isActionJustPressed(DemoInputActions.MENU_CONFIRM)) {
+            context.getAudioManager().playSound(DemoAudio.SFX_MENU_NAVIGATE, false);
             if (selectedIndex == 0) {
-                context.getSceneManager().setActiveScene(SceneId.GAME);
+                context.getSceneManager().setActiveScene(DemoSceneIds.GAME);
             } else {
                 Gdx.app.exit();
             }

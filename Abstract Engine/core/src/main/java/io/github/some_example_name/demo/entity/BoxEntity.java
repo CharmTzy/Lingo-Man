@@ -1,6 +1,7 @@
-package io.github.some_example_name.entity;
+package io.github.some_example_name.demo.entity;
 
 import com.badlogic.gdx.graphics.Color;
+import io.github.some_example_name.entity.Entity;
 import io.github.some_example_name.managers.OutputManager;
 
 public class BoxEntity extends Entity {

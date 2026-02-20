@@ -5,6 +5,7 @@ import io.github.some_example_name.managers.OutputManager;
 
 public abstract class Entity {
   private final String id;
+  private final Rectangle bounds = new Rectangle();
 
   protected Entity(String id) { this.id = id; }
 
@@ -24,7 +25,8 @@ public abstract class Entity {
   public void onCollision(Entity other) {}
 
   public Rectangle bounds() {
-    return new Rectangle(getX(), getY(), getWidth(), getHeight());
+    bounds.set(getX(), getY(), getWidth(), getHeight());
+    return bounds;
   }
 
   // Convenience getters/setters for subclasses

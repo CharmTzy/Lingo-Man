@@ -13,23 +13,6 @@ import com.badlogic.gdx.utils.Disposable;
 
 public class AudioManager implements Disposable {
 
-    public static final String SFX_MENU_NAVIGATE = "sfx_menu_navigate";
-    public static final String SFX_BORDER_COLLISION = "sfx_border_collision";
-    public static final String SFX_PLAYER_COLLISION = "sfx_player_collision";
-
-    public static final String BGM_MENU = "bgm_menu";
-    public static final String BGM_GAME = "bgm_game";
-    public static final String BGM_PAUSE = "bgm_pause";
-    public static final String BGM_GAME_OVER = "bgm_game_over";
-
-    public static final String PATH_SFX_MENU_NAVIGATE = "audio/menu_navigate.ogg";
-    public static final String PATH_SFX_BORDER_COLLISION = "audio/border_collision.ogg";
-    public static final String PATH_SFX_PLAYER_COLLISION = "audio/player_collision.ogg";
-    public static final String PATH_BGM_MENU = "audio/menu_bgm.ogg";
-    public static final String PATH_BGM_GAME = "audio/game_bgm.ogg";
-    public static final String PATH_BGM_PAUSE = "audio/pause_bgm.ogg";
-    public static final String PATH_BGM_GAME_OVER = "audio/game_over_bgm.ogg";
-
     private final Map<String, Sound> soundEffects = new HashMap<>();
     private final Map<String, Music> musicTracks = new HashMap<>();
     private final Map<String, Float> soundVolumes = new HashMap<>();
@@ -37,17 +20,6 @@ public class AudioManager implements Disposable {
     private float masterVolume = 1f;
     private boolean muted = false;
     private Music currentMusic;
-
-    public void loadDefaultAudio() {
-        loadSound(SFX_MENU_NAVIGATE, PATH_SFX_MENU_NAVIGATE);
-        loadSound(SFX_BORDER_COLLISION, PATH_SFX_BORDER_COLLISION);
-        loadSound(SFX_PLAYER_COLLISION, PATH_SFX_PLAYER_COLLISION);
-
-        loadMusic(BGM_MENU, PATH_BGM_MENU);
-        loadMusic(BGM_GAME, PATH_BGM_GAME);
-        loadMusic(BGM_PAUSE, PATH_BGM_PAUSE);
-        loadMusic(BGM_GAME_OVER, PATH_BGM_GAME_OVER);
-    }
 
     public void loadSound(String id, String path) {
         validateIdAndPath(id, path);
