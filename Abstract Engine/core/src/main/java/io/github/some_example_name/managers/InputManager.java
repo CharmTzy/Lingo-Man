@@ -27,6 +27,9 @@ public class InputManager {
     private int keySaveSession = Input.Keys.F5;
     private int keyLoadSession = Input.Keys.F9;
     private int keyDeleteSession = Input.Keys.F10;
+    private int keyMusicVolumeUp = Input.Keys.EQUALS;
+    private int keyMusicVolumeDown = Input.Keys.MINUS;
+    private int keyMusicMuteToggle = Input.Keys.V;
 
     public InputManager() {
         // Constructor can be used to load custom bindings from a file later
@@ -120,6 +123,21 @@ public class InputManager {
     /** Returns true only on the frame the collision debug toggle key is pressed. */
     public boolean isToggleCollisionDebugJustPressed() {
         return Gdx.input.isKeyJustPressed(keyToggleCollisionDebug);
+    }
+
+    /** Returns true only on the frame the music-volume-up key is pressed. */
+    public boolean isMusicVolumeUpJustPressed() {
+        return Gdx.input.isKeyJustPressed(keyMusicVolumeUp) || Gdx.input.isKeyJustPressed(Input.Keys.NUMPAD_ADD);
+    }
+
+    /** Returns true only on the frame the music-volume-down key is pressed. */
+    public boolean isMusicVolumeDownJustPressed() {
+        return Gdx.input.isKeyJustPressed(keyMusicVolumeDown) || Gdx.input.isKeyJustPressed(Input.Keys.NUMPAD_SUBTRACT);
+    }
+
+    /** Returns true only on the frame the music mute toggle key is pressed. */
+    public boolean isMusicMuteToggleJustPressed() {
+        return Gdx.input.isKeyJustPressed(keyMusicMuteToggle);
     }
 
 }

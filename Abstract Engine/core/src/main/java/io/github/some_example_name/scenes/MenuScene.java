@@ -56,8 +56,13 @@ public class MenuScene implements Scene {
     @Override
     public void render() {
         context.getOutputManager().clearScreen(0.10f, 0.10f, 0.15f, 1f);
+        float musicVolume = context.getAudioManager().getMusicVolume() * 100f;
+        String musicStatus = context.getAudioManager().isMuted() ? "Muted" : Math.round(musicVolume) + "%";
+
         context.getOutputManager().drawText("ABSTRACT ENGINE", 230f, 420f);
         context.getOutputManager().drawText("Use UP / DOWN + ENTER", 190f, 360f);
+        context.getOutputManager().drawText("Music: " + musicStatus, 200f, 180f);
+        context.getOutputManager().drawText("Volume: - / =   Mute: V", 170f, 150f);
 
         for (int i = 0; i < menuOptions.length; i++) {
             String prefix = (i == selectedIndex) ? "> " : "  ";

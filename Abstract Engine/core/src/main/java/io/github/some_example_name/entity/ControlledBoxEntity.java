@@ -1,16 +1,16 @@
 package io.github.some_example_name.entity;
 
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Color;
 import io.github.some_example_name.managers.InputManager;
 import io.github.some_example_name.managers.OutputManager;
 
 public class ControlledBoxEntity extends DynamicEntity {
-    private final Texture tex;
+    private final Color color;
     private final InputManager input;
 
-    public ControlledBoxEntity(Texture tex, InputManager input, float x, float y) {
+    public ControlledBoxEntity(InputManager input, float x, float y) {
         super("controlled_box");
-        this.tex = tex;
+        this.color = new Color(0.20f, 0.75f, 1.00f, 1f);
         this.input = input;
         setX(x);
         setY(y);
@@ -31,6 +31,6 @@ public class ControlledBoxEntity extends DynamicEntity {
 
     @Override
     public void render(OutputManager outputManager) {
-        outputManager.draw(tex, getX(), getY(), getWidth(), getHeight());
+        outputManager.drawRect(getX(), getY(), getWidth(), getHeight(), color);
     }
 }

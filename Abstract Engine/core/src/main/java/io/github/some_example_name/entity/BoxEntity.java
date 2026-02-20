@@ -1,17 +1,15 @@
 package io.github.some_example_name.entity;
 
-import com.badlogic.gdx.graphics.Texture;
-// 1. Removed: import com.badlogic.gdx.graphics.g2d.Batch;
-// 2. Added: Import your custom OutputManager
+import com.badlogic.gdx.graphics.Color;
 import io.github.some_example_name.managers.OutputManager;
 
 public class BoxEntity extends Entity {
 
-  private final Texture tex;
+  private final Color color;
 
-  public BoxEntity(Texture tex, float x, float y) {
+  public BoxEntity(float x, float y) {
     super("box");
-    this.tex = tex;
+    this.color = new Color(0.95f, 0.90f, 0.20f, 1f);
     setX(x);
     setY(y);
     setWidth(32);
@@ -20,11 +18,9 @@ public class BoxEntity extends Entity {
     setVy(0f);
   }
 
-  // 3. Changed: Replaced Batch with OutputManager
   @Override
   public void render(OutputManager outputManager) {
-    // 4. Changed: Use the OutputManager to draw instead of Batch
-    outputManager.draw(tex, getX(), getY(), getWidth(), getHeight());
+    outputManager.drawRect(getX(), getY(), getWidth(), getHeight(), color);
   }
 
   @Override

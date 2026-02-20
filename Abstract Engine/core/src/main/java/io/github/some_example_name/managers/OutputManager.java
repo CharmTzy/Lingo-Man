@@ -2,6 +2,7 @@ package io.github.some_example_name.managers;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Disposable;
@@ -14,6 +15,7 @@ public class OutputManager implements Disposable {
 
     private SpriteBatch batch;
     private BitmapFont font;
+    private Texture pixel;
     
     // Abstract Engine requirement: Encapsulate the "How" (LibGDX Batch) 
     // from the "What" (Draw this texture).
@@ -22,6 +24,11 @@ public class OutputManager implements Disposable {
         this.batch = new SpriteBatch();
         this.font = new BitmapFont(); // Default font
         this.font.getData().setScale(2.0f); // Make text readable
+        Pixmap pm = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pm.setColor(1f, 1f, 1f, 1f);
+        pm.fill();
+        this.pixel = new Texture(pm);
+        pm.dispose();
     }
 
     /** call this at the start of the render loop */
@@ -72,6 +79,14 @@ public class OutputManager implements Disposable {
     }
 
     /**
+     * Draws a filled rectangle using a shared 1x1 white pixel texture.
+     */
+    public void drawRect(float x, float y, float width, float height, Color color) {
+        if (color == null || width <= 0f || height <= 0f) return;
+        drawTinted(pixel, x, y, width, height, color);
+    }
+
+    /**
      * Draws text to the screen.
      * @param text The string to display
      * @param x X position
@@ -90,6 +105,7 @@ public class OutputManager implements Disposable {
     public void dispose() {
         batch.dispose();
         font.dispose();
+        pixel.dispose();
     }
     
     // Helper to get raw batch if absolutely needed (try to avoid using this in Game Scenes)

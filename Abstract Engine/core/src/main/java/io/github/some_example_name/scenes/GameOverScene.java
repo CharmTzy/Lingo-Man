@@ -42,6 +42,13 @@ public class GameOverScene implements Scene {
     @Override
     public void render() {
         context.getOutputManager().clearScreen(0.20f, 0.05f, 0.05f, 1f);
+        float musicVolume = context.getAudioManager().getMusicVolume() * 100f;
+        String musicStatus = context.getAudioManager().isMuted() ? "Muted" : Math.round(musicVolume) + "%";
+
+        context.getOutputManager().drawText("GAME OVER", 220f, 360f);
+        context.getOutputManager().drawText("R: Restart   M: Menu", 180f, 300f);
+        context.getOutputManager().drawText("Music: " + musicStatus, 210f, 240f);
+        context.getOutputManager().drawText("Volume: - / =   Mute: V", 170f, 210f);
     }
 
     @Override

@@ -42,6 +42,13 @@ public class PauseScene implements Scene {
     @Override
     public void render() {
         context.getOutputManager().clearScreen(0.15f, 0.10f, 0.05f, 1f);
+        float musicVolume = context.getAudioManager().getMusicVolume() * 100f;
+        String musicStatus = context.getAudioManager().isMuted() ? "Muted" : Math.round(musicVolume) + "%";
+
+        context.getOutputManager().drawText("PAUSED", 250f, 360f);
+        context.getOutputManager().drawText("ESC: Resume   M: Menu", 170f, 300f);
+        context.getOutputManager().drawText("Music: " + musicStatus, 210f, 240f);
+        context.getOutputManager().drawText("Volume: - / =   Mute: V", 170f, 210f);
     }
 
     @Override

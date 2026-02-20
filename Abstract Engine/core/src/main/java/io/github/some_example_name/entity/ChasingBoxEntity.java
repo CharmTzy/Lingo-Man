@@ -2,7 +2,7 @@ package io.github.some_example_name.entity;
 
 import java.util.List;
 
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import io.github.some_example_name.managers.OutputManager;
 import io.github.some_example_name.movement.Movable;
@@ -24,7 +24,7 @@ public class ChasingBoxEntity extends NPCEntity {
         }
     }
 
-    private final Texture tex;
+    private final Color color;
     private final Movable target;
     private final MovementPhysics movementPhysics = new MovementPhysics();
     private final List<Vector2> route = List.of(
@@ -35,9 +35,9 @@ public class ChasingBoxEntity extends NPCEntity {
     );
     private BehaviourMode behaviourMode = BehaviourMode.SEEK_TARGET;
 
-    public ChasingBoxEntity(Texture tex, Movable target, float x, float y) {
+    public ChasingBoxEntity(Movable target, float x, float y) {
         super("chasing_box");
-        this.tex = tex;
+        this.color = new Color(1.00f, 0.35f, 0.30f, 1f);
         this.target = target;
         setX(x);
         setY(y);
@@ -58,7 +58,7 @@ public class ChasingBoxEntity extends NPCEntity {
 
     @Override
     public void render(OutputManager outputManager) {
-        outputManager.draw(tex, getX(), getY(), getWidth(), getHeight());
+        outputManager.drawRect(getX(), getY(), getWidth(), getHeight(), color);
     }
 
     @Override
