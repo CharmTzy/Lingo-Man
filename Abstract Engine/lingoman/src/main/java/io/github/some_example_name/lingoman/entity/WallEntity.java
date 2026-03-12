@@ -17,6 +17,9 @@ public class WallEntity extends Entity {
     }
 
     @Override
+    public boolean isStatic() { return true; }
+
+    @Override
     public void render(OutputManager outputManager) {
         outputManager.drawRect(getX(), getY(), getWidth(), getHeight(), color);
     }
