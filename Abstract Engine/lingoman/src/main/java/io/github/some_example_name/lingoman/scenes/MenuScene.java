@@ -1,5 +1,9 @@
 package io.github.some_example_name.lingoman.scenes;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 
@@ -8,9 +12,13 @@ import io.github.some_example_name.lingoman.LingoInputActions;
 import io.github.some_example_name.lingoman.LingoSceneIds;
 import io.github.some_example_name.lingoman.LingoSession;
 import io.github.some_example_name.lingoman.model.GameState;
+import io.github.some_example_name.save.ISaveable;
+import io.github.some_example_name.save.SaveData;
 import io.github.some_example_name.scenes.Scene;
 
-public class MenuScene implements Scene {
+public class MenuScene implements Scene, ISaveable {
+
+    private static final String PROFILE_FILE = "lingoman_progress.json";
 
     private static final Color BACKGROUND = new Color(0.07f, 0.10f, 0.13f, 1f);
     private static final Color BACKDROP_TOP = new Color(0.15f, 0.24f, 0.23f, 0.45f);
@@ -27,16 +35,21 @@ public class MenuScene implements Scene {
 
     private EngineContext context;
     private final MenuOption[] options = {
-        new MenuOption("Easy", "1 ghost", GameState.Difficulty.EASY),
-        new MenuOption("Medium", "2 ghosts", GameState.Difficulty.MEDIUM),
-        new MenuOption("Hard", "3 ghosts", GameState.Difficulty.HARD),
-        new MenuOption("Quit", "Exit game", null)
+        new MenuOption("Easy", "1 ghost", GameState.Difficulty.EASY, null),
+        new MenuOption("Medium", "2 ghosts", GameState.Difficulty.MEDIUM, null),
+        new MenuOption("Hard", "3 ghosts", GameState.Difficulty.HARD, null),
+        new MenuOption("Words Found", "open list", null, LingoSceneIds.FOUND_WORDS),
+        new MenuOption("Quit", "Exit game", null, null)
     };
     private int selectedIndex = 0;
 
     @Override
     public void initialize(EngineContext context) {
         this.context = context;
+        context.getSaveManager().register(this);
+        if (context.getSaveManager().hasSaveFile(PROFILE_FILE)) {
+            context.getSaveManager().load(PROFILE_FILE);
+        }
     }
 
     @Override
@@ -62,6 +75,8 @@ public class MenuScene implements Scene {
             if (selected.difficulty != null) {
                 LingoSession.get().getGameState().setDifficulty(selected.difficulty);
                 context.getSceneManager().setActiveScene(LingoSceneIds.GAME);
+            } else if (selected.targetSceneId != null) {
+                context.getSceneManager().setActiveScene(selected.targetSceneId);
             } else {
                 Gdx.app.exit();
             }
@@ -81,6 +96,12 @@ public class MenuScene implements Scene {
 
         context.getOutputManager().drawTextCenteredWithShadow("LINGO-MAN", 320f, 350f, TEXT_PRIMARY);
         context.getOutputManager().drawTextCentered("Educational arcade word hunt", 320f, 324f, TEXT_MUTED);
+        context.getOutputManager().drawTextCentered(
+            "Words found: " + LingoSession.get().getGameState().getFoundWordsCount(),
+            320f,
+            306f,
+            TEXT_MUTED
+        );
         context.getOutputManager().drawTextCentered("Choose a difficulty", 320f, 298f, TEXT_MUTED);
 
         for (int i = 0; i < options.length; i++) {
@@ -100,18 +121,49 @@ public class MenuScene implements Scene {
 
     @Override
     public void dispose() {
+        context.getSaveManager().unregister(getSaveId());
         System.out.println("[LingoMan] Menu disposed");
+    }
+
+    @Override
+    public String getSaveId() {
+        return "lingoman_progress";
+    }
+
+    @Override
+    public SaveData writeSaveData() {
+        SaveData data = new SaveData(getSaveId());
+        List<String> foundWords = LingoSession.get().getGameState().getFoundWords();
+        data.put("found_words", String.join("\n", foundWords));
+        return data;
+    }
+
+    @Override
+    public void readSaveData(SaveData saveData) {
+        if (saveData == null) {
+            return;
+        }
+
+        Object rawWords = saveData.get("found_words");
+        List<String> words = new ArrayList<>();
+        if (rawWords instanceof String wordBlock && !wordBlock.isBlank()) {
+            words.addAll(Arrays.asList(wordBlock.split("\\R")));
+        }
+
+        LingoSession.get().getGameState().setFoundWords(words);
     }
 
     private static final class MenuOption {
         final String label;
         final String hint;
         final GameState.Difficulty difficulty;
+        final String targetSceneId;
 
-        private MenuOption(String label, String hint, GameState.Difficulty difficulty) {
+        private MenuOption(String label, String hint, GameState.Difficulty difficulty, String targetSceneId) {
             this.label = label;
             this.hint = hint;
             this.difficulty = difficulty;
+            this.targetSceneId = targetSceneId;
         }
     }
 }

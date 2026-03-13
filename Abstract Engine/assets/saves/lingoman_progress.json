@@ -1,0 +1,10 @@
+{
+lingoman_progress: {
+	entries: {
+		found_words: {
+			class: java.lang.String
+			value: FISH
+		}
+	}
+}
+}

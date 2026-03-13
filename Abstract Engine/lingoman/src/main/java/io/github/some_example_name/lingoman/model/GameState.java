@@ -1,6 +1,9 @@
 package io.github.some_example_name.lingoman.model;
 
 import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -16,6 +19,7 @@ public final class GameState {
     private String targetWord = "";
     private final Map<Character, Integer> targetCounts = new LinkedHashMap<>();
     private final Map<Character, Integer> collectedCounts = new HashMap<>();
+    private final List<String> foundWords = new ArrayList<>();
     private int lives = 3;
     private String lastResult = "";
 
@@ -101,11 +105,43 @@ public final class GameState {
         return builder.toString();
     }
 
+    public void addFoundWord(String word) {
+        String normalized = normalizeWord(word);
+        if (!normalized.isEmpty()) {
+            foundWords.add(normalized);
+        }
+    }
+
+    public List<String> getFoundWords() {
+        return Collections.unmodifiableList(foundWords);
+    }
+
+    public int getFoundWordsCount() {
+        return foundWords.size();
+    }
+
+    public void setFoundWords(List<String> words) {
+        foundWords.clear();
+        if (words == null) {
+            return;
+        }
+        for (String word : words) {
+            String normalized = normalizeWord(word);
+            if (!normalized.isEmpty()) {
+                foundWords.add(normalized);
+            }
+        }
+    }
+
     public void setLastResult(String lastResult) {
         this.lastResult = lastResult == null ? "" : lastResult;
     }
 
     public String getLastResult() {
         return lastResult;
+    }
+
+    private String normalizeWord(String word) {
+        return word == null ? "" : word.trim().toUpperCase();
     }
 }
