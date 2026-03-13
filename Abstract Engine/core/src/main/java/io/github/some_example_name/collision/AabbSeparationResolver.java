@@ -26,25 +26,48 @@ public final class AabbSeparationResolver implements ICollisionResolver {
         Entity ea = a.getOwner();
         Entity eb = b.getOwner();
 
+        if (ea.isTrigger() || eb.isTrigger()) return;
+
+        boolean aStatic = ea.isStatic();
+        boolean bStatic = eb.isStatic();
+
+        // If both are static, nothing to resolve
+        if (aStatic && bStatic) return;
+
         if (overlapX < overlapY) {
-            float separation = overlapX * 0.5f;
-            if (ra.x < rb.x) {
-                ea.setX(ea.getX() - separation);
-                eb.setX(eb.getX() + separation);
+            if (!aStatic && !bStatic) {
+                // Both movable — split equally
+                float separation = overlapX * 0.5f;
+                if (ra.x < rb.x) {
+                    ea.setX(ea.getX() - separation);
+                    eb.setX(eb.getX() + separation);
+                } else {
+                    ea.setX(ea.getX() + separation);
+                    eb.setX(eb.getX() - separation);
+                }
+            } else if (!aStatic) {
+                // Only push a the full amount
+                ea.setX(ra.x < rb.x ? ea.getX() - overlapX : ea.getX() + overlapX);
             } else {
-                ea.setX(ea.getX() + separation);
-                eb.setX(eb.getX() - separation);
+                // Only push b the full amount
+                eb.setX(rb.x < ra.x ? eb.getX() - overlapX : eb.getX() + overlapX);
             }
             return;
         }
 
-        float separation = overlapY * 0.5f;
-        if (ra.y < rb.y) {
-            ea.setY(ea.getY() - separation);
-            eb.setY(eb.getY() + separation);
+        if (!aStatic && !bStatic) {
+            float separation = overlapY * 0.5f;
+            if (ra.y < rb.y) {
+                ea.setY(ea.getY() - separation);
+                eb.setY(eb.getY() + separation);
+            } else {
+                ea.setY(ea.getY() + separation);
+                eb.setY(eb.getY() - separation);
+            }
+        } else if (!aStatic) {
+            ea.setY(ra.y < rb.y ? ea.getY() - overlapY : ea.getY() + overlapY);
         } else {
-            ea.setY(ea.getY() + separation);
-            eb.setY(eb.getY() - separation);
+            eb.setY(rb.y < ra.y ? eb.getY() - overlapY : eb.getY() + overlapY);
         }
     }
 }

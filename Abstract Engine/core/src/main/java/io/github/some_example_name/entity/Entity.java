@@ -51,4 +51,16 @@ public abstract class Entity implements Activatable {
 
   public boolean isActive() { return active; }
   public void setActive(boolean active) { this.active = active; }
+
+  /** 
+   * Returns true if this entity should not be moved.
+   * For example, walls stay in place during collision resolution.
+  */
+  public boolean isStatic() { return false; }
+
+  /**
+   * Returns true if this entity only needs overlap events and should not
+   * physically push other entities during collision resolution.
+   */
+  public boolean isTrigger() { return false; }
 }
