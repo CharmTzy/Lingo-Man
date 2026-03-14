@@ -6,6 +6,7 @@ import io.github.some_example_name.EngineContext;
 import io.github.some_example_name.lingoman.LingoInputActions;
 import io.github.some_example_name.lingoman.LingoSceneIds;
 import io.github.some_example_name.lingoman.LingoSession;
+import io.github.some_example_name.lingoman.model.WordBank;
 import io.github.some_example_name.scenes.Scene;
 
 public class GameOverScene implements Scene {
@@ -57,7 +58,9 @@ public class GameOverScene implements Scene {
             result = "GAME OVER";
         }
         String word = LingoSession.get().getGameState().getTargetWord();
+        String meaning = WordBank.meaningFor(word);
         String difficulty = LingoSession.get().getGameState().getDifficulty().name();
+        int foundCount = LingoSession.get().getGameState().getFoundWordsCount();
         boolean success = "WORD COMPLETE".equalsIgnoreCase(result);
         Color resultColor = success ? SUCCESS : FAILURE;
 
@@ -66,7 +69,9 @@ public class GameOverScene implements Scene {
         context.getOutputManager().drawTextCenteredWithShadow("ROUND OVER", 320f, 298f, TEXT_MUTED);
         context.getOutputManager().drawTextCenteredWithShadow(result, 320f, 262f, resultColor);
         context.getOutputManager().drawTextCentered("Word: " + word + "    Mode: " + difficulty, 320f, 220f, TEXT_PRIMARY);
-        context.getOutputManager().drawTextCentered("R restart    M or ESC menu", 320f, 182f, TEXT_MUTED);
+        context.getOutputManager().drawTextCentered("Meaning: " + meaning, 320f, 202f, TEXT_MUTED);
+        context.getOutputManager().drawTextCentered("Words found total: " + foundCount, 320f, 184f, TEXT_MUTED);
+        context.getOutputManager().drawTextCentered("R restart    M or ESC menu", 320f, 166f, TEXT_MUTED);
     }
 
     @Override

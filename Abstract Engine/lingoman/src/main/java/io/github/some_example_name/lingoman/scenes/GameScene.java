@@ -32,6 +32,8 @@ import io.github.some_example_name.scenes.Scene;
 
 public class GameScene implements Scene {
 
+    private static final String PROFILE_FILE = "lingoman_progress.json";
+
     private static final Color PANEL_FILL = new Color(0.06f, 0.09f, 0.12f, 0.90f);
     private static final Color PANEL_BORDER = new Color(0.92f, 0.76f, 0.27f, 1f);
     private static final Color STATUS_FILL = new Color(0.18f, 0.10f, 0.08f, 0.92f);
@@ -104,6 +106,8 @@ public class GameScene implements Scene {
 
         GameState state = LingoSession.get().getGameState();
         if (state.hasCollectedAllLetters()) {
+            state.addFoundWord(state.getTargetWord());
+            context.getSaveManager().save(PROFILE_FILE);
             state.setLastResult("WORD COMPLETE");
             context.getSceneManager().setActiveScene(LingoSceneIds.GAME_OVER);
         } else if (state.getLives() <= 0) {
@@ -128,6 +132,7 @@ public class GameScene implements Scene {
         context.getOutputManager().drawTextWithShadow("Lives: " + state.getLives(), 420f, 447f,
             state.getLives() <= 1 ? TEXT_WARNING : TEXT_PRIMARY);
         context.getOutputManager().drawTextWithShadow("Mode: " + state.getDifficulty(), 420f, 423f, TEXT_PRIMARY);
+        context.getOutputManager().drawTextWithShadow("Words Found: " + state.getFoundWordsCount(), 420f, 399f, TEXT_MUTED);
 
         context.getOutputManager().drawTextWithShadow("Move: WASD / Arrows", 24f, 35f, TEXT_PRIMARY);
         context.getOutputManager().drawTextWithShadow("Menu: M or ESC", 220f, 35f, TEXT_MUTED);
