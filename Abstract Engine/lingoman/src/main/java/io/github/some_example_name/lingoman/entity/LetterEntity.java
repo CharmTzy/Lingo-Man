@@ -35,6 +35,13 @@ public class LetterEntity extends Entity {
     @Override
     public void render(OutputManager outputManager) {
         outputManager.drawRect(getX(), getY(), getWidth(), getHeight(), color);
-        outputManager.drawText(String.valueOf(letter), getX() + 6f, getY() + getHeight() - 6f);
+        float textScale = Math.max(0.42f, Math.min(0.68f, getWidth() / 22f));
+        outputManager.drawTextCenteredScaled(
+            String.valueOf(letter),
+            getX() + getWidth() * 0.5f,
+            getY() + getHeight() * 0.76f,
+            Color.WHITE,
+            textScale
+        );
     }
 }

@@ -37,7 +37,7 @@ public class MenuScene implements Scene, ISaveable {
     private final MenuOption[] options = {
         new MenuOption("Easy", "1 ghost", GameState.Difficulty.EASY, null),
         new MenuOption("Medium", "2 ghosts", GameState.Difficulty.MEDIUM, null),
-        new MenuOption("Hard", "3 ghosts", GameState.Difficulty.HARD, null),
+        new MenuOption("Hard", "4 ghosts", GameState.Difficulty.HARD, null),
         new MenuOption("Words Found", "open list", null, LingoSceneIds.FOUND_WORDS),
         new MenuOption("Quit", "Exit game", null, null)
     };
@@ -92,31 +92,29 @@ public class MenuScene implements Scene, ISaveable {
         context.getOutputManager().clearScreen(BACKGROUND.r, BACKGROUND.g, BACKGROUND.b, BACKGROUND.a);
         context.getOutputManager().drawRect(0f, 330f, 640f, 150f, BACKDROP_TOP);
         context.getOutputManager().drawRect(0f, 0f, 640f, 105f, BACKDROP_BOTTOM);
-        context.getOutputManager().drawPanel(100f, 88f, 440f, 286f, CARD_FILL, CARD_BORDER);
+        context.getOutputManager().drawPanel(96f, 56f, 448f, 332f, CARD_FILL, CARD_BORDER);
 
-        context.getOutputManager().drawTextCenteredWithShadow("LINGO-MAN", 320f, 350f, TEXT_PRIMARY);
-        context.getOutputManager().drawTextCentered("Educational arcade word hunt", 320f, 324f, TEXT_MUTED);
-        context.getOutputManager().drawTextCentered(
-            "Words found: " + LingoSession.get().getGameState().getFoundWordsCount(),
-            320f,
-            306f,
-            TEXT_MUTED
-        );
-        context.getOutputManager().drawTextCentered("Choose a difficulty", 320f, 298f, TEXT_MUTED);
+        context.getOutputManager().drawTextCenteredWithShadow("LINGO-MAN", 320f, 356f, TEXT_PRIMARY);
+        context.getOutputManager().drawTextCentered("Educational arcade word hunt", 320f, 328f, TEXT_MUTED);
+        context.getOutputManager().drawTextCentered("Choose a mode", 320f, 300f, TEXT_MUTED);
 
         for (int i = 0; i < options.length; i++) {
             boolean selected = i == selectedIndex;
-            float y = 242f - (i * 44f);
+            float y = 236f - (i * 38f);
             Color fill = selected ? OPTION_SELECTED_FILL : OPTION_FILL;
             Color border = selected ? OPTION_SELECTED_BORDER : OPTION_BORDER;
             Color labelColor = selected ? TEXT_DARK : TEXT_PRIMARY;
             Color hintColor = selected ? TEXT_DARK : TEXT_MUTED;
-            context.getOutputManager().drawPanel(144f, y, 352f, 34f, fill, border);
-            context.getOutputManager().drawText(options[i].label, 164f, y + 23f, labelColor);
-            context.getOutputManager().drawTextRightAligned(options[i].hint, 476f, y + 23f, hintColor);
+            String hint = options[i].targetSceneId != null
+                ? LingoSession.get().getGameState().getFoundWordsCount() + " saved"
+                : options[i].hint;
+
+            context.getOutputManager().drawPanel(142f, y, 356f, 30f, fill, border);
+            context.getOutputManager().drawText(options[i].label, 162f, y + 21f, labelColor);
+            context.getOutputManager().drawTextRightAligned(hint, 478f, y + 21f, hintColor);
         }
 
-        context.getOutputManager().drawTextCentered("W/S or arrow keys to move, ENTER to select", 320f, 54f, TEXT_MUTED);
+        context.getOutputManager().drawTextCentered("W/S or arrow keys to move, ENTER to select", 320f, 28f, TEXT_MUTED);
     }
 
     @Override

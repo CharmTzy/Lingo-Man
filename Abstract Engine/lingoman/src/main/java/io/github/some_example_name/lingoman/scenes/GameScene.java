@@ -7,12 +7,11 @@ import java.util.Random;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.GridPoint2;
-import com.badlogic.gdx.math.Vector2;
 
 import io.github.some_example_name.EngineContext;
+import io.github.some_example_name.collision.Collider;
 import io.github.some_example_name.collision.EntityCollisionListenerAdapter;
 import io.github.some_example_name.collision.ICollisionListener;
-import io.github.some_example_name.collision.Collider;
 import io.github.some_example_name.lingoman.LingoInputActions;
 import io.github.some_example_name.lingoman.LingoSceneIds;
 import io.github.some_example_name.lingoman.LingoSession;
@@ -23,45 +22,31 @@ import io.github.some_example_name.lingoman.entity.WallEntity;
 import io.github.some_example_name.lingoman.level.MazeLayout;
 import io.github.some_example_name.lingoman.model.GameState;
 import io.github.some_example_name.lingoman.model.WordBank;
+import io.github.some_example_name.lingoman.movement.MazeFollowBehaviour;
+import io.github.some_example_name.lingoman.movement.MazePatrolBehaviour;
+import io.github.some_example_name.lingoman.movement.MazeSeekBehaviour;
+import io.github.some_example_name.lingoman.movement.MazeWanderBehaviour;
 import io.github.some_example_name.lingoman.world.LingoWorld;
-import io.github.some_example_name.movement.behaviour.FollowPathBehaviour;
 import io.github.some_example_name.movement.behaviour.MovementBehaviour;
-import io.github.some_example_name.movement.behaviour.PatrolBehaviour;
-import io.github.some_example_name.movement.behaviour.SeekTargetBehaviour;
 import io.github.some_example_name.scenes.Scene;
 
 public class GameScene implements Scene {
 
     private static final String PROFILE_FILE = "lingoman_progress.json";
 
-    private static final Color PANEL_FILL = new Color(0.06f, 0.09f, 0.12f, 0.90f);
-    private static final Color PANEL_BORDER = new Color(0.92f, 0.76f, 0.27f, 1f);
-    private static final Color STATUS_FILL = new Color(0.18f, 0.10f, 0.08f, 0.92f);
-    private static final Color STATUS_BORDER = new Color(0.97f, 0.70f, 0.34f, 1f);
     private static final Color TEXT_PRIMARY = new Color(0.96f, 0.96f, 0.92f, 1f);
     private static final Color TEXT_MUTED = new Color(0.72f, 0.77f, 0.79f, 1f);
     private static final Color TEXT_ACCENT = new Color(0.98f, 0.84f, 0.36f, 1f);
     private static final Color TEXT_WARNING = new Color(1.00f, 0.64f, 0.47f, 1f);
 
-    private static final float PLAYER_SPEED = 140f;
-    private static final float GHOST_SPEED_EASY = 70f;
-    private static final float GHOST_SPEED_MEDIUM = 85f;
-    private static final float GHOST_SPEED_HARD = 95f;
-    private static final float LETTER_SIZE = 22f;
     private static final float STATUS_MESSAGE_DURATION = 2.0f;
     private static final float INVULNERABLE_SECONDS = 1.25f;
-
-    private static final GridPoint2 PLAYER_SPAWN = new GridPoint2(1, 13);
-    private static final GridPoint2[] GHOST_SPAWNS = {
-        new GridPoint2(18, 1),
-        new GridPoint2(18, 13),
-        new GridPoint2(1, 1)
-    };
 
     private EngineContext context;
     private final LingoWorld world = new LingoWorld();
     private final List<GhostEntity> ghosts = new ArrayList<>();
 
+    private MazeLayout.Layout currentLayout;
     private PlayerEntity player;
     private float invulnerableTimer = 0f;
     private String statusMessage = "";
@@ -122,23 +107,18 @@ public class GameScene implements Scene {
         world.render(context.getOutputManager());
 
         GameState state = LingoSession.get().getGameState();
-        context.getOutputManager().drawPanel(12f, 408f, 384f, 60f, 2f, PANEL_FILL, PANEL_BORDER);
-        context.getOutputManager().drawPanel(408f, 408f, 220f, 60f, 2f, PANEL_FILL, PANEL_BORDER);
-        context.getOutputManager().drawPanel(12f, 12f, 616f, 36f, 2f, PANEL_FILL, PANEL_BORDER);
+        context.getOutputManager().drawTextWithShadow("Target: " + state.getTargetWord(), 28f, 474f, TEXT_ACCENT);
+        context.getOutputManager().drawTextWithShadow("Progress: " + state.getCollectedLettersDisplay(), 28f, 454f, TEXT_PRIMARY);
 
-        context.getOutputManager().drawTextWithShadow("Target: " + state.getTargetWord(), 24f, 447f, TEXT_ACCENT);
-        context.getOutputManager().drawTextWithShadow("Progress: " + state.getCollectedLettersDisplay(), 24f, 423f, TEXT_PRIMARY);
-
-        context.getOutputManager().drawTextWithShadow("Lives: " + state.getLives(), 420f, 447f,
+        context.getOutputManager().drawTextWithShadow("Lives: " + state.getLives(), 432f, 474f,
             state.getLives() <= 1 ? TEXT_WARNING : TEXT_PRIMARY);
-        context.getOutputManager().drawTextWithShadow("Mode: " + state.getDifficulty(), 420f, 423f, TEXT_PRIMARY);
-        context.getOutputManager().drawTextWithShadow("Words Found: " + state.getFoundWordsCount(), 420f, 399f, TEXT_MUTED);
+        context.getOutputManager().drawTextWithShadow("Mode: " + state.getDifficulty(), 432f, 454f, TEXT_PRIMARY);
 
-        context.getOutputManager().drawTextWithShadow("Move: WASD / Arrows", 24f, 35f, TEXT_PRIMARY);
-        context.getOutputManager().drawTextWithShadow("Menu: M or ESC", 220f, 35f, TEXT_MUTED);
+        context.getOutputManager().drawTextWithShadow("Move: WASD / Arrows", 28f, 18f, TEXT_PRIMARY);
+        context.getOutputManager().drawTextWithShadow("Menu: M or ESC", 236f, 18f, TEXT_MUTED);
 
         if (!statusMessage.isBlank()) {
-            context.getOutputManager().drawTextWithShadow(statusMessage, 390f, 35f, TEXT_WARNING);
+            context.getOutputManager().drawTextRightAlignedWithShadow(statusMessage, 610f, 18f, TEXT_WARNING);
         }
     }
 
@@ -156,6 +136,7 @@ public class GameScene implements Scene {
         state.setLastResult("");
         state.setTargetWord(WordBank.randomWord(state.getDifficulty(), rng));
 
+        currentLayout = MazeLayout.forDifficulty(state.getDifficulty());
         invulnerableTimer = 0f;
         statusMessage = "";
         statusMessageTimer = 0f;
@@ -179,50 +160,52 @@ public class GameScene implements Scene {
 
     private void buildWalls() {
         int id = 0;
-        for (int row = 0; row < MazeLayout.ROWS; row++) {
-            for (int col = 0; col < MazeLayout.COLS; col++) {
-                if (!MazeLayout.isWall(col, row)) {
+        for (int row = 0; row < currentLayout.getRows(); row++) {
+            for (int col = 0; col < currentLayout.getCols(); col++) {
+                if (!MazeLayout.isWall(currentLayout, col, row)) {
                     continue;
                 }
-                float x = MazeLayout.toWorldX(col);
-                float y = MazeLayout.toWorldY(row);
-                WallEntity wall = new WallEntity("wall_" + id++, x, y, MazeLayout.TILE_SIZE);
+
+                float x = MazeLayout.toWorldX(currentLayout, col);
+                float y = MazeLayout.toWorldY(currentLayout, row);
+                WallEntity wall = new WallEntity("wall_" + id++, x, y, currentLayout.getTileSize());
                 world.addCollidableEntity(wall, null);
             }
         }
     }
 
     private void buildPlayer() {
-        float x = MazeLayout.toWorldXCentered(PLAYER_SPAWN.x, 28f);
-        float y = MazeLayout.toWorldYCentered(PLAYER_SPAWN.y, 28f);
-        player = new PlayerEntity("player", context.getInputManager(), x, y, PLAYER_SPEED);
+        GridPoint2 spawn = currentLayout.getPlayerSpawn();
+        float size = entitySize();
+        float x = MazeLayout.toWorldXCentered(currentLayout, spawn.x, size);
+        float y = MazeLayout.toWorldYCentered(currentLayout, spawn.y, size);
+        player = new PlayerEntity("player", context.getInputManager(), x, y, playerSpeed(), size);
         world.addCollidableEntity(player, new PlayerCollisionListener());
     }
 
     private void buildGhosts(GameState.Difficulty difficulty) {
         int ghostCount = switch (difficulty) {
             case MEDIUM -> 2;
-            case HARD -> 3;
+            case HARD -> 4;
             default -> 1;
         };
 
-        float speed = switch (difficulty) {
-            case MEDIUM -> GHOST_SPEED_MEDIUM;
-            case HARD -> GHOST_SPEED_HARD;
-            default -> GHOST_SPEED_EASY;
-        };
+        float speed = ghostSpeed(difficulty);
+        float size = entitySize();
+        GridPoint2[] spawns = currentLayout.getGhostSpawns();
 
         List<Color> colors = List.of(
             new Color(1.0f, 0.35f, 0.30f, 1f),
             new Color(0.90f, 0.20f, 0.90f, 1f),
-            new Color(0.35f, 0.90f, 0.45f, 1f)
+            new Color(0.35f, 0.90f, 0.45f, 1f),
+            new Color(0.95f, 0.70f, 0.22f, 1f)
         );
 
         for (int i = 0; i < ghostCount; i++) {
-            GridPoint2 spawn = GHOST_SPAWNS[i % GHOST_SPAWNS.length];
-            float x = MazeLayout.toWorldXCentered(spawn.x, 28f);
-            float y = MazeLayout.toWorldYCentered(spawn.y, 28f);
-            GhostEntity ghost = new GhostEntity("ghost_" + i, colors.get(i % colors.size()), x, y);
+            GridPoint2 spawn = spawns[i % spawns.length];
+            float x = MazeLayout.toWorldXCentered(currentLayout, spawn.x, size);
+            float y = MazeLayout.toWorldYCentered(currentLayout, spawn.y, size);
+            GhostEntity ghost = new GhostEntity("ghost_" + i, colors.get(i % colors.size()), x, y, size);
             ghosts.add(ghost);
             world.addCollidableEntity(ghost, new EntityCollisionListenerAdapter(ghost));
             world.assignBehaviour(ghost, buildGhostBehaviour(i, speed));
@@ -234,20 +217,22 @@ public class GameScene implements Scene {
             return;
         }
 
-        List<GridPoint2> openCells = MazeLayout.collectOpenCells();
-        openCells.removeIf(cell -> isSpawnCell(cell));
+        List<GridPoint2> openCells = MazeLayout.collectReachableOpenCells(currentLayout, currentLayout.getPlayerSpawn());
+        openCells.removeIf(this::isSpawnCell);
         Collections.shuffle(openCells, LingoSession.get().getRandom());
 
+        float size = letterSize();
         int placed = 0;
         for (int i = 0; i < targetWord.length(); i++) {
             if (placed >= openCells.size()) {
                 break;
             }
+
             char letter = targetWord.charAt(i);
             GridPoint2 cell = openCells.get(placed++);
-            float x = MazeLayout.toWorldXCentered(cell.x, LETTER_SIZE);
-            float y = MazeLayout.toWorldYCentered(cell.y, LETTER_SIZE);
-            LetterEntity entity = new LetterEntity("letter_" + i, letter, x, y, LETTER_SIZE);
+            float x = MazeLayout.toWorldXCentered(currentLayout, cell.x, size);
+            float y = MazeLayout.toWorldYCentered(currentLayout, cell.y, size);
+            LetterEntity entity = new LetterEntity("letter_" + i, letter, x, y, size);
             world.addCollidableEntity(entity, null);
         }
     }
@@ -256,10 +241,10 @@ public class GameScene implements Scene {
         if (cell == null) {
             return false;
         }
-        if (cell.equals(PLAYER_SPAWN)) {
+        if (cell.equals(currentLayout.getPlayerSpawn())) {
             return true;
         }
-        for (GridPoint2 spawn : GHOST_SPAWNS) {
+        for (GridPoint2 spawn : currentLayout.getGhostSpawns()) {
             if (cell.equals(spawn)) {
                 return true;
             }
@@ -268,33 +253,36 @@ public class GameScene implements Scene {
     }
 
     private MovementBehaviour buildGhostBehaviour(int index, float speed) {
-        List<Vector2> route = List.of(
-            new Vector2(MazeLayout.toWorldXCentered(3, 28f), MazeLayout.toWorldYCentered(3, 28f)),
-            new Vector2(MazeLayout.toWorldXCentered(16, 28f), MazeLayout.toWorldYCentered(3, 28f)),
-            new Vector2(MazeLayout.toWorldXCentered(16, 28f), MazeLayout.toWorldYCentered(11, 28f)),
-            new Vector2(MazeLayout.toWorldXCentered(3, 28f), MazeLayout.toWorldYCentered(11, 28f))
-        );
-
+        List<GridPoint2> route = currentLayout.getWaypointRoute();
+        float threshold = Math.max(2f, currentLayout.getTileSize() * 0.22f);
         return switch (index) {
-            case 0 -> new SeekTargetBehaviour(player, speed, 6f);
-            case 1 -> new PatrolBehaviour(route, speed * 0.9f, 6f);
-            default -> new FollowPathBehaviour(route, speed * 0.85f, 6f, true);
+            case 0 -> new MazeSeekBehaviour(currentLayout, player, speed);
+            case 1 -> new MazePatrolBehaviour(currentLayout, route, speed * 0.96f, threshold);
+            case 2 -> new MazeFollowBehaviour(currentLayout, player, speed * 0.92f, 4, threshold);
+            default -> new MazeWanderBehaviour(currentLayout, speed * 0.88f);
         };
     }
 
     private void resetPositions() {
-        player.setX(MazeLayout.toWorldXCentered(PLAYER_SPAWN.x, player.getWidth()));
-        player.setY(MazeLayout.toWorldYCentered(PLAYER_SPAWN.y, player.getHeight()));
+        GridPoint2 playerSpawn = currentLayout.getPlayerSpawn();
+        player.setX(MazeLayout.toWorldXCentered(currentLayout, playerSpawn.x, player.getWidth()));
+        player.setY(MazeLayout.toWorldYCentered(currentLayout, playerSpawn.y, player.getHeight()));
         player.setVx(0f);
         player.setVy(0f);
 
+        GridPoint2[] spawns = currentLayout.getGhostSpawns();
         for (int i = 0; i < ghosts.size(); i++) {
             GhostEntity ghost = ghosts.get(i);
-            GridPoint2 spawn = GHOST_SPAWNS[i % GHOST_SPAWNS.length];
-            ghost.setX(MazeLayout.toWorldXCentered(spawn.x, ghost.getWidth()));
-            ghost.setY(MazeLayout.toWorldYCentered(spawn.y, ghost.getHeight()));
+            GridPoint2 spawn = spawns[i % spawns.length];
+            ghost.setX(MazeLayout.toWorldXCentered(currentLayout, spawn.x, ghost.getWidth()));
+            ghost.setY(MazeLayout.toWorldYCentered(currentLayout, spawn.y, ghost.getHeight()));
             ghost.setVx(0f);
             ghost.setVy(0f);
+        }
+
+        float speed = ghostSpeed(LingoSession.get().getGameState().getDifficulty());
+        for (int i = 0; i < ghosts.size(); i++) {
+            world.assignBehaviour(ghosts.get(i), buildGhostBehaviour(i, speed));
         }
     }
 
@@ -302,6 +290,7 @@ public class GameScene implements Scene {
         if (invulnerableTimer > 0f) {
             return;
         }
+
         GameState state = LingoSession.get().getGameState();
         state.loseLife();
         invulnerableTimer = INVULNERABLE_SECONDS;
@@ -314,6 +303,27 @@ public class GameScene implements Scene {
         statusMessageTimer = STATUS_MESSAGE_DURATION;
     }
 
+    private float entitySize() {
+        return currentLayout.getTileSize() * 0.72f;
+    }
+
+    private float letterSize() {
+        return currentLayout.getTileSize() * 0.55f;
+    }
+
+    private float playerSpeed() {
+        return currentLayout.getTileSize() * 5.0f;
+    }
+
+    private float ghostSpeed(GameState.Difficulty difficulty) {
+        float scale = switch (difficulty) {
+            case MEDIUM -> 3.0f;
+            case HARD -> 3.35f;
+            default -> 2.6f;
+        };
+        return currentLayout.getTileSize() * scale;
+    }
+
     private final class PlayerCollisionListener implements ICollisionListener {
 
         @Override
@@ -321,11 +331,13 @@ public class GameScene implements Scene {
             if (other == null) {
                 return;
             }
+
             Object owner = other.getOwner();
             if (owner instanceof LetterEntity letter) {
                 if (!letter.isActive()) {
                     return;
                 }
+
                 LingoSession.get().getGameState().collectLetter(letter.getLetter());
                 world.removeEntity(letter);
                 showStatus("Collected: " + letter.getLetter());
