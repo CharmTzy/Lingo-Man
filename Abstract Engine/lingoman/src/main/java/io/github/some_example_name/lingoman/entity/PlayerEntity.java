@@ -12,14 +12,14 @@ public class PlayerEntity extends DynamicEntity {
     private final InputManager input;
     private final float moveSpeed;
 
-    public PlayerEntity(String id, InputManager input, float x, float y, float moveSpeed) {
+    public PlayerEntity(String id, InputManager input, float x, float y, float moveSpeed, float size) {
         super(id);
         this.input = input;
         this.moveSpeed = moveSpeed;
         setX(x);
         setY(y);
-        setWidth(28f);
-        setHeight(28f);
+        setWidth(size);
+        setHeight(size);
     }
 
     @Override

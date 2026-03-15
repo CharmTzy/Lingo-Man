@@ -9,13 +9,24 @@ public class GhostEntity extends NPCEntity {
 
     private final Color color;
 
-    public GhostEntity(String id, Color color, float x, float y) {
+    public GhostEntity(String id, Color color, float x, float y, float size) {
         super(id);
         this.color = color == null ? new Color(1f, 0.3f, 0.3f, 1f) : color;
         setX(x);
         setY(y);
-        setWidth(28f);
-        setHeight(28f);
+        setWidth(size);
+        setHeight(size);
+    }
+
+    @Override
+    public void update(float dt) {
+        if (dt <= 0f || getMovementBehaviour() == null) {
+            return;
+        }
+
+        getMovementBehaviour().move(this, dt);
+        setX(getX() + getVx() * dt);
+        setY(getY() + getVy() * dt);
     }
 
     @Override
@@ -26,8 +37,8 @@ public class GhostEntity extends NPCEntity {
     @Override
     public void onCollision(Entity other) {
         if (other instanceof WallEntity) {
-            setVx(-getVx());
-            setVy(-getVy());
+            setVx(0f);
+            setVy(0f);
         }
     }
 }
