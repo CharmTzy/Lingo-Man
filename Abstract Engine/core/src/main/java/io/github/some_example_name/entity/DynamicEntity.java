@@ -13,6 +13,8 @@ import io.github.some_example_name.movement.behaviour.MovementBehaviour;
 public abstract class DynamicEntity extends Entity implements Movable {
 
     private MovementBehaviour movementBehaviour;
+    private final Vector2 positionCache = new Vector2();
+    private final Vector2 velocityCache = new Vector2();
 
     protected DynamicEntity(String id) {
         super(id);
@@ -20,7 +22,7 @@ public abstract class DynamicEntity extends Entity implements Movable {
 
     @Override
     public Vector2 getPosition() {
-        return new Vector2(getX(), getY());
+        return positionCache.set(getX(), getY());
     }
 
     @Override
@@ -36,7 +38,7 @@ public abstract class DynamicEntity extends Entity implements Movable {
 
     @Override
     public Vector2 getVelocity() {
-        return new Vector2(getVx(), getVy());
+        return velocityCache.set(getVx(), getVy());
     }
 
     @Override

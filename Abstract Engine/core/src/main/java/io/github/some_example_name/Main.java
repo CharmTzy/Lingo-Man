@@ -2,27 +2,32 @@ package io.github.some_example_name;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import io.github.some_example_name.managers.SceneManager;
-import io.github.some_example_name.scenes.GameOverScene;
-import io.github.some_example_name.scenes.GameScene;
-import io.github.some_example_name.scenes.MenuScene;
-import io.github.some_example_name.scenes.PauseScene;
-import io.github.some_example_name.scenes.SceneId;
 
 /** Single runtime entrypoint shared by all launchers. */
 public class Main extends ApplicationAdapter {
 
+    private final EngineBootstrap bootstrap;
     private EngineContext context;
+
+    public Main() {
+        this(EngineBootstrap.NO_OP);
+    }
+
+    public Main(EngineBootstrap bootstrap) {
+        this.bootstrap = bootstrap == null ? EngineBootstrap.NO_OP : bootstrap;
+    }
 
     @Override
     public void create() {
         context = new EngineContext();
-        registerScenes(context.getSceneManager());
+        bootstrap.initialize(context);
     }
 
     @Override
     public void render() {
         float deltaTime = Gdx.graphics.getDeltaTime();
+
+        bootstrap.update(context, deltaTime);
         
         // 1. Update logic
         context.getSceneManager().update(deltaTime);
@@ -53,16 +58,9 @@ public class Main extends ApplicationAdapter {
             return;
         }
 
+        bootstrap.dispose(context);
         context.getSceneManager().dispose();
         context.getAudioManager().dispose();
         context.getOutputManager().dispose();
-    }
-
-    private void registerScenes(SceneManager sceneManager) {
-        sceneManager.registerScene(SceneId.MENU, new MenuScene());
-        sceneManager.registerScene(SceneId.GAME, new GameScene());
-        sceneManager.registerScene(SceneId.PAUSE, new PauseScene());
-        sceneManager.registerScene(SceneId.GAME_OVER, new GameOverScene());
-        sceneManager.setActiveScene(SceneId.MENU);
     }
 }

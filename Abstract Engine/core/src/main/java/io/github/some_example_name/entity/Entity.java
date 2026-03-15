@@ -1,10 +1,12 @@
 package io.github.some_example_name.entity;
 
 import com.badlogic.gdx.math.Rectangle;
+import io.github.some_example_name.lifecycle.Activatable;
 import io.github.some_example_name.managers.OutputManager;
 
-public abstract class Entity {
+public abstract class Entity implements Activatable {
   private final String id;
+  private final Rectangle bounds = new Rectangle();
 
   protected Entity(String id) { this.id = id; }
 
@@ -24,7 +26,8 @@ public abstract class Entity {
   public void onCollision(Entity other) {}
 
   public Rectangle bounds() {
-    return new Rectangle(getX(), getY(), getWidth(), getHeight());
+    bounds.set(getX(), getY(), getWidth(), getHeight());
+    return bounds;
   }
 
   // Convenience getters/setters for subclasses
@@ -48,4 +51,16 @@ public abstract class Entity {
 
   public boolean isActive() { return active; }
   public void setActive(boolean active) { this.active = active; }
+
+  /** 
+   * Returns true if this entity should not be moved.
+   * For example, walls stay in place during collision resolution.
+  */
+  public boolean isStatic() { return false; }
+
+  /**
+   * Returns true if this entity only needs overlap events and should not
+   * physically push other entities during collision resolution.
+   */
+  public boolean isTrigger() { return false; }
 }

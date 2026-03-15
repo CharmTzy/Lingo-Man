@@ -84,8 +84,11 @@ public final class EntityManager {
     }
   }
   public Entity getById(String id) {
+    if (id == null) {
+      return null;
+    }
     for (Entity e : entities) {
-      if (e.getId().equals(id))
+      if (id.equals(e.getId()))
         return e;
     }
     return null;

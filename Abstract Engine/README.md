@@ -29,5 +29,16 @@ Useful Gradle tasks and flags:
 - `lwjgl3:run`: starts the application.
 - `test`: runs unit tests (if any).
 
+## How to Run
+
+1. Open terminal.
+2. Navigate to the project directory:
+
+   cd "Abstract Engine"
+
+3. Run the application:
+
+   ./gradlew lwjgl3:run
+   
 Note that most tasks that are not specific to a single project can be run with `name:` prefix, where the `name` should be replaced with the ID of a specific project.
 For example, `core:clean` removes `build` folder only from the `core` project.

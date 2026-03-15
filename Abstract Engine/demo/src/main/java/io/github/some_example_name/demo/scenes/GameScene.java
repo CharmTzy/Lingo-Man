@@ -1,0 +1,300 @@
+package io.github.some_example_name.demo.scenes;
+
+import java.util.IdentityHashMap;
+import java.util.Map;
+
+import io.github.some_example_name.EngineContext;
+import io.github.some_example_name.collision.Collider;
+import io.github.some_example_name.collision.EntityCollisionListenerAdapter;
+import io.github.some_example_name.collision.ICollisionListener;
+import io.github.some_example_name.debug.CollisionDebugOverlay;
+import io.github.some_example_name.debug.DebugDraw;
+import io.github.some_example_name.demo.DemoAudio;
+import io.github.some_example_name.demo.DemoInputActions;
+import io.github.some_example_name.demo.DemoSceneIds;
+import io.github.some_example_name.demo.entity.ChasingBoxEntity;
+import io.github.some_example_name.demo.entity.ControlledBoxEntity;
+import io.github.some_example_name.entity.Entity;
+import io.github.some_example_name.entity.EntityManager;
+import io.github.some_example_name.managers.CollisionManager;
+import io.github.some_example_name.managers.MovementManager;
+import io.github.some_example_name.save.ISaveable;
+import io.github.some_example_name.save.SaveData;
+import io.github.some_example_name.scenes.Scene;
+
+public class GameScene implements Scene, ISaveable {
+
+    private static final float WORLD_WIDTH = 640f;
+    private static final float WORLD_HEIGHT = 480f;
+    private static final String SESSION_FILE = "session.json";
+    private static final float STATUS_MESSAGE_DURATION_SECONDS = 2f;
+
+    private EngineContext context;
+    private final EntityManager entityManager = new EntityManager();
+    private final CollisionManager collisionManager = new CollisionManager();
+    private final MovementManager movementManager = new MovementManager();
+    private final Map<Entity, Boolean> borderCollisionStates = new IdentityHashMap<>();
+
+    private ControlledBoxEntity player;
+    private ChasingBoxEntity enemy;
+    private Collider playerCollider;
+    private Collider enemyCollider;
+    private boolean showCollisionDebug = false;
+    private DebugDraw debugDraw;
+    private CollisionDebugOverlay collisionDebugOverlay;
+    private String statusMessage = "";
+    private float statusMessageTimer = 0f;
+
+    @Override
+    public void initialize(EngineContext context) {
+        this.context = context;
+
+        player = new ControlledBoxEntity(context.getInputManager(), 80f, 80f);
+        enemy = new ChasingBoxEntity(player, 500f, 360f);
+
+        entityManager.add(player);
+        entityManager.add(enemy);
+        movementManager.registerEntity(player);
+        movementManager.registerEntity(enemy);
+
+        playerCollider = new Collider(player, player.getWidth(), player.getHeight());
+        playerCollider.setListener(new ICollisionListener() {
+            private final EntityCollisionListenerAdapter base = new EntityCollisionListenerAdapter(player);
+
+            @Override
+            public void onCollisionEnter(Collider other) {
+                context.getAudioManager().playSound(DemoAudio.SFX_PLAYER_COLLISION, false);
+                base.onCollisionEnter(other);
+            }
+
+            @Override
+            public void onCollisionStay(Collider other) {
+                base.onCollisionStay(other);
+            }
+
+            @Override
+            public void onCollisionExit(Collider other) {
+                base.onCollisionExit(other);
+            }
+        });
+
+        debugDraw = new DebugDraw();
+        collisionDebugOverlay = new CollisionDebugOverlay(debugDraw);
+
+        enemyCollider = new Collider(enemy, enemy.getWidth(), enemy.getHeight());
+        enemyCollider.setListener(new EntityCollisionListenerAdapter(enemy));
+        collisionManager.add(playerCollider);
+        collisionManager.add(enemyCollider);
+        context.getSaveManager().register(this);
+    }
+
+    @Override
+    public void enter() {
+        context.getAudioManager().playMusic(DemoAudio.BGM_GAME, true);
+        resetState();
+        clearStatusMessage();
+        System.out.println("[GameScene] Game started");
+    }
+
+    @Override
+    public void exit() {
+        System.out.println("[GameScene] Game paused/ended");
+    }
+
+    @Override
+    public void handleInput() {
+        if (context.getInputManager().isActionJustPressed(DemoInputActions.GAME_PAUSE)) {
+            context.getAudioManager().playSound(DemoAudio.SFX_MENU_NAVIGATE, false);
+            context.getSceneManager().setActiveScene(DemoSceneIds.PAUSE);
+        }
+
+        if (context.getInputManager().isActionJustPressed(DemoInputActions.GAME_ACTION)) {
+            context.getSceneManager().setActiveScene(DemoSceneIds.GAME_OVER);
+        }
+
+        if (context.getInputManager().isActionJustPressed(DemoInputActions.GAME_TOGGLE_NPC_MODE)) {
+            enemy.cycleBehaviourMode();
+            context.getAudioManager().playSound(DemoAudio.SFX_MENU_NAVIGATE, false);
+        }
+
+        if (context.getInputManager().isActionJustPressed(DemoInputActions.GAME_SAVE_SESSION)) {
+            context.getSaveManager().save(SESSION_FILE);
+            showStatusMessage("Session saved");
+            context.getAudioManager().playSound(DemoAudio.SFX_MENU_NAVIGATE, false);
+        }
+
+        if (context.getInputManager().isActionJustPressed(DemoInputActions.GAME_LOAD_SESSION)) {
+            boolean hasSave = context.getSaveManager().hasSaveFile(SESSION_FILE);
+            context.getSaveManager().load(SESSION_FILE);
+            showStatusMessage(hasSave ? "Session loaded" : "No save file to load");
+            context.getAudioManager().playSound(DemoAudio.SFX_MENU_NAVIGATE, false);
+        }
+
+        if (context.getInputManager().isActionJustPressed(DemoInputActions.GAME_DELETE_SESSION)) {
+            boolean hasSave = context.getSaveManager().hasSaveFile(SESSION_FILE);
+            context.getSaveManager().delete(SESSION_FILE);
+            showStatusMessage(hasSave ? "Session deleted" : "No save file to delete");
+            context.getAudioManager().playSound(DemoAudio.SFX_MENU_NAVIGATE, false);
+        }
+
+        if (context.getInputManager().isActionJustPressed(DemoInputActions.GAME_TOGGLE_COLLISION_DEBUG)) {
+            showCollisionDebug = !showCollisionDebug;
+        }
+    }
+
+    @Override
+    public void update(float deltaTime) {
+        if (statusMessageTimer > 0f) {
+            statusMessageTimer = Math.max(0f, statusMessageTimer - deltaTime);
+            if (statusMessageTimer == 0f) {
+                clearStatusMessage();
+            }
+        }
+
+        entityManager.update(deltaTime);
+        movementManager.updateAll(deltaTime);
+        collisionManager.update();
+
+        for (Entity entity : entityManager.getAll()) {
+            if (!entity.isActive()) {
+                continue;
+            }
+            handleBorderCollision(entity);
+        }
+    }
+
+    @Override
+    public void render() {
+        context.getOutputManager().clearScreen(0.05f, 0.15f, 0.07f, 1f);
+        entityManager.render(context.getOutputManager());
+        float musicVolume = context.getAudioManager().getMusicVolume() * 100f;
+        String musicStatus = context.getAudioManager().isMuted() ? "Muted" : Math.round(musicVolume) + "%";
+
+        if (showCollisionDebug) {
+            collisionDebugOverlay.render(context.getOutputManager(), collisionManager);
+            context.getOutputManager().drawText("Hitboxes: ON (F1)", 16f, 304f);
+        } else {
+            context.getOutputManager().drawText("Hitboxes: OFF (F1)", 16f, 304f);
+        }
+        context.getOutputManager().drawText("Move: WASD/Arrows", 16f, 416f);
+        context.getOutputManager().drawText("TAB: NPC Mode: " + enemy.getBehaviourModeLabel(), 16f, 388f);
+        context.getOutputManager().drawText("ESC: Pause   SPACE: Game Over", 16f, 360f);
+        context.getOutputManager().drawText("F5: Save   F9: Load   F10: Delete", 16f, 332f);
+        context.getOutputManager().drawText("Music: " + musicStatus + "   (-/=) Volume   V Mute", 16f, 248f);
+        if (statusMessageTimer > 0f && !statusMessage.isBlank()) {
+            context.getOutputManager().drawText("Status: " + statusMessage, 16f, 276f);
+        }
+    }
+
+    @Override
+    public void dispose() {
+        context.getSaveManager().unregister(getSaveId());
+
+        movementManager.unregisterEntity(player);
+        movementManager.unregisterEntity(enemy);
+        if (playerCollider != null) collisionManager.remove(playerCollider);
+        if (enemyCollider != null) collisionManager.remove(enemyCollider);
+        if (debugDraw != null) debugDraw.dispose();
+        System.out.println("[GameScene] Resources disposed");
+    }
+
+    private void resetState() {
+        player.setX(80f);
+        player.setY(80f);
+        player.setVx(0f);
+        player.setVy(0f);
+
+        enemy.setX(500f);
+        enemy.setY(360f);
+        enemy.setVx(0f);
+        enemy.setVy(0f);
+
+        borderCollisionStates.clear();
+    }
+
+    private void handleBorderCollision(Entity entity) {
+        boolean collided = false;
+
+        if (entity.getX() < 0f) {
+            entity.setX(0f);
+            collided = true;
+        }
+        if (entity.getY() < 0f) {
+            entity.setY(0f);
+            collided = true;
+        }
+        if (entity.getX() > WORLD_WIDTH - entity.getWidth()) {
+            entity.setX(WORLD_WIDTH - entity.getWidth());
+            collided = true;
+        }
+        if (entity.getY() > WORLD_HEIGHT - entity.getHeight()) {
+            entity.setY(WORLD_HEIGHT - entity.getHeight());
+            collided = true;
+        }
+
+        boolean wasColliding = borderCollisionStates.getOrDefault(entity, false);
+        if (collided && !wasColliding) {
+            context.getAudioManager().playSound(DemoAudio.SFX_BORDER_COLLISION, false);
+        }
+        borderCollisionStates.put(entity, collided);
+    }
+
+    @Override
+    public String getSaveId() {
+        return "game_scene";
+    }
+
+    @Override
+    public SaveData writeSaveData() {
+        SaveData data = new SaveData(getSaveId());
+        data.put("player_x", player.getX());
+        data.put("player_y", player.getY());
+        data.put("enemy_x", enemy.getX());
+        data.put("enemy_y", enemy.getY());
+        data.put("enemy_mode", enemy.getBehaviourMode().name());
+        return data;
+    }
+
+    @Override
+    public void readSaveData(SaveData saveData) {
+        if (saveData == null) {
+            return;
+        }
+
+        player.setX(readFloat(saveData, "player_x", player.getX()));
+        player.setY(readFloat(saveData, "player_y", player.getY()));
+        enemy.setX(readFloat(saveData, "enemy_x", enemy.getX()));
+        enemy.setY(readFloat(saveData, "enemy_y", enemy.getY()));
+
+        Object modeObj = saveData.get("enemy_mode");
+        if (modeObj instanceof String modeStr) {
+            try {
+                enemy.setBehaviourMode(ChasingBoxEntity.BehaviourMode.valueOf(modeStr));
+            } catch (IllegalArgumentException ignored) {
+                // Keep current mode for unknown save data.
+            }
+        }
+
+        borderCollisionStates.clear();
+        handleBorderCollision(player);
+        handleBorderCollision(enemy);
+    }
+
+    private float readFloat(SaveData saveData, String key, float fallback) {
+        Object value = saveData.get(key);
+        if (value instanceof Number number) {
+            return number.floatValue();
+        }
+        return fallback;
+    }
+
+    private void showStatusMessage(String message) {
+        statusMessage = (message == null) ? "" : message;
+        statusMessageTimer = STATUS_MESSAGE_DURATION_SECONDS;
+    }
+
+    private void clearStatusMessage() {
+        statusMessage = "";
+        statusMessageTimer = 0f;
+    }
+}
