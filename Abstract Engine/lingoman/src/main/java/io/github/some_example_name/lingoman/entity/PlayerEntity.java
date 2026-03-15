@@ -1,14 +1,12 @@
 package io.github.some_example_name.lingoman.entity;
 
-import com.badlogic.gdx.graphics.Color;
 import io.github.some_example_name.lingoman.LingoInputActions;
 import io.github.some_example_name.entity.DynamicEntity;
+import io.github.some_example_name.lingoman.graphics.LingoSprites;
 import io.github.some_example_name.managers.InputManager;
 import io.github.some_example_name.managers.OutputManager;
 
 public class PlayerEntity extends DynamicEntity {
-
-    private final Color color = new Color(0.20f, 0.75f, 1.00f, 1f);
     private final InputManager input;
     private final float moveSpeed;
 
@@ -48,6 +46,6 @@ public class PlayerEntity extends DynamicEntity {
 
     @Override
     public void render(OutputManager outputManager) {
-        outputManager.drawRect(getX(), getY(), getWidth(), getHeight(), color);
+        outputManager.draw(LingoSprites.player(), getX(), getY(), getWidth(), getHeight());
     }
 }

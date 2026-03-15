@@ -1,2 +1,163 @@
+## Workspace:
 /.vscode/
 /saves/
+
+## Gradle:
+.gradle/
+gradle-app.setting
+/Abstract Engine/*/build/
+/Abstract Engine/build/
+/Abstract Engine/android/build/
+/Abstract Engine/core/build/
+/Abstract Engine/lwjgl2/build/
+/Abstract Engine/lwjgl3/build/
+/Abstract Engine/html/build/
+/Abstract Engine/teavm/build/
+/Abstract Engine/ios/build/
+/Abstract Engine/ios-moe/build/
+/Abstract Engine/headless/build/
+/Abstract Engine/server/build/
+/Abstract Engine/shared/build/
+
+## Java:
+*.class
+*.war
+*.ear
+hs_err_pid*
+.attach_pid*
+
+## Android:
+/Abstract Engine/android/libs/armeabi-v7a/
+/Abstract Engine/android/libs/arm64-v8a/
+/Abstract Engine/android/libs/x86/
+/Abstract Engine/android/libs/x86_64/
+/Abstract Engine/android/gen/
+/Abstract Engine/android/out/
+local.properties
+com_crashlytics_export_strings.xml
+
+## Robovm:
+/Abstract Engine/ios/robovm-build/
+
+## iOS:
+/Abstract Engine/ios/xcode/*.xcodeproj/*
+!/Abstract Engine/ios/xcode/*.xcodeproj/xcshareddata
+!/Abstract Engine/ios/xcode/*.xcodeproj/project.pbxproj
+/Abstract Engine/ios/xcode/native/
+/Abstract Engine/ios/IOSLauncher.app
+/Abstract Engine/ios/IOSLauncher.app.dSYM
+
+## GWT:
+/Abstract Engine/html/war/
+/Abstract Engine/html/gwt-unitCache/
+.apt_generated/
+/Abstract Engine/html/war/WEB-INF/deploy/
+/Abstract Engine/html/war/WEB-INF/classes/
+.gwt/
+gwt-unitCache/
+www-test/
+.gwt-tmp/
+
+## TeaVM:
+# Not sure yet...
+
+## IntelliJ, Android Studio:
+.idea/
+*.ipr
+*.iws
+*.iml
+
+## Eclipse:
+.classpath
+.project
+.metadata/
+/Abstract Engine/android/bin/
+/Abstract Engine/core/bin/
+/Abstract Engine/lwjgl2/bin/
+/Abstract Engine/lwjgl3/bin/
+/Abstract Engine/html/bin/
+/Abstract Engine/teavm/bin/
+/Abstract Engine/ios/bin/
+/Abstract Engine/ios-moe/bin/
+/Abstract Engine/headless/bin/
+/Abstract Engine/server/bin/
+/Abstract Engine/shared/bin/
+*.tmp
+*.bak
+*.swp
+*~.nib
+.settings/
+.loadpath
+.externalToolBuilders/
+*.launch
+
+## NetBeans:
+/Abstract Engine/nbproject/private/
+/Abstract Engine/android/nbproject/private/
+/Abstract Engine/core/nbproject/private/
+/Abstract Engine/lwjgl2/nbproject/private/
+/Abstract Engine/lwjgl3/nbproject/private/
+/Abstract Engine/html/nbproject/private/
+/Abstract Engine/teavm/nbproject/private/
+/Abstract Engine/ios/nbproject/private/
+/Abstract Engine/ios-moe/nbproject/private/
+/Abstract Engine/headless/nbproject/private/
+/Abstract Engine/server/nbproject/private/
+/Abstract Engine/shared/nbproject/private/
+
+/Abstract Engine/nbbuild/
+/Abstract Engine/android/nbbuild/
+/Abstract Engine/core/nbbuild/
+/Abstract Engine/lwjgl2/nbbuild/
+/Abstract Engine/lwjgl3/nbbuild/
+/Abstract Engine/html/nbbuild/
+/Abstract Engine/teavm/nbbuild/
+/Abstract Engine/ios/nbbuild/
+/Abstract Engine/ios-moe/nbbuild/
+/Abstract Engine/headless/nbbuild/
+/Abstract Engine/server/nbbuild/
+/Abstract Engine/shared/nbbuild/
+
+/Abstract Engine/dist/
+/Abstract Engine/android/dist/
+/Abstract Engine/core/dist/
+/Abstract Engine/lwjgl2/dist/
+/Abstract Engine/lwjgl3/dist/
+/Abstract Engine/html/dist/
+/Abstract Engine/teavm/dist/
+/Abstract Engine/ios/dist/
+/Abstract Engine/ios-moe/dist/
+/Abstract Engine/headless/dist/
+/Abstract Engine/server/dist/
+/Abstract Engine/shared/dist/
+
+/Abstract Engine/nbdist/
+/Abstract Engine/android/nbdist/
+/Abstract Engine/core/nbdist/
+/Abstract Engine/lwjgl2/nbdist/
+/Abstract Engine/lwjgl3/nbdist/
+/Abstract Engine/html/nbdist/
+/Abstract Engine/teavm/nbdist/
+/Abstract Engine/ios/nbdist/
+/Abstract Engine/ios-moe/nbdist/
+/Abstract Engine/headless/nbdist/
+/Abstract Engine/server/nbdist/
+/Abstract Engine/shared/nbdist/
+
+nbactions.xml
+nb-configuration.xml
+
+## OS-Specific:
+.DS_Store
+Thumbs.db
+
+## Miscellaneous:
+*~
+*.*#
+*#*#
+/.kotlin/
+/Abstract Engine/assets/assets.txt
+/Abstract Engine/assets/saves/lingoman_progress.json
+
+## Special cases:
+**/resource-config.json
