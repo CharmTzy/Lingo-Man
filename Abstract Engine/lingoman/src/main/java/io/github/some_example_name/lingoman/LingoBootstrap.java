@@ -4,6 +4,7 @@ import com.badlogic.gdx.Input;
 
 import io.github.some_example_name.EngineBootstrap;
 import io.github.some_example_name.EngineContext;
+import io.github.some_example_name.lingoman.graphics.LingoSprites;
 import io.github.some_example_name.lingoman.scenes.GameOverScene;
 import io.github.some_example_name.lingoman.scenes.GameScene;
 import io.github.some_example_name.lingoman.scenes.FoundWordsScene;
@@ -43,5 +44,10 @@ public final class LingoBootstrap implements EngineBootstrap {
         sceneManager.registerScene(LingoSceneIds.GAME, new GameScene());
         sceneManager.registerScene(LingoSceneIds.GAME_OVER, new GameOverScene());
         sceneManager.setActiveScene(LingoSceneIds.MENU);
+    }
+
+    @Override
+    public void dispose(EngineContext context) {
+        LingoSprites.disposeAll();
     }
 }

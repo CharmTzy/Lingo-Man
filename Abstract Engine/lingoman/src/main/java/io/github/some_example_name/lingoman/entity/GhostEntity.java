@@ -3,6 +3,7 @@ package io.github.some_example_name.lingoman.entity;
 import com.badlogic.gdx.graphics.Color;
 import io.github.some_example_name.entity.Entity;
 import io.github.some_example_name.entity.NPCEntity;
+import io.github.some_example_name.lingoman.graphics.LingoSprites;
 import io.github.some_example_name.managers.OutputManager;
 
 public class GhostEntity extends NPCEntity {
@@ -31,7 +32,7 @@ public class GhostEntity extends NPCEntity {
 
     @Override
     public void render(OutputManager outputManager) {
-        outputManager.drawRect(getX(), getY(), getWidth(), getHeight(), color);
+        outputManager.draw(LingoSprites.ghost(color), getX(), getY(), getWidth(), getHeight());
     }
 
     @Override
