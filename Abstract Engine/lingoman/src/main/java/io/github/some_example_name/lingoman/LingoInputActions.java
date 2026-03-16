@@ -3,6 +3,8 @@ package io.github.some_example_name.lingoman;
 public final class LingoInputActions {
     public static final String MENU_UP = "lingo.menu.up";
     public static final String MENU_DOWN = "lingo.menu.down";
+    public static final String MENU_LEFT = "lingo.menu.left";
+    public static final String MENU_RIGHT = "lingo.menu.right";
     public static final String MENU_CONFIRM = "lingo.menu.confirm";
 
     public static final String GAME_MENU = "lingo.game.menu";
