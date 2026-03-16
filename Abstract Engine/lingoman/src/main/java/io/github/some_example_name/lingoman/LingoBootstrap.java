@@ -9,6 +9,7 @@ import io.github.some_example_name.lingoman.scenes.GameOverScene;
 import io.github.some_example_name.lingoman.scenes.GameScene;
 import io.github.some_example_name.lingoman.scenes.FoundWordsScene;
 import io.github.some_example_name.lingoman.scenes.MenuScene;
+import io.github.some_example_name.managers.AudioManager;
 import io.github.some_example_name.managers.InputManager;
 import io.github.some_example_name.managers.SceneManager;
 
@@ -21,6 +22,7 @@ public final class LingoBootstrap implements EngineBootstrap {
         }
 
         configureInput(context.getInputManager());
+        configureAudio(context.getAudioManager());
         configureScenes(context.getSceneManager());
     }
 
@@ -44,6 +46,16 @@ public final class LingoBootstrap implements EngineBootstrap {
         sceneManager.registerScene(LingoSceneIds.GAME, new GameScene());
         sceneManager.registerScene(LingoSceneIds.GAME_OVER, new GameOverScene());
         sceneManager.setActiveScene(LingoSceneIds.MENU);
+    }
+
+    private void configureAudio(AudioManager audio) {
+        audio.loadSound(LingoAudio.SFX_COLLECT_LETTER, LingoAudio.PATH_SFX_COLLECT_LETTER);
+        audio.loadSound(LingoAudio.SFX_MOVE, LingoAudio.PATH_SFX_MOVE);
+        audio.loadSound(LingoAudio.SFX_GAME_OVER, LingoAudio.PATH_SFX_GAME_OVER);
+        audio.loadSound(LingoAudio.SFX_VICTORY, LingoAudio.PATH_SFX_VICTORY);
+        audio.loadSound(LingoAudio.SFX_HURT, LingoAudio.PATH_SFX_HURT);
+
+        audio.loadMusic(LingoAudio.BGM_GAME, LingoAudio.PATH_BGM_GAME);
     }
 
     @Override
