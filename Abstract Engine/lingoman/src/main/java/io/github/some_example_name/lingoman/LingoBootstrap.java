@@ -9,6 +9,8 @@ import io.github.some_example_name.lingoman.scenes.GameOverScene;
 import io.github.some_example_name.lingoman.scenes.GameScene;
 import io.github.some_example_name.lingoman.scenes.FoundWordsScene;
 import io.github.some_example_name.lingoman.scenes.MenuScene;
+import io.github.some_example_name.lingoman.scenes.PauseScene;
+import io.github.some_example_name.lingoman.scenes.SettingsScene;
 import io.github.some_example_name.managers.AudioManager;
 import io.github.some_example_name.managers.InputManager;
 import io.github.some_example_name.managers.SceneManager;
@@ -29,6 +31,8 @@ public final class LingoBootstrap implements EngineBootstrap {
     private void configureInput(InputManager input) {
         input.bindAction(LingoInputActions.MENU_UP, Input.Keys.UP, Input.Keys.W);
         input.bindAction(LingoInputActions.MENU_DOWN, Input.Keys.DOWN, Input.Keys.S);
+        input.bindAction(LingoInputActions.MENU_LEFT, Input.Keys.LEFT, Input.Keys.A);
+        input.bindAction(LingoInputActions.MENU_RIGHT, Input.Keys.RIGHT, Input.Keys.D);
         input.bindAction(LingoInputActions.MENU_CONFIRM, Input.Keys.ENTER);
 
         input.bindAction(LingoInputActions.GAME_MENU, Input.Keys.M, Input.Keys.ESCAPE);
@@ -43,7 +47,9 @@ public final class LingoBootstrap implements EngineBootstrap {
     private void configureScenes(SceneManager sceneManager) {
         sceneManager.registerScene(LingoSceneIds.MENU, new MenuScene());
         sceneManager.registerScene(LingoSceneIds.FOUND_WORDS, new FoundWordsScene());
+        sceneManager.registerScene(LingoSceneIds.SETTINGS, new SettingsScene());
         sceneManager.registerScene(LingoSceneIds.GAME, new GameScene());
+        sceneManager.registerScene(LingoSceneIds.PAUSE, new PauseScene());
         sceneManager.registerScene(LingoSceneIds.GAME_OVER, new GameOverScene());
         sceneManager.setActiveScene(LingoSceneIds.MENU);
     }

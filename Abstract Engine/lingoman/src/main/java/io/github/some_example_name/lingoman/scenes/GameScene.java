@@ -61,6 +61,13 @@ public class GameScene implements Scene {
 
     @Override
     public void enter() {
+        if (LingoSession.get().consumeGameResumeRequest()) {
+            moveLoopPlaying = false;
+            context.getAudioManager().playMusic(LingoAudio.BGM_GAME, true);
+            System.out.println("[LingoMan] Game resumed");
+            return;
+        }
+
         startNewGame();
         moveLoopPlaying = false;
         context.getAudioManager().playMusic(LingoAudio.BGM_GAME, true);
@@ -77,7 +84,7 @@ public class GameScene implements Scene {
     @Override
     public void handleInput() {
         if (context.getInputManager().isActionJustPressed(LingoInputActions.GAME_MENU)) {
-            context.getSceneManager().setActiveScene(LingoSceneIds.MENU);
+            context.getSceneManager().setActiveScene(LingoSceneIds.PAUSE);
         }
     }
 

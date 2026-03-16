@@ -19,6 +19,8 @@ public class AudioManager implements Disposable {
     private final Map<String, Long> loopingSoundInstances = new HashMap<>();
 
     private float masterVolume = 1f;
+    private float musicVolume = 1f;
+    private float soundMasterVolume = 1f;
     private boolean muted = false;
     private Music currentMusic;
 
@@ -62,8 +64,7 @@ public class AudioManager implements Disposable {
             return;
         }
 
-        float volume = muted ? 0f : MathUtils.clamp(soundVolumes.getOrDefault(id, 1f) * masterVolume, 0f, 1f);
-        long instanceId = sound.play(volume);
+        long instanceId = sound.play(resolveSoundVolume(id));
         if (loop) {
             sound.setLooping(instanceId, true);
         }
@@ -105,7 +106,7 @@ public class AudioManager implements Disposable {
 
         currentMusic = nextMusic;
         currentMusic.setLooping(loop);
-        currentMusic.setVolume(muted ? 0f : masterVolume);
+        currentMusic.setVolume(resolveMusicVolume());
         currentMusic.play();
     }
 
@@ -116,15 +117,35 @@ public class AudioManager implements Disposable {
     }
 
     public void setMusicVolume(float volume) {
+        musicVolume = MathUtils.clamp(volume, 0f, 1f);
+        if (currentMusic != null) {
+            currentMusic.setVolume(resolveMusicVolume());
+        }
+    }
+
+    public float getMusicVolume() {
+        return musicVolume;
+    }
+
+    public void setMasterVolume(float volume) {
         masterVolume = MathUtils.clamp(volume, 0f, 1f);
         if (currentMusic != null) {
-            currentMusic.setVolume(muted ? 0f : masterVolume);
+            currentMusic.setVolume(resolveMusicVolume());
         }
         refreshLoopingSoundVolumes();
     }
 
-    public float getMusicVolume() {
+    public float getMasterVolume() {
         return masterVolume;
+    }
+
+    public void setSoundMasterVolume(float volume) {
+        soundMasterVolume = MathUtils.clamp(volume, 0f, 1f);
+        refreshLoopingSoundVolumes();
+    }
+
+    public float getSoundMasterVolume() {
+        return soundMasterVolume;
     }
 
     public void pauseMusic() {
@@ -150,7 +171,7 @@ public class AudioManager implements Disposable {
     public void setMuted(boolean muted) {
         this.muted = muted;
         if (currentMusic != null) {
-            currentMusic.setVolume(muted ? 0f : masterVolume);
+            currentMusic.setVolume(resolveMusicVolume());
         }
         refreshLoopingSoundVolumes();
     }
@@ -197,7 +218,11 @@ public class AudioManager implements Disposable {
     }
 
     private float resolveSoundVolume(String id) {
-        return muted ? 0f : MathUtils.clamp(soundVolumes.getOrDefault(id, 1f) * masterVolume, 0f, 1f);
+        return muted ? 0f : MathUtils.clamp(soundVolumes.getOrDefault(id, 1f) * soundMasterVolume * masterVolume, 0f, 1f);
+    }
+
+    private float resolveMusicVolume() {
+        return muted ? 0f : MathUtils.clamp(masterVolume * musicVolume, 0f, 1f);
     }
 
     private void refreshLoopingSoundVolumes() {
