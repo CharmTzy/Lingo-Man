@@ -38,6 +38,7 @@ public class MenuScene implements Scene, ISaveable {
         new MenuOption("Easy", "1 ghost", GameState.Difficulty.EASY, null),
         new MenuOption("Medium", "2 ghosts", GameState.Difficulty.MEDIUM, null),
         new MenuOption("Hard", "4 ghosts", GameState.Difficulty.HARD, null),
+        new MenuOption("Settings", "audio levels", null, LingoSceneIds.SETTINGS),
         new MenuOption("Words Found", "open list", null, LingoSceneIds.FOUND_WORDS),
         new MenuOption("Quit", "Exit game", null, null)
     };
@@ -54,6 +55,7 @@ public class MenuScene implements Scene, ISaveable {
 
     @Override
     public void enter() {
+        context.getAudioManager().stopMusic();
         System.out.println("[LingoMan] Menu entered");
     }
 
@@ -76,6 +78,9 @@ public class MenuScene implements Scene, ISaveable {
                 LingoSession.get().getGameState().setDifficulty(selected.difficulty);
                 context.getSceneManager().setActiveScene(LingoSceneIds.GAME);
             } else if (selected.targetSceneId != null) {
+                if (LingoSceneIds.SETTINGS.equals(selected.targetSceneId)) {
+                    LingoSession.get().setSettingsReturnSceneId(LingoSceneIds.MENU);
+                }
                 context.getSceneManager().setActiveScene(selected.targetSceneId);
             } else {
                 Gdx.app.exit();

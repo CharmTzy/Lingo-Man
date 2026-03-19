@@ -12,6 +12,7 @@ import io.github.some_example_name.EngineContext;
 import io.github.some_example_name.collision.Collider;
 import io.github.some_example_name.collision.EntityCollisionListenerAdapter;
 import io.github.some_example_name.collision.ICollisionListener;
+import io.github.some_example_name.lingoman.LingoAudio;
 import io.github.some_example_name.lingoman.LingoInputActions;
 import io.github.some_example_name.lingoman.LingoSceneIds;
 import io.github.some_example_name.lingoman.LingoSession;
@@ -51,6 +52,7 @@ public class GameScene implements Scene {
     private float invulnerableTimer = 0f;
     private String statusMessage = "";
     private float statusMessageTimer = 0f;
+    private boolean moveLoopPlaying = false;
 
     @Override
     public void initialize(EngineContext context) {
@@ -59,19 +61,30 @@ public class GameScene implements Scene {
 
     @Override
     public void enter() {
+        if (LingoSession.get().consumeGameResumeRequest()) {
+            moveLoopPlaying = false;
+            context.getAudioManager().playMusic(LingoAudio.BGM_GAME, true);
+            System.out.println("[LingoMan] Game resumed");
+            return;
+        }
+
         startNewGame();
+        moveLoopPlaying = false;
+        context.getAudioManager().playMusic(LingoAudio.BGM_GAME, true);
         System.out.println("[LingoMan] Game started");
     }
 
     @Override
     public void exit() {
+        stopMovementAudio();
+        context.getAudioManager().stopMusic();
         System.out.println("[LingoMan] Game exit");
     }
 
     @Override
     public void handleInput() {
         if (context.getInputManager().isActionJustPressed(LingoInputActions.GAME_MENU)) {
-            context.getSceneManager().setActiveScene(LingoSceneIds.MENU);
+            context.getSceneManager().setActiveScene(LingoSceneIds.PAUSE);
         }
     }
 
@@ -88,15 +101,20 @@ public class GameScene implements Scene {
         }
 
         world.update(deltaTime);
+        updateMovementAudio();
 
         GameState state = LingoSession.get().getGameState();
         if (state.hasCollectedAllLetters()) {
+            stopGameplayAudio();
             state.addFoundWord(state.getTargetWord());
             context.getSaveManager().save(PROFILE_FILE);
             state.setLastResult("WORD COMPLETE");
+            context.getAudioManager().playSound(LingoAudio.SFX_VICTORY, false);
             context.getSceneManager().setActiveScene(LingoSceneIds.GAME_OVER);
         } else if (state.getLives() <= 0) {
+            stopGameplayAudio();
             state.setLastResult("OUT OF LIVES");
+            context.getAudioManager().playSound(LingoAudio.SFX_GAME_OVER, false);
             context.getSceneManager().setActiveScene(LingoSceneIds.GAME_OVER);
         }
     }
@@ -124,6 +142,7 @@ public class GameScene implements Scene {
 
     @Override
     public void dispose() {
+        stopGameplayAudio();
         clearWorld();
         System.out.println("[LingoMan] Game disposed");
     }
@@ -295,7 +314,39 @@ public class GameScene implements Scene {
         state.loseLife();
         invulnerableTimer = INVULNERABLE_SECONDS;
         showStatus("Ouch! Lives left: " + state.getLives());
+        context.getAudioManager().playSound(LingoAudio.SFX_HURT, false);
         resetPositions();
+    }
+
+    private void updateMovementAudio() {
+        boolean shouldPlayMoveLoop = isMovementInputPressed();
+        if (shouldPlayMoveLoop == moveLoopPlaying) {
+            return;
+        }
+
+        moveLoopPlaying = shouldPlayMoveLoop;
+        if (moveLoopPlaying) {
+            context.getAudioManager().playLoopingSound(LingoAudio.SFX_MOVE);
+        } else {
+            context.getAudioManager().stopLoopingSound(LingoAudio.SFX_MOVE);
+        }
+    }
+
+    private boolean isMovementInputPressed() {
+        return context.getInputManager().isActionPressed(LingoInputActions.MOVE_LEFT)
+            || context.getInputManager().isActionPressed(LingoInputActions.MOVE_RIGHT)
+            || context.getInputManager().isActionPressed(LingoInputActions.MOVE_UP)
+            || context.getInputManager().isActionPressed(LingoInputActions.MOVE_DOWN);
+    }
+
+    private void stopMovementAudio() {
+        moveLoopPlaying = false;
+        context.getAudioManager().stopLoopingSound(LingoAudio.SFX_MOVE);
+    }
+
+    private void stopGameplayAudio() {
+        stopMovementAudio();
+        context.getAudioManager().stopMusic();
     }
 
     private void showStatus(String message) {
@@ -339,6 +390,7 @@ public class GameScene implements Scene {
                 }
 
                 LingoSession.get().getGameState().collectLetter(letter.getLetter());
+                context.getAudioManager().playSound(LingoAudio.SFX_COLLECT_LETTER, false);
                 world.removeEntity(letter);
                 showStatus("Collected: " + letter.getLetter());
             } else if (owner instanceof GhostEntity) {

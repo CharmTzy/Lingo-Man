@@ -10,6 +10,8 @@ public final class LingoSession {
 
     private final GameState gameState = new GameState();
     private final Random random = new Random();
+    private boolean resumeGameRequested;
+    private String settingsReturnSceneId = LingoSceneIds.MENU;
 
     private LingoSession() {
     }
@@ -24,5 +26,25 @@ public final class LingoSession {
 
     public Random getRandom() {
         return random;
+    }
+
+    public void requestGameResume() {
+        resumeGameRequested = true;
+    }
+
+    public boolean consumeGameResumeRequest() {
+        boolean requested = resumeGameRequested;
+        resumeGameRequested = false;
+        return requested;
+    }
+
+    public void setSettingsReturnSceneId(String sceneId) {
+        if (sceneId != null && !sceneId.isBlank()) {
+            settingsReturnSceneId = sceneId;
+        }
+    }
+
+    public String getSettingsReturnSceneId() {
+        return settingsReturnSceneId;
     }
 }
