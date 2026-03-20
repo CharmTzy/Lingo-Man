@@ -67,6 +67,31 @@ public class OutputManager implements Disposable {
     }
 
     /**
+     * Draws a texture centered on itself with rotation applied.
+     */
+    public void drawRotated(Texture texture, float x, float y, float width, float height, float rotationDegrees) {
+        if (texture == null) return;
+        batch.draw(
+            texture,
+            x,
+            y,
+            width * 0.5f,
+            height * 0.5f,
+            width,
+            height,
+            1f,
+            1f,
+            rotationDegrees,
+            0,
+            0,
+            texture.getWidth(),
+            texture.getHeight(),
+            false,
+            false
+        );
+    }
+
+    /**
      * Draws a texture with specified size and tint color.
      * Useful for debug overlays (hitboxes, bounding boxes, etc.).
      */
@@ -115,6 +140,14 @@ public class OutputManager implements Disposable {
         font.setColor(pr, pg, pb, pa);
     }
 
+    public void drawTextScaled(String text, float x, float y, Color color, float scale) {
+        float previousX = font.getData().scaleX;
+        float previousY = font.getData().scaleY;
+        font.getData().setScale(scale);
+        drawText(text, x, y, color);
+        font.getData().setScale(previousX, previousY);
+    }
+
     public void drawTextCentered(String text, float centerX, float y) {
         drawTextCentered(text, centerX, y, null);
     }
@@ -125,10 +158,26 @@ public class OutputManager implements Disposable {
         drawText(safeText, centerX - glyphLayout.width * 0.5f, y, color);
     }
 
+    public void drawTextCenteredScaled(String text, float centerX, float y, Color color, float scale) {
+        String safeText = text == null ? "" : text;
+        float previousX = font.getData().scaleX;
+        float previousY = font.getData().scaleY;
+        font.getData().setScale(scale);
+        glyphLayout.setText(font, safeText);
+        drawText(safeText, centerX - glyphLayout.width * 0.5f, y, color);
+        font.getData().setScale(previousX, previousY);
+    }
+
     public void drawTextRightAligned(String text, float rightX, float y, Color color) {
         String safeText = text == null ? "" : text;
         glyphLayout.setText(font, safeText);
         drawText(safeText, rightX - glyphLayout.width, y, color);
+    }
+
+    public void drawTextRightAlignedWithShadow(String text, float rightX, float y, Color color) {
+        String safeText = text == null ? "" : text;
+        glyphLayout.setText(font, safeText);
+        drawTextWithShadow(safeText, rightX - glyphLayout.width, y, color);
     }
 
     public void drawTextWithShadow(String text, float x, float y, Color color) {

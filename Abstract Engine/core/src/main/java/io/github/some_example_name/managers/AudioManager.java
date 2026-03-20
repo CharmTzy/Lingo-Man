@@ -16,8 +16,11 @@ public class AudioManager implements Disposable {
     private final Map<String, Sound> soundEffects = new HashMap<>();
     private final Map<String, Music> musicTracks = new HashMap<>();
     private final Map<String, Float> soundVolumes = new HashMap<>();
+    private final Map<String, Long> loopingSoundInstances = new HashMap<>();
 
     private float masterVolume = 1f;
+    private float musicVolume = 1f;
+    private float soundMasterVolume = 1f;
     private boolean muted = false;
     private Music currentMusic;
 
@@ -30,6 +33,10 @@ public class AudioManager implements Disposable {
 
         Sound previous = soundEffects.put(id, Gdx.audio.newSound(Gdx.files.internal(path)));
         if (previous != null) {
+            Long loopingInstanceId = loopingSoundInstances.remove(id);
+            if (loopingInstanceId != null) {
+                previous.stop(loopingInstanceId);
+            }
             previous.dispose();
         }
         soundVolumes.putIfAbsent(id, 1f);
@@ -57,11 +64,34 @@ public class AudioManager implements Disposable {
             return;
         }
 
-        float volume = muted ? 0f : MathUtils.clamp(soundVolumes.getOrDefault(id, 1f) * masterVolume, 0f, 1f);
-        long instanceId = sound.play(volume);
+        long instanceId = sound.play(resolveSoundVolume(id));
         if (loop) {
             sound.setLooping(instanceId, true);
         }
+    }
+
+    public void playLoopingSound(String id) {
+        Sound sound = soundEffects.get(id);
+        if (sound == null || loopingSoundInstances.containsKey(id)) {
+            return;
+        }
+
+        long instanceId = sound.loop(resolveSoundVolume(id));
+        loopingSoundInstances.put(id, instanceId);
+    }
+
+    public void stopLoopingSound(String id) {
+        if (id == null || id.isBlank()) {
+            return;
+        }
+
+        Sound sound = soundEffects.get(id);
+        Long instanceId = loopingSoundInstances.remove(id);
+        if (sound == null || instanceId == null) {
+            return;
+        }
+
+        sound.stop(instanceId);
     }
 
     public void playMusic(String id, boolean loop) {
@@ -76,7 +106,7 @@ public class AudioManager implements Disposable {
 
         currentMusic = nextMusic;
         currentMusic.setLooping(loop);
-        currentMusic.setVolume(muted ? 0f : masterVolume);
+        currentMusic.setVolume(resolveMusicVolume());
         currentMusic.play();
     }
 
@@ -87,14 +117,35 @@ public class AudioManager implements Disposable {
     }
 
     public void setMusicVolume(float volume) {
-        masterVolume = MathUtils.clamp(volume, 0f, 1f);
+        musicVolume = MathUtils.clamp(volume, 0f, 1f);
         if (currentMusic != null) {
-            currentMusic.setVolume(muted ? 0f : masterVolume);
+            currentMusic.setVolume(resolveMusicVolume());
         }
     }
 
     public float getMusicVolume() {
+        return musicVolume;
+    }
+
+    public void setMasterVolume(float volume) {
+        masterVolume = MathUtils.clamp(volume, 0f, 1f);
+        if (currentMusic != null) {
+            currentMusic.setVolume(resolveMusicVolume());
+        }
+        refreshLoopingSoundVolumes();
+    }
+
+    public float getMasterVolume() {
         return masterVolume;
+    }
+
+    public void setSoundMasterVolume(float volume) {
+        soundMasterVolume = MathUtils.clamp(volume, 0f, 1f);
+        refreshLoopingSoundVolumes();
+    }
+
+    public float getSoundMasterVolume() {
+        return soundMasterVolume;
     }
 
     public void pauseMusic() {
@@ -114,13 +165,15 @@ public class AudioManager implements Disposable {
             return;
         }
         soundVolumes.put(id, MathUtils.clamp(volume, 0f, 1f));
+        refreshLoopingSoundVolume(id);
     }
 
     public void setMuted(boolean muted) {
         this.muted = muted;
         if (currentMusic != null) {
-            currentMusic.setVolume(muted ? 0f : masterVolume);
+            currentMusic.setVolume(resolveMusicVolume());
         }
+        refreshLoopingSoundVolumes();
     }
 
     public boolean isMuted() {
@@ -137,6 +190,7 @@ public class AudioManager implements Disposable {
         }
         soundEffects.clear();
         soundVolumes.clear();
+        loopingSoundInstances.clear();
 
         Set<Music> music = new HashSet<>(musicTracks.values());
         for (Music track : music) {
@@ -161,5 +215,28 @@ public class AudioManager implements Disposable {
         if (Gdx.app != null) {
             Gdx.app.log("AudioManager", "Skipping missing " + type + " [" + id + "] at path: " + path);
         }
+    }
+
+    private float resolveSoundVolume(String id) {
+        return muted ? 0f : MathUtils.clamp(soundVolumes.getOrDefault(id, 1f) * soundMasterVolume * masterVolume, 0f, 1f);
+    }
+
+    private float resolveMusicVolume() {
+        return muted ? 0f : MathUtils.clamp(masterVolume * musicVolume, 0f, 1f);
+    }
+
+    private void refreshLoopingSoundVolumes() {
+        for (String id : loopingSoundInstances.keySet()) {
+            refreshLoopingSoundVolume(id);
+        }
+    }
+
+    private void refreshLoopingSoundVolume(String id) {
+        Sound sound = soundEffects.get(id);
+        Long instanceId = loopingSoundInstances.get(id);
+        if (sound == null || instanceId == null) {
+            return;
+        }
+        sound.setVolume(instanceId, resolveSoundVolume(id));
     }
 }

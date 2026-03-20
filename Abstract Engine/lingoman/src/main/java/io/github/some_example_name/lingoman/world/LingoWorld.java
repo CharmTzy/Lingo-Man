@@ -11,6 +11,7 @@ import io.github.some_example_name.collision.ICollisionListener;
 import io.github.some_example_name.entity.Entity;
 import io.github.some_example_name.entity.EntityManager;
 import io.github.some_example_name.lingoman.LingoCollisionFilter;
+import io.github.some_example_name.lingoman.entity.GhostEntity;
 import io.github.some_example_name.managers.CollisionManager;
 import io.github.some_example_name.managers.MovementManager;
 import io.github.some_example_name.managers.OutputManager;
@@ -46,6 +47,10 @@ public final class LingoWorld {
             entityManager.add(entity);
         }
 
+        if (entity instanceof GhostEntity) {
+            return;
+        }
+
         if (entity instanceof Movable movable && movables.add(movable)) {
             movementManager.registerEntity(movable);
         }
@@ -72,6 +77,10 @@ public final class LingoWorld {
 
     public void assignBehaviour(Movable movable, MovementBehaviour behaviour) {
         if (movable == null) {
+            return;
+        }
+        if (movable instanceof GhostEntity) {
+            movable.setMovementBehaviour(behaviour);
             return;
         }
         if (movables.add(movable)) {
