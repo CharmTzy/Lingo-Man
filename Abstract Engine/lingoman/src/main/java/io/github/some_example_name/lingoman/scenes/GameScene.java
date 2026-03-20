@@ -996,6 +996,7 @@ public class GameScene implements Scene {
 
                 world.removeEntity(pickup);
                 freezePickup = null;
+                context.getAudioManager().playSound(LingoAudio.SFX_POWER_UP, false);
                 activateFreeze();
             } else if (owner instanceof ShockPickupEntity pickup) {
                 if (!pickup.isActive()) {
@@ -1004,6 +1005,7 @@ public class GameScene implements Scene {
 
                 world.removeEntity(pickup);
                 shockPickup = null;
+                context.getAudioManager().playSound(LingoAudio.SFX_POWER_UP, false);
                 activateShock();
             } else if (owner instanceof GhostEntity ghost) {
                 handlePlayerGhostContact(ghost);
