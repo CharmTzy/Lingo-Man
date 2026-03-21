@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.MathUtils;
 
 import io.github.some_example_name.EngineContext;
 import io.github.some_example_name.lingoman.LingoInputActions;
+import io.github.some_example_name.lingoman.LingoSaveFiles;
 import io.github.some_example_name.lingoman.LingoSession;
 import io.github.some_example_name.managers.AudioManager;
 import io.github.some_example_name.scenes.Scene;
@@ -59,6 +60,7 @@ public class SettingsScene implements Scene {
         }
         if (context.getInputManager().isActionJustPressed(LingoInputActions.GAME_MENU)
             || context.getInputManager().isActionJustPressed(LingoInputActions.MENU_CONFIRM)) {
+            persistAudioSettings();
             context.getSceneManager().setActiveScene(LingoSession.get().getSettingsReturnSceneId());
         }
     }
@@ -110,6 +112,13 @@ public class SettingsScene implements Scene {
             case 2 -> audio.setSoundMasterVolume(audio.getSoundMasterVolume() + delta);
             default -> {
             }
+        }
+        persistAudioSettings();
+    }
+
+    private void persistAudioSettings() {
+        if (context != null) {
+            context.getSaveManager().save(LingoSaveFiles.PROFILE);
         }
     }
 }

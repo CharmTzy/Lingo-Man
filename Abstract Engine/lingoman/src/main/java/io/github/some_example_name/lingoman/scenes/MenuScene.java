@@ -11,6 +11,7 @@ import io.github.some_example_name.EngineContext;
 import io.github.some_example_name.lingoman.LingoAudio;
 import io.github.some_example_name.lingoman.LingoInputActions;
 import io.github.some_example_name.lingoman.LingoSceneIds;
+import io.github.some_example_name.lingoman.LingoSaveFiles;
 import io.github.some_example_name.lingoman.LingoSession;
 import io.github.some_example_name.lingoman.model.GameState;
 import io.github.some_example_name.save.ISaveable;
@@ -18,8 +19,6 @@ import io.github.some_example_name.save.SaveData;
 import io.github.some_example_name.scenes.Scene;
 
 public class MenuScene implements Scene, ISaveable {
-
-    private static final String PROFILE_FILE = "lingoman_progress.json";
 
     private static final Color BACKGROUND = new Color(0.07f, 0.10f, 0.13f, 1f);
     private static final Color BACKDROP_TOP = new Color(0.15f, 0.24f, 0.23f, 0.45f);
@@ -49,8 +48,8 @@ public class MenuScene implements Scene, ISaveable {
     public void initialize(EngineContext context) {
         this.context = context;
         context.getSaveManager().register(this);
-        if (context.getSaveManager().hasSaveFile(PROFILE_FILE)) {
-            context.getSaveManager().load(PROFILE_FILE);
+        if (context.getSaveManager().hasSaveFile(LingoSaveFiles.PROFILE)) {
+            context.getSaveManager().load(LingoSaveFiles.PROFILE);
         }
     }
 

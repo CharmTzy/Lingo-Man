@@ -12,6 +12,7 @@ import io.github.some_example_name.collision.ICollisionListener;
 import io.github.some_example_name.lingoman.LingoAudio;
 import io.github.some_example_name.lingoman.LingoInputActions;
 import io.github.some_example_name.lingoman.LingoSceneIds;
+import io.github.some_example_name.lingoman.LingoSaveFiles;
 import io.github.some_example_name.lingoman.LingoSession;
 import io.github.some_example_name.lingoman.entity.BossFireballEntity;
 import io.github.some_example_name.lingoman.entity.FreezePickupEntity;
@@ -32,8 +33,6 @@ import io.github.some_example_name.scenes.Scene;
 public class GameScene implements Scene {
 
     private static final Color BACKGROUND_OUTER = new Color(0f, 0f, 0f, 1f);
-
-    private static final String PROFILE_FILE = "lingoman_progress.json";
 
     private static final Color TEXT_PRIMARY = new Color(0.96f, 0.96f, 0.92f, 1f);
     private static final Color TEXT_MUTED = new Color(0.72f, 0.77f, 0.79f, 1f);
@@ -73,7 +72,7 @@ public class GameScene implements Scene {
     public void enter() {
         if (LingoSession.get().consumeGameResumeRequest()) {
             moveLoopPlaying = false;
-            context.getAudioManager().playMusic(LingoAudio.BGM_GAME, true);
+            context.getAudioManager().resumeSuspendedMusic();
             System.out.println("[LingoMan] Game resumed");
             return;
         }
@@ -87,13 +86,13 @@ public class GameScene implements Scene {
     @Override
     public void exit() {
         stopMovementAudio();
-        context.getAudioManager().stopMusic();
         System.out.println("[LingoMan] Game exit");
     }
 
     @Override
     public void handleInput() {
         if (context.getInputManager().isActionJustPressed(LingoInputActions.GAME_MENU)) {
+            context.getAudioManager().suspendMusic();
             context.getSceneManager().setActiveScene(LingoSceneIds.PAUSE);
         }
     }
@@ -119,7 +118,7 @@ public class GameScene implements Scene {
         if (state.hasCollectedAllLetters()) {
             stopGameplayAudio();
             state.addFoundWord(state.getTargetWord());
-            context.getSaveManager().save(PROFILE_FILE);
+            context.getSaveManager().save(LingoSaveFiles.PROFILE);
             state.setLastResult("WORD COMPLETE");
             context.getAudioManager().playSound(LingoAudio.SFX_VICTORY, false);
             context.getSceneManager().setActiveScene(LingoSceneIds.GAME_OVER);
