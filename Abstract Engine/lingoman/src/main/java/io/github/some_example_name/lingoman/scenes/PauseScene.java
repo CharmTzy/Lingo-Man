@@ -3,7 +3,6 @@ package io.github.some_example_name.lingoman.scenes;
 import com.badlogic.gdx.graphics.Color;
 
 import io.github.some_example_name.EngineContext;
-import io.github.some_example_name.lingoman.LingoAudio;
 import io.github.some_example_name.lingoman.LingoInputActions;
 import io.github.some_example_name.lingoman.LingoSceneIds;
 import io.github.some_example_name.lingoman.LingoSession;
@@ -35,7 +34,7 @@ public class PauseScene implements Scene {
     @Override
     public void enter() {
         selectedIndex = 0;
-        context.getAudioManager().playMusic(LingoAudio.BGM_GAME, true);
+        context.getAudioManager().suspendMusic();
     }
 
     @Override
