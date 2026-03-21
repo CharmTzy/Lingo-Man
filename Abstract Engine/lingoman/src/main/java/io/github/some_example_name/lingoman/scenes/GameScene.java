@@ -32,6 +32,7 @@ import io.github.some_example_name.lingoman.model.GameState;
 import io.github.some_example_name.lingoman.model.WordBank;
 import io.github.some_example_name.lingoman.movement.MazeSeekBehaviour;
 import io.github.some_example_name.lingoman.movement.MazeWanderBehaviour;
+import io.github.some_example_name.lingoman.movement.ConstantVelocityBehaviour;
 import io.github.some_example_name.lingoman.world.LingoWorld;
 import io.github.some_example_name.movement.behaviour.MovementBehaviour;
 import io.github.some_example_name.scenes.Scene;
@@ -689,6 +690,11 @@ public class GameScene implements Scene {
         );
         bossFireballs.add(fireball);
         world.addCollidableEntity(fireball, new BossFireballCollisionListener(fireball));
+        // Option 4: assign ConstantVelocityBehaviour so MovementManager dispatches
+        // behaviour.move() and MovementPhysics integrates position each frame.
+        // The fireball's vx/vy were set in its constructor from the direction vector.
+        world.assignBehaviour(fireball,
+            new ConstantVelocityBehaviour(fireball.getVx(), fireball.getVy()));
         return true;
     }
 
@@ -996,6 +1002,7 @@ public class GameScene implements Scene {
 
                 world.removeEntity(pickup);
                 freezePickup = null;
+                context.getAudioManager().playSound(LingoAudio.SFX_POWER_UP, false);
                 activateFreeze();
             } else if (owner instanceof ShockPickupEntity pickup) {
                 if (!pickup.isActive()) {
@@ -1004,6 +1011,7 @@ public class GameScene implements Scene {
 
                 world.removeEntity(pickup);
                 shockPickup = null;
+                context.getAudioManager().playSound(LingoAudio.SFX_POWER_UP, false);
                 activateShock();
             } else if (owner instanceof GhostEntity ghost) {
                 handlePlayerGhostContact(ghost);
