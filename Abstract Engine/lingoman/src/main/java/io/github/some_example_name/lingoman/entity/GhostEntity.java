@@ -63,14 +63,6 @@ public class GhostEntity extends NPCEntity {
             setVy(0f);
             return;
         }
-
-        if (getMovementBehaviour() == null) {
-            return;
-        }
-
-        getMovementBehaviour().move(this, dt);
-        setX(getX() + getVx() * dt);
-        setY(getY() + getVy() * dt);
     }
 
     @Override
