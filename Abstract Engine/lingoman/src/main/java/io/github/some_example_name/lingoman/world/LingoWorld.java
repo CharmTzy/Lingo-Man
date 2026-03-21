@@ -12,6 +12,7 @@ import io.github.some_example_name.entity.Entity;
 import io.github.some_example_name.entity.EntityManager;
 import io.github.some_example_name.lingoman.LingoCollisionFilter;
 import io.github.some_example_name.lingoman.entity.GhostEntity;
+import io.github.some_example_name.lingoman.movement.FrozenAwareBehaviour;
 import io.github.some_example_name.managers.CollisionManager;
 import io.github.some_example_name.managers.MovementManager;
 import io.github.some_example_name.managers.OutputManager;
@@ -23,6 +24,17 @@ import io.github.some_example_name.movement.behaviour.MovementBehaviour;
  *
  * <p>The scene can focus on rules while this class manages engine registration
  * for rendering, movement, collisions, and deferred cleanup.
+ *
+ * <h3>Movement registration strategy</h3>
+ * <ul>
+ *   <li><strong>Non-ghost Movables</strong> (player, fireballs) — registered with
+ *       physics <em>enabled</em>. {@link MovementPhysics} integrates their
+ *       position after the behaviour runs each frame.</li>
+ *   <li><strong>GhostEntity</strong> — registered with physics <em>disabled</em>.
+ *       The manager still dispatches their {@link FrozenAwareBehaviour} every
+ *       frame; the ghost self-integrates its position inside its own
+ *       {@code update()} to preserve precise maze-cell alignment.</li>
+ * </ul>
  */
 public final class LingoWorld {
 
@@ -38,6 +50,19 @@ public final class LingoWorld {
         collisionManager.setFilter(new LingoCollisionFilter());
     }
 
+    // ── Entity lifecycle ──────────────────────────────────────────────────────
+
+    /**
+     * Add an entity to the world.
+     *
+     * <p>If the entity implements {@link Movable}:
+     * <ul>
+     *   <li>Ghosts are registered with physics <strong>disabled</strong> — they
+     *       self-integrate position so that maze navigation remains frame-accurate.</li>
+     *   <li>All other Movables are registered with physics <strong>enabled</strong>
+     *       so {@code MovementPhysics} handles position integration.</li>
+     * </ul>
+     */
     public void addEntity(Entity entity) {
         if (entity == null) {
             return;
@@ -47,12 +72,14 @@ public final class LingoWorld {
             entityManager.add(entity);
         }
 
-        if (entity instanceof GhostEntity) {
-            return;
-        }
-
         if (entity instanceof Movable movable && movables.add(movable)) {
-            movementManager.registerEntity(movable);
+            if (entity instanceof GhostEntity) {
+                // Physics disabled: manager dispatches behaviour, ghost self-integrates
+                movementManager.registerEntity(movable, false);
+            } else {
+                // Physics enabled: manager dispatches behaviour + integrates position
+                movementManager.registerEntity(movable, true);
+            }
         }
     }
 
@@ -75,16 +102,36 @@ public final class LingoWorld {
         return collider;
     }
 
+    /**
+     * Assign a movement behaviour to a movable entity.
+     *
+     * <p>For {@link GhostEntity}, the supplied behaviour is wrapped in a
+     * {@link FrozenAwareBehaviour} before being handed to the
+     * {@link MovementManager}. This prevents the manager from calling
+     * {@code move()} while the ghost is frozen, without requiring any changes to
+     * engine code (OCP).
+     *
+     * <p>For all other entities the behaviour is assigned directly via the manager.
+     */
     public void assignBehaviour(Movable movable, MovementBehaviour behaviour) {
         if (movable == null) {
             return;
         }
-        if (movable instanceof GhostEntity) {
-            movable.setMovementBehaviour(behaviour);
+
+        if (movable instanceof GhostEntity ghost) {
+            // Ensure ghost is registered (may be called before addEntity in some flows)
+            if (movables.add(ghost)) {
+                movementManager.registerEntity(ghost, false);
+            }
+            // Wrap with FrozenAwareBehaviour so the manager skips move() when frozen
+            MovementBehaviour wrapped = new FrozenAwareBehaviour(ghost, behaviour);
+            movementManager.assignBehaviour(ghost, wrapped);
             return;
         }
+
+        // Non-ghost: register if not already done, then assign directly
         if (movables.add(movable)) {
-            movementManager.registerEntity(movable);
+            movementManager.registerEntity(movable, true);
         }
         movementManager.assignBehaviour(movable, behaviour);
     }
@@ -101,6 +148,8 @@ public final class LingoWorld {
         return collidersByEntity.get(entity);
     }
 
+    // ── Per-frame update ──────────────────────────────────────────────────────
+
     public void update(float deltaTime) {
         entityManager.update(deltaTime);
         movementManager.updateAll(deltaTime);
@@ -111,6 +160,8 @@ public final class LingoWorld {
     public void render(OutputManager outputManager) {
         entityManager.render(outputManager);
     }
+
+    // ── Cleanup ───────────────────────────────────────────────────────────────
 
     public void clear() {
         pendingRemoval.clear();
