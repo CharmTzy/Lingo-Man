@@ -4,6 +4,7 @@ import com.badlogic.gdx.Input;
 
 import io.github.some_example_name.EngineBootstrap;
 import io.github.some_example_name.EngineContext;
+import io.github.some_example_name.lingoman.audio.LingoAudioSettingsSaveable;
 import io.github.some_example_name.lingoman.graphics.LingoSprites;
 import io.github.some_example_name.lingoman.scenes.GameOverScene;
 import io.github.some_example_name.lingoman.scenes.GameScene;
@@ -17,6 +18,8 @@ import io.github.some_example_name.managers.SceneManager;
 
 public final class LingoBootstrap implements EngineBootstrap {
 
+    private LingoAudioSettingsSaveable audioSettingsSaveable;
+
     @Override
     public void initialize(EngineContext context) {
         if (context == null) {
@@ -25,6 +28,7 @@ public final class LingoBootstrap implements EngineBootstrap {
 
         configureInput(context.getInputManager());
         configureAudio(context.getAudioManager());
+        configureSaveables(context);
         configureScenes(context.getSceneManager());
     }
 
@@ -57,16 +61,26 @@ public final class LingoBootstrap implements EngineBootstrap {
 
     private void configureAudio(AudioManager audio) {
         audio.loadSound(LingoAudio.SFX_COLLECT_LETTER, LingoAudio.PATH_SFX_COLLECT_LETTER);
+        audio.loadSound(LingoAudio.SFX_WRONG_LETTER, LingoAudio.PATH_SFX_WRONG_LETTER);
         audio.loadSound(LingoAudio.SFX_MOVE, LingoAudio.PATH_SFX_MOVE);
         audio.loadSound(LingoAudio.SFX_GAME_OVER, LingoAudio.PATH_SFX_GAME_OVER);
         audio.loadSound(LingoAudio.SFX_VICTORY, LingoAudio.PATH_SFX_VICTORY);
         audio.loadSound(LingoAudio.SFX_HURT, LingoAudio.PATH_SFX_HURT);
-
+        audio.loadSound(LingoAudio.SFX_MENU_NAVIGATE, LingoAudio.PATH_SFX_MENU_NAVIGATE);
         audio.loadMusic(LingoAudio.BGM_GAME, LingoAudio.PATH_BGM_GAME);
+    }
+
+    private void configureSaveables(EngineContext context) {
+        audioSettingsSaveable = new LingoAudioSettingsSaveable(context.getAudioManager());
+        context.getSaveManager().register(audioSettingsSaveable);
     }
 
     @Override
     public void dispose(EngineContext context) {
+        if (context != null && audioSettingsSaveable != null) {
+            context.getSaveManager().unregister(audioSettingsSaveable.getSaveId());
+            audioSettingsSaveable = null;
+        }
         LingoSprites.disposeAll();
     }
 }
