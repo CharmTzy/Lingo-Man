@@ -161,3 +161,6 @@ Thumbs.db
 
 ## Special cases:
 **/resource-config.json
+
+**/build/
+*.jar

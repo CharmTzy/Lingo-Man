@@ -61,17 +61,8 @@ public class GhostEntity extends NPCEntity {
             frozenTimer = Math.max(0f, frozenTimer - dt);
             setVx(0f);
             setVy(0f);
-            // FrozenAwareBehaviour (registered in LingoWorld) prevents the
-            // MovementManager from calling move() while frozen — velocity stays zero.
             return;
         }
-
-        // MovementManager dispatches behaviour.move() via FrozenAwareBehaviour after
-        // EntityManager calls this update(). We only need to self-integrate position
-        // here because this ghost is registered with physics disabled (maze navigation
-        // requires frame-accurate cell alignment that MovementPhysics must not disturb).
-        setX(getX() + getVx() * dt);
-        setY(getY() + getVy() * dt);
     }
 
     @Override
