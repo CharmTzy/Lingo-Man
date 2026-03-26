@@ -434,6 +434,9 @@ public class GameScene implements Scene {
         if (ghost == null || !ghost.isActive()) {
             return;
         }
+        if (ghost.isRespawnProtected() || (player != null && player.isRespawnProtected())) {
+            return;
+        }
         if (player != null && player.hasShockPower()) {
             if (!ghost.isRespawnProtected()) {
                 respawnGhost(ghost);
