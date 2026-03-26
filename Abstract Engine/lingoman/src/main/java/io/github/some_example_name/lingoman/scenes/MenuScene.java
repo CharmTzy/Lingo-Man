@@ -23,6 +23,7 @@ public class MenuScene implements Scene, ISaveable {
     private static final Color BACKGROUND = new Color(0.07f, 0.10f, 0.13f, 1f);
     private static final Color BACKDROP_TOP = new Color(0.15f, 0.24f, 0.23f, 0.45f);
     private static final Color BACKDROP_BOTTOM = new Color(0.24f, 0.18f, 0.08f, 0.35f);
+    private static final Color BACKDROP_STRIPE = new Color(0.98f, 0.84f, 0.32f, 0.18f);
     private static final Color CARD_FILL = new Color(0.08f, 0.11f, 0.14f, 0.95f);
     private static final Color CARD_BORDER = new Color(0.94f, 0.78f, 0.28f, 1f);
     private static final Color OPTION_FILL = new Color(0.14f, 0.18f, 0.22f, 0.98f);
@@ -55,7 +56,7 @@ public class MenuScene implements Scene, ISaveable {
 
     @Override
     public void enter() {
-        context.getAudioManager().stopMusic();
+        context.getAudioManager().playMusic(LingoAudio.BGM_MENU, true);
         System.out.println("[LingoMan] Menu entered");
     }
 
@@ -97,12 +98,14 @@ public class MenuScene implements Scene, ISaveable {
     @Override
     public void render() {
         context.getOutputManager().clearScreen(BACKGROUND.r, BACKGROUND.g, BACKGROUND.b, BACKGROUND.a);
-        context.getOutputManager().drawRect(0f, 330f, 640f, 150f, BACKDROP_TOP);
-        context.getOutputManager().drawRect(0f, 0f, 640f, 105f, BACKDROP_BOTTOM);
+        context.getOutputManager().drawRect(0f, 382f, 640f, 98f, BACKDROP_TOP);
+        context.getOutputManager().drawRect(0f, 0f, 640f, 120f, BACKDROP_BOTTOM);
+        context.getOutputManager().drawRect(44f, 336f, 552f, 10f, BACKDROP_STRIPE);
+        context.getOutputManager().drawRect(44f, 110f, 552f, 10f, BACKDROP_STRIPE);
         context.getOutputManager().drawPanel(88f, 30f, 464f, 386f, CARD_FILL, CARD_BORDER);
 
-        context.getOutputManager().drawTextCenteredWithShadow("LINGO-MAN", 320f, 372f, TEXT_PRIMARY);
-        context.getOutputManager().drawTextCentered("Educational arcade word hunt", 320f, 342f, TEXT_MUTED);
+        context.getOutputManager().drawTextCenteredWithShadow("SELECT MODE", 320f, 378f, TEXT_PRIMARY);
+        context.getOutputManager().drawTextCentered("Choose difficulty, settings, or review found words", 320f, 350f, TEXT_MUTED);
 
         for (int i = 0; i < options.length; i++) {
             boolean selected = i == selectedIndex;

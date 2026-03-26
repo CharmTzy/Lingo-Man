@@ -46,6 +46,7 @@ public final class LingoSprites {
     private static Texture fireballTexture;
     private static Texture wallBombTexture;
     private static Texture wallBlastTexture;
+    private static Texture startMenuTexture;
     private static final Texture[] HEDGE_WALL_TEXTURES = new Texture[HEDGE_VARIANTS];
 
     private LingoSprites() {
@@ -95,6 +96,13 @@ public final class LingoSprites {
             wallBlastTexture = createWallBlastTexture();
         }
         return wallBlastTexture;
+    }
+
+    public static Texture startMenu() {
+        if (startMenuTexture == null) {
+            startMenuTexture = createStartMenuTexture();
+        }
+        return startMenuTexture;
     }
 
     public static Texture ghost(Color color) {
@@ -160,6 +168,7 @@ public final class LingoSprites {
         if (fireballTexture != null)     { fireballTexture.dispose();     fireballTexture = null; }
         if (wallBombTexture != null)     { wallBombTexture.dispose();     wallBombTexture = null; }
         if (wallBlastTexture != null)    { wallBlastTexture.dispose();    wallBlastTexture = null; }
+        if (startMenuTexture != null)    { startMenuTexture.dispose();    startMenuTexture = null; }
 
         for (int i = 0; i < HEDGE_WALL_TEXTURES.length; i++) {
             if (HEDGE_WALL_TEXTURES[i] != null) {
@@ -188,7 +197,8 @@ public final class LingoSprites {
     // -------------------------------------------------------------------------
 
     private static Texture createPlayerTexture() {
-        return loadAssetTexture("lingoman/player_iggle.png");
+        Texture texture = tryLoadAssetTexture("lingoman/player_hero.png");
+        return texture != null ? texture : loadAssetTexture("lingoman/player_iggle.png");
     }
 
     private static Texture getGhostTexture(Map<Integer, Texture> cache, Color color, GhostStyle style) {
@@ -293,6 +303,7 @@ public final class LingoSprites {
 
     private static Texture createWallBombTexture()  { return loadAssetTexture("lingoman/wall_bomb.png"); }
     private static Texture createWallBlastTexture() { return loadAssetTexture("lingoman/wall_blast.png"); }
+    private static Texture createStartMenuTexture() { return loadAssetTexture("lingoman/startmenu.png"); }
 
     // -------------------------------------------------------------------------
     // NEW: Word icon dispatch + per-word drawing methods
