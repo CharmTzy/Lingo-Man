@@ -1,6 +1,7 @@
 package io.github.some_example_name.lingoman;
 
 public final class LingoSceneIds {
+    public static final String MAIN_MENU = "lingo.main_menu";
     public static final String MENU = "lingo.menu";
     public static final String FOUND_WORDS = "lingo.found_words";
     public static final String SETTINGS = "lingo.settings";
