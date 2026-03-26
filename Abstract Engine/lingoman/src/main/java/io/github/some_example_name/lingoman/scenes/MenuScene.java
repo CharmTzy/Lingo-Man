@@ -20,25 +20,25 @@ import io.github.some_example_name.scenes.Scene;
 
 public class MenuScene implements Scene, ISaveable {
 
-    private static final Color BACKGROUND = new Color(0.07f, 0.10f, 0.13f, 1f);
-    private static final Color BACKDROP_TOP = new Color(0.15f, 0.24f, 0.23f, 0.45f);
-    private static final Color BACKDROP_BOTTOM = new Color(0.24f, 0.18f, 0.08f, 0.35f);
-    private static final Color BACKDROP_STRIPE = new Color(0.98f, 0.84f, 0.32f, 0.18f);
-    private static final Color CARD_FILL = new Color(0.08f, 0.11f, 0.14f, 0.95f);
-    private static final Color CARD_BORDER = new Color(0.94f, 0.78f, 0.28f, 1f);
-    private static final Color OPTION_FILL = new Color(0.14f, 0.18f, 0.22f, 0.98f);
-    private static final Color OPTION_BORDER = new Color(0.30f, 0.38f, 0.42f, 1f);
-    private static final Color OPTION_SELECTED_FILL = new Color(0.96f, 0.79f, 0.26f, 1f);
-    private static final Color OPTION_SELECTED_BORDER = new Color(1.00f, 0.90f, 0.52f, 1f);
-    private static final Color TEXT_PRIMARY = new Color(0.96f, 0.96f, 0.92f, 1f);
-    private static final Color TEXT_MUTED = new Color(0.71f, 0.76f, 0.77f, 1f);
-    private static final Color TEXT_DARK = new Color(0.11f, 0.10f, 0.08f, 1f);
+    private static final Color BACKGROUND = new Color(0.02f, 0.05f, 0.14f, 1f);
+    private static final Color BACKDROP_TOP = new Color(0.05f, 0.19f, 0.36f, 0.52f);
+    private static final Color BACKDROP_BOTTOM = new Color(0.03f, 0.10f, 0.24f, 0.48f);
+    private static final Color BACKDROP_STRIPE = new Color(1.00f, 0.78f, 0.24f, 0.24f);
+    private static final Color CARD_FILL = new Color(0.03f, 0.10f, 0.20f, 0.96f);
+    private static final Color CARD_BORDER = new Color(0.32f, 0.90f, 1.00f, 1f);
+    private static final Color OPTION_FILL = new Color(0.08f, 0.18f, 0.30f, 0.98f);
+    private static final Color OPTION_BORDER = new Color(0.27f, 0.52f, 0.67f, 1f);
+    private static final Color OPTION_SELECTED_FILL = new Color(0.24f, 0.84f, 1.00f, 1f);
+    private static final Color OPTION_SELECTED_BORDER = new Color(0.88f, 0.98f, 1.00f, 1f);
+    private static final Color TEXT_PRIMARY = new Color(0.95f, 0.98f, 1.00f, 1f);
+    private static final Color TEXT_MUTED = new Color(0.72f, 0.88f, 0.96f, 1f);
+    private static final Color TEXT_DARK = new Color(0.02f, 0.11f, 0.20f, 1f);
 
     private EngineContext context;
     private final MenuOption[] options = {
-        new MenuOption("Easy", "1 normal ghost", GameState.Difficulty.EASY, null),
-        new MenuOption("Medium", "1 ghost + bomber", GameState.Difficulty.MEDIUM, null),
-        new MenuOption("Hard", "boss + ghost + bomber", GameState.Difficulty.HARD, null),
+        new MenuOption("Easy", "GhastlyGhost", GameState.Difficulty.EASY, null),
+        new MenuOption("Medium", "GhastlyGhost + MadMortar", GameState.Difficulty.MEDIUM, null),
+        new MenuOption("Hard", "FireLord + HellHound + MadMortar", GameState.Difficulty.HARD, null),
         new MenuOption("Settings", "audio levels", null, LingoSceneIds.SETTINGS),
         new MenuOption("Words Found", "open list", null, LingoSceneIds.FOUND_WORDS),
         new MenuOption("Quit", "Exit game", null, null)

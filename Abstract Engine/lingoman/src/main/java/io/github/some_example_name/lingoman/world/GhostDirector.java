@@ -21,6 +21,7 @@ import io.github.some_example_name.lingoman.entity.PlayerEntity;
 import io.github.some_example_name.lingoman.entity.WallBombEntity;
 import io.github.some_example_name.lingoman.level.MazeLayout;
 import io.github.some_example_name.lingoman.model.GameState;
+import io.github.some_example_name.lingoman.movement.ConstantVelocityBehaviour;
 import io.github.some_example_name.lingoman.movement.GhostMovementGuard;
 import io.github.some_example_name.lingoman.movement.MazeSeekBehaviour;
 import io.github.some_example_name.lingoman.movement.MazeWanderBehaviour;
@@ -422,6 +423,8 @@ public final class GhostDirector {
         );
         bossFireballs.add(fireball);
         world.addCollidableEntity(fireball, createFireballListener(fireball));
+        world.assignBehaviour(fireball,
+            new ConstantVelocityBehaviour(fireball.getVx(), fireball.getVy()));
         return true;
     }
 
@@ -645,9 +648,9 @@ public final class GhostDirector {
                     2.20f
                 ),
                 new GhostLoadout(
-                    GhostEntity.GhostType.NORMAL,
+                    GhostEntity.GhostType.HELL_HOUND,
                     GhostMovePattern.WANDER,
-                    new Color(0.67f, 0.47f, 0.82f, 1f),
+                    new Color(0.36f, 0.56f, 0.78f, 1f),
                     0.96f,
                     1.06f,
                     ShotPattern.NONE,
