@@ -1,5 +1,6 @@
 package io.github.some_example_name.lingoman.scenes;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
@@ -17,6 +18,10 @@ public class MainMenuScene implements Scene {
     private static final float SCREEN_HEIGHT = 480f;
     private static final float IMAGE_MAX_WIDTH = 620f;
     private static final float IMAGE_MAX_HEIGHT = 350f;
+    private static final float START_BUTTON_X = 166f;
+    private static final float START_BUTTON_Y = 36f;
+    private static final float START_BUTTON_WIDTH = 308f;
+    private static final float START_BUTTON_HEIGHT = 54f;
 
     private static final Color BACKGROUND = new Color(0.03f, 0.08f, 0.18f, 1f);
     private static final Color IMAGE_FRAME = new Color(0.16f, 0.82f, 0.95f, 0.60f);
@@ -50,7 +55,7 @@ public class MainMenuScene implements Scene {
 
     @Override
     public void handleInput() {
-        if (context.getInputManager().isActionJustPressed(LingoInputActions.MENU_CONFIRM)) {
+        if (context.getInputManager().isActionJustPressed(LingoInputActions.MENU_CONFIRM) || isStartClicked()) {
             context.getAudioManager().playSound(LingoAudio.SFX_MENU_NAVIGATE, false);
             context.getSceneManager().setActiveScene(LingoSceneIds.MENU);
         }
@@ -105,7 +110,28 @@ public class MainMenuScene implements Scene {
         );
 
         context.getOutputManager().drawRect(162f, 32f, 316f, 62f, START_SHADOW);
-        context.getOutputManager().drawPanel(166f, 36f, 308f, 54f, 4f, pulsingFill, pulsingBorder);
+        context.getOutputManager().drawPanel(
+            START_BUTTON_X,
+            START_BUTTON_Y,
+            START_BUTTON_WIDTH,
+            START_BUTTON_HEIGHT,
+            4f,
+            pulsingFill,
+            pulsingBorder
+        );
         context.getOutputManager().drawTextCenteredScaled("START", SCREEN_WIDTH * 0.5f, 73f, START_TEXT, 1.28f);
+    }
+
+    private boolean isStartClicked() {
+        if (!Gdx.input.justTouched()) {
+            return false;
+        }
+
+        float worldX = Gdx.input.getX();
+        float worldY = SCREEN_HEIGHT - Gdx.input.getY();
+        return worldX >= START_BUTTON_X
+            && worldX <= START_BUTTON_X + START_BUTTON_WIDTH
+            && worldY >= START_BUTTON_Y
+            && worldY <= START_BUTTON_Y + START_BUTTON_HEIGHT;
     }
 }
