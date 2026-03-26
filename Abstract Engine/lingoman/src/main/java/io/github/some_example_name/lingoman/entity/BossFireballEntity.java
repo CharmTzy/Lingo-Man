@@ -6,22 +6,6 @@ import io.github.some_example_name.entity.DynamicEntity;
 import io.github.some_example_name.lingoman.graphics.LingoSprites;
 import io.github.some_example_name.managers.OutputManager;
 
-/**
- * A straight-line projectile fired by the boss ghost.
- *
- * <h3>Movement (Option 4)</h3>
- * {@code BossFireballEntity} now extends {@link DynamicEntity}, making it a
- * {@link io.github.some_example_name.movement.Movable}. When spawned,
- * {@code GameScene} assigns a {@link
- * io.github.some_example_name.lingoman.movement.ConstantVelocityBehaviour} via
- * {@code LingoWorld.assignBehaviour()}. The {@code MovementManager} then:
- * <ol>
- *   <li>Calls {@code ConstantVelocityBehaviour.move()} each frame to re-apply
- *       the fixed velocity (preventing any physics damping from altering speed).</li>
- *   <li>Calls {@code MovementPhysics.integrate()} to step the position forward.</li>
- * </ol>
- * The fireball no longer self-integrates position inside {@code update()}.
- */
 public class BossFireballEntity extends DynamicEntity {
 
     private static final Color FIREBALL_GLOW = new Color(1.00f, 0.42f, 0.12f, 0.34f);
@@ -73,9 +57,8 @@ public class BossFireballEntity extends DynamicEntity {
             return;
         }
 
-        // Position is now integrated by MovementPhysics via the MovementManager.
+        // Position integration is now handled by MovementPhysics via MovementManager.
         // ConstantVelocityBehaviour re-applies vx/vy each frame so speed stays exact.
-        // Only the visual rotation is updated here.
         rotationDegrees += 540f * dt;
     }
 

@@ -14,6 +14,7 @@ public class GhostEntity extends NPCEntity {
 
     public enum GhostType {
         NORMAL,
+        HELL_HOUND,
         BOSS,
         WALL_BOMBER
     }
@@ -26,6 +27,7 @@ public class GhostEntity extends NPCEntity {
     private float throwAimX = 0f;
     private float throwAimY = 1f;
     private float respawnProtectionTimer;
+    private boolean facingLeft;
 
     public GhostEntity(String id, Color color, float x, float y, float size) {
         this(id, GhostType.NORMAL, color, x, y, size);
@@ -61,17 +63,8 @@ public class GhostEntity extends NPCEntity {
             frozenTimer = Math.max(0f, frozenTimer - dt);
             setVx(0f);
             setVy(0f);
-            // FrozenAwareBehaviour (registered in LingoWorld) prevents the
-            // MovementManager from calling move() while frozen — velocity stays zero.
             return;
         }
-
-        // MovementManager dispatches behaviour.move() via FrozenAwareBehaviour after
-        // EntityManager calls this update(). We only need to self-integrate position
-        // here because this ghost is registered with physics disabled (maze navigation
-        // requires frame-accurate cell alignment that MovementPhysics must not disturb).
-        setX(getX() + getVx() * dt);
-        setY(getY() + getVy() * dt);
     }
 
     @Override
@@ -86,6 +79,7 @@ public class GhostEntity extends NPCEntity {
         float recover = smoothStep(phaseProgress(throwProgress, 0.58f, 1.00f));
         float scale = switch (type) {
             case BOSS -> 1.38f;
+            case HELL_HOUND -> 1.28f;
             case WALL_BOMBER -> 1.20f;
             default -> 1.24f;
         };
@@ -107,6 +101,7 @@ public class GhostEntity extends NPCEntity {
         }
         switch (type) {
             case BOSS -> outputManager.draw(LingoSprites.bossGhost(color), drawX, drawY, drawWidth, drawHeight);
+            case HELL_HOUND -> drawHellHound(outputManager, drawX, drawY, drawWidth, drawHeight);
             case WALL_BOMBER -> {
                 outputManager.draw(LingoSprites.wallBomberGhost(color), drawX, drawY, drawWidth, drawHeight);
                 if (throwAnimationTimer > 0f) {
@@ -252,5 +247,18 @@ public class GhostEntity extends NPCEntity {
             return false;
         }
         return ((int) (timer / RESPAWN_BLINK_INTERVAL)) % 2 != 0;
+    }
+
+    private void drawHellHound(OutputManager outputManager, float drawX, float drawY, float drawWidth, float drawHeight) {
+        if (Math.abs(getVx()) > 0.5f) {
+            facingLeft = getVx() < 0f;
+        }
+
+        float spriteWidth = facingLeft ? -drawWidth : drawWidth;
+        float spriteX = facingLeft ? drawX + drawWidth : drawX;
+        // HellHound source art is authored inverted on Y, so flip vertically at render time.
+        float spriteHeight = -drawHeight;
+        float spriteY = drawY + drawHeight;
+        outputManager.draw(LingoSprites.hellHoundGhost(color), spriteX, spriteY, spriteWidth, spriteHeight);
     }
 }

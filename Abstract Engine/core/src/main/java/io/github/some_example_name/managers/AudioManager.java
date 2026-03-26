@@ -30,6 +30,7 @@ public class AudioManager implements Disposable {
     private float musicVolume = 1f;
     private float soundMasterVolume = 1f;
     private boolean muted = false;
+    private boolean musicSuspended = false;
     private Music currentMusic;
 
     public AudioManager() {
@@ -173,6 +174,7 @@ public class AudioManager implements Disposable {
         }
 
         currentMusic = nextMusic;
+        musicSuspended = false;
         currentMusic.setLooping(loop);
         currentMusic.setVolume(resolveMusicVolume());
         currentMusic.play();
@@ -182,6 +184,7 @@ public class AudioManager implements Disposable {
         if (currentMusic != null) {
             currentMusic.stop();
         }
+        musicSuspended = false;
     }
 
     public void setMusicVolume(float volume) {
@@ -223,9 +226,28 @@ public class AudioManager implements Disposable {
     }
 
     public void resumeMusic() {
-        if (currentMusic != null) {
+        if (currentMusic != null && !musicSuspended) {
             currentMusic.play();
         }
+    }
+
+    public void suspendMusic() {
+        if (currentMusic == null) {
+            return;
+        }
+
+        currentMusic.pause();
+        musicSuspended = true;
+    }
+
+    public void resumeSuspendedMusic() {
+        if (currentMusic == null || !musicSuspended) {
+            return;
+        }
+
+        currentMusic.setVolume(resolveMusicVolume());
+        currentMusic.play();
+        musicSuspended = false;
     }
 
     public void setSoundVolume(String id, float volume) {
@@ -267,6 +289,7 @@ public class AudioManager implements Disposable {
             }
         }
         musicTracks.clear();
+        musicSuspended = false;
         currentMusic = null;
     }
 

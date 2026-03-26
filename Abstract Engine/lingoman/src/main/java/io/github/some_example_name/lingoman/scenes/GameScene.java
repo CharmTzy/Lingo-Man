@@ -1,23 +1,18 @@
 package io.github.some_example_name.lingoman.scenes;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.IdentityHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.GridPoint2;
-import com.badlogic.gdx.math.Vector2;
 
 import io.github.some_example_name.EngineContext;
 import io.github.some_example_name.collision.Collider;
-import io.github.some_example_name.collision.EntityCollisionListenerAdapter;
 import io.github.some_example_name.collision.ICollisionListener;
 import io.github.some_example_name.lingoman.LingoAudio;
 import io.github.some_example_name.lingoman.LingoInputActions;
 import io.github.some_example_name.lingoman.LingoSceneIds;
+import io.github.some_example_name.lingoman.LingoSaveFiles;
 import io.github.some_example_name.lingoman.LingoSession;
 import io.github.some_example_name.lingoman.entity.BossFireballEntity;
 import io.github.some_example_name.lingoman.entity.FreezePickupEntity;
@@ -27,65 +22,30 @@ import io.github.some_example_name.lingoman.entity.PlayerEntity;
 import io.github.some_example_name.lingoman.entity.ShockPickupEntity;
 import io.github.some_example_name.lingoman.entity.WallBombEntity;
 import io.github.some_example_name.lingoman.entity.WallEntity;
+import io.github.some_example_name.lingoman.graphics.LingoSprites;
+import io.github.some_example_name.lingoman.level.LevelBuilder;
+
 import io.github.some_example_name.lingoman.level.MazeLayout;
 import io.github.some_example_name.lingoman.model.GameState;
 import io.github.some_example_name.lingoman.model.WordBank;
-import io.github.some_example_name.lingoman.movement.MazeSeekBehaviour;
-import io.github.some_example_name.lingoman.movement.MazeWanderBehaviour;
-import io.github.some_example_name.lingoman.movement.ConstantVelocityBehaviour;
+import io.github.some_example_name.lingoman.world.GhostDirector;
 import io.github.some_example_name.lingoman.world.LingoWorld;
-import io.github.some_example_name.movement.behaviour.MovementBehaviour;
 import io.github.some_example_name.scenes.Scene;
 
 public class GameScene implements Scene {
 
-    private static final Color BACKGROUND_OUTER = new Color(0f, 0f, 0f, 1f);
-
-    private enum GhostMovePattern {
-        SEEK,
-        WANDER,
-        STATIONARY
-    }
-
-    private enum ShotPattern {
-        NONE,
-        BOMB_DROP,
-        FIREBALL
-    }
-
-    private static final class GhostLoadout {
-        private final GhostEntity.GhostType type;
-        private final GhostMovePattern movePattern;
-        private final Color color;
-        private final float speedMultiplier;
-        private final float sizeMultiplier;
-        private final ShotPattern shotPattern;
-        private final float shotCooldownSeconds;
-
-        private GhostLoadout(
-            GhostEntity.GhostType type,
-            GhostMovePattern movePattern,
-            Color color,
-            float speedMultiplier,
-            float sizeMultiplier,
-            ShotPattern shotPattern,
-            float shotCooldownSeconds
-        ) {
-            this.type = type;
-            this.movePattern = movePattern;
-            this.color = color == null ? new Color(1f, 0.3f, 0.3f, 1f) : new Color(color);
-            this.speedMultiplier = speedMultiplier;
-            this.sizeMultiplier = sizeMultiplier;
-            this.shotPattern = shotPattern;
-            this.shotCooldownSeconds = shotCooldownSeconds;
-        }
-
-        private boolean canShoot() {
-            return shotPattern != ShotPattern.NONE;
-        }
-    }
-
-    private static final String PROFILE_FILE = "lingoman_progress.json";
+    private static final Color BACKGROUND_OUTER = new Color(0.01f, 0.03f, 0.10f, 1f);
+    private static final Color MAP_BAND_0 = new Color(0.02f, 0.09f, 0.28f, 1f);
+    private static final Color MAP_BAND_1 = new Color(0.02f, 0.12f, 0.34f, 1f);
+    private static final Color MAP_BAND_2 = new Color(0.03f, 0.15f, 0.39f, 1f);
+    private static final Color MAP_BAND_3 = new Color(0.04f, 0.18f, 0.44f, 1f);
+    private static final Color MAP_BAND_4 = new Color(0.05f, 0.21f, 0.49f, 1f);
+    private static final Color MAP_BAND_5 = new Color(0.06f, 0.24f, 0.54f, 1f);
+    private static final Color MAP_GRID_MINOR = new Color(0.31f, 0.92f, 1.00f, 0.17f);
+    private static final Color MAP_GRID_MAJOR = new Color(0.58f, 0.98f, 1.00f, 0.30f);
+    private static final Color MAP_CORE_GLOW = new Color(0.20f, 0.86f, 1.00f, 0.13f);
+    private static final Color MAP_ACCENT_GOLD = new Color(1.00f, 0.80f, 0.28f, 0.11f);
+    private static final Color MAP_WARM_STREAK = new Color(1.00f, 0.64f, 0.18f, 0.06f);
 
     private static final Color TEXT_PRIMARY = new Color(0.96f, 0.96f, 0.92f, 1f);
     private static final Color TEXT_MUTED = new Color(0.72f, 0.77f, 0.79f, 1f);
@@ -94,25 +54,13 @@ public class GameScene implements Scene {
 
     private static final float STATUS_MESSAGE_DURATION = 2.0f;
     private static final float RESPAWN_IMMUNITY_SECONDS = 5.0f;
-    private static final float BOMB_THROW_SECONDS = 0.82f;
-    private static final float BOMB_BLAST_SECONDS = 0.18f;
-    private static final float FIREBALL_SPEED = 182f;
-    private static final float FIREBALL_LIFETIME_SECONDS = 1.55f;
-    private static final float FIREBALL_ATTACK_RANGE_TILES = 6.0f;
-    private static final float BOMB_TARGET_PLAYER_CHANCE = 0.70f;
-    private static final int BOMB_NEAR_PLAYER_RADIUS = 3;
     private static final float FREEZE_SECONDS = 4.5f;
     private static final float SHOCK_SECONDS = 6.0f;
 
     private EngineContext context;
     private final LingoWorld world = new LingoWorld();
-    private final List<GhostEntity> ghosts = new ArrayList<>();
-    private final List<WallBombEntity> wallBombs = new ArrayList<>();
-    private final List<BossFireballEntity> bossFireballs = new ArrayList<>();
-    private final Map<GhostEntity, Float> ghostShotCooldowns = new IdentityHashMap<>();
-    private final Map<GhostEntity, GhostLoadout> ghostLoadouts = new IdentityHashMap<>();
-    private final Map<GhostEntity, GridPoint2> ghostSpawnCells = new IdentityHashMap<>();
-    private final List<GridPoint2> bombDropCells = new ArrayList<>();
+    private GhostDirector ghostDirector;
+    private LevelBuilder levelBuilder;
 
     private MazeLayout.Layout currentLayout;
     private PlayerEntity player;
@@ -122,19 +70,22 @@ public class GameScene implements Scene {
     private String statusMessage = "";
     private float statusMessageTimer = 0f;
     private boolean moveLoopPlaying = false;
-    private int bombSequence = 0;
-    private int fireballSequence = 0;
 
     @Override
     public void initialize(EngineContext context) {
         this.context = context;
+        this.ghostDirector = new GhostDirector(
+            world,
+            WallBombCollisionListener::new,
+            BossFireballCollisionListener::new
+        );
     }
 
     @Override
     public void enter() {
         if (LingoSession.get().consumeGameResumeRequest()) {
             moveLoopPlaying = false;
-            context.getAudioManager().playMusic(LingoAudio.BGM_GAME, true);
+            context.getAudioManager().resumeSuspendedMusic();
             System.out.println("[LingoMan] Game resumed");
             return;
         }
@@ -148,13 +99,13 @@ public class GameScene implements Scene {
     @Override
     public void exit() {
         stopMovementAudio();
-        context.getAudioManager().stopMusic();
         System.out.println("[LingoMan] Game exit");
     }
 
     @Override
     public void handleInput() {
         if (context.getInputManager().isActionJustPressed(LingoInputActions.GAME_MENU)) {
+            context.getAudioManager().suspendMusic();
             context.getSceneManager().setActiveScene(LingoSceneIds.PAUSE);
         }
     }
@@ -172,16 +123,15 @@ public class GameScene implements Scene {
         }
 
         world.update(deltaTime);
-        updateGhostShooting(deltaTime);
-        cleanupInactiveBombs();
-        cleanupInactiveFireballs();
+        ghostDirector.updateShooting(deltaTime, player, invulnerableTimer, currentLayout);
+        ghostDirector.cleanupInactiveAttacks();
         updateMovementAudio();
 
         GameState state = LingoSession.get().getGameState();
         if (state.hasCollectedAllLetters()) {
             stopGameplayAudio();
             state.addFoundWord(state.getTargetWord());
-            context.getSaveManager().save(PROFILE_FILE);
+            context.getSaveManager().save(LingoSaveFiles.PROFILE);
             state.setLastResult("WORD COMPLETE");
             context.getAudioManager().playSound(LingoAudio.SFX_VICTORY, false);
             context.getSceneManager().setActiveScene(LingoSceneIds.GAME_OVER);
@@ -195,23 +145,121 @@ public class GameScene implements Scene {
 
     @Override
     public void render() {
-        context.getOutputManager().clearScreen(BACKGROUND_OUTER.r, BACKGROUND_OUTER.g, BACKGROUND_OUTER.b, BACKGROUND_OUTER.a);
+        context.getOutputManager().clearScreen(
+            BACKGROUND_OUTER.r, BACKGROUND_OUTER.g, BACKGROUND_OUTER.b, BACKGROUND_OUTER.a);
+        drawMapBackdrop();
         world.render(context.getOutputManager());
-
+ 
         GameState state = LingoSession.get().getGameState();
-        context.getOutputManager().drawTextWithShadow("Target: " + state.getTargetWord(), 28f, 474f, TEXT_ACCENT);
-        context.getOutputManager().drawTextWithShadow("Progress: " + state.getCollectedLettersDisplay(), 28f, 454f, TEXT_PRIMARY);
-
+ 
+        final float ICON_SIZE = 40f;
+        final float ICON_X    = 28f;
+        final float ICON_Y    = 432f;   // sits above "Progress" line at y=454
+ 
+        context.getOutputManager().draw(
+            LingoSprites.wordIcon(state.getTargetWord()),
+            ICON_X, ICON_Y, ICON_SIZE, ICON_SIZE
+        );
+ 
+        final float TEXT_X = ICON_X + ICON_SIZE + 8f;  // 76f
+ 
+        context.getOutputManager().drawTextWithShadow(
+            "Progress: " + state.getCollectedLettersDisplay(), TEXT_X, 474f, TEXT_PRIMARY);
+ 
+        char nextLetter = state.getNextExpectedLetter();
+        String nextHint = nextLetter == '\0' ? "Next: -" : "Next: " + nextLetter;
+        context.getOutputManager().drawTextWithShadow(nextHint, TEXT_X, 454f, TEXT_WARNING);
+ 
         context.getOutputManager().drawTextWithShadow("Lives: " + state.getLives(), 432f, 474f,
             state.getLives() <= 1 ? TEXT_WARNING : TEXT_PRIMARY);
-        context.getOutputManager().drawTextWithShadow("Mode: " + state.getDifficulty(), 432f, 454f, TEXT_PRIMARY);
-
+        context.getOutputManager().drawTextWithShadow(
+            "Mode: " + state.getDifficulty(), 432f, 454f, TEXT_PRIMARY);
+ 
         context.getOutputManager().drawTextWithShadow("Move: WASD / Arrows", 28f, 18f, TEXT_PRIMARY);
         context.getOutputManager().drawTextWithShadow("Dash: SPACE", 246f, 18f, TEXT_PRIMARY);
         context.getOutputManager().drawTextRightAlignedWithShadow("Menu: M or ESC", 610f, 18f, TEXT_MUTED);
-
+ 
         if (!statusMessage.isBlank()) {
-            context.getOutputManager().drawTextRightAlignedWithShadow(statusMessage, 610f, 18f, TEXT_WARNING);
+            context.getOutputManager().drawTextCenteredScaled(
+                statusMessage, 320f, 474f, TEXT_WARNING, 0.8f);
+        }
+    }
+
+    private void drawMapBackdrop() {
+        if (currentLayout == null) {
+            return;
+        }
+
+        float left = currentLayout.getOffsetX();
+        float bottom = currentLayout.getOffsetY();
+        float width = currentLayout.getCols() * currentLayout.getTileSize();
+        float height = currentLayout.getRows() * currentLayout.getTileSize();
+        float bandHeight = height / 6f;
+
+        context.getOutputManager().drawRect(left, bottom + bandHeight * 0f, width, bandHeight + 1f, MAP_BAND_0);
+        context.getOutputManager().drawRect(left, bottom + bandHeight * 1f, width, bandHeight + 1f, MAP_BAND_1);
+        context.getOutputManager().drawRect(left, bottom + bandHeight * 2f, width, bandHeight + 1f, MAP_BAND_2);
+        context.getOutputManager().drawRect(left, bottom + bandHeight * 3f, width, bandHeight + 1f, MAP_BAND_3);
+        context.getOutputManager().drawRect(left, bottom + bandHeight * 4f, width, bandHeight + 1f, MAP_BAND_4);
+        context.getOutputManager().drawRect(left, bottom + bandHeight * 5f, width, bandHeight + 1f, MAP_BAND_5);
+
+        context.getOutputManager().drawRect(
+            left + width * 0.16f,
+            bottom + height * 0.12f,
+            width * 0.68f,
+            height * 0.70f,
+            MAP_CORE_GLOW
+        );
+        context.getOutputManager().drawRect(
+            left + width * 0.24f,
+            bottom + height * 0.22f,
+            width * 0.52f,
+            height * 0.48f,
+            MAP_ACCENT_GOLD
+        );
+        context.getOutputManager().drawRect(
+            left + width * 0.10f,
+            bottom + height * 0.79f,
+            width * 0.80f,
+            height * 0.08f,
+            MAP_WARM_STREAK
+        );
+        context.getOutputManager().drawRect(
+            left + width * 0.18f,
+            bottom + height * 0.09f,
+            width * 0.64f,
+            height * 0.06f,
+            MAP_WARM_STREAK
+        );
+
+        int cols = currentLayout.getCols();
+        int rows = currentLayout.getRows();
+        float tile = currentLayout.getTileSize();
+
+        for (int col = 0; col <= cols; col++) {
+            float x = left + col * tile;
+            boolean major = (col % 4) == 0;
+            float lineWidth = major ? 1.8f : 0.9f;
+            context.getOutputManager().drawRect(
+                x - lineWidth * 0.5f,
+                bottom,
+                lineWidth,
+                height,
+                major ? MAP_GRID_MAJOR : MAP_GRID_MINOR
+            );
+        }
+
+        for (int row = 0; row <= rows; row++) {
+            float y = bottom + row * tile;
+            boolean major = (row % 4) == 0;
+            float lineHeight = major ? 1.8f : 0.9f;
+            context.getOutputManager().drawRect(
+                left,
+                y - lineHeight * 0.5f,
+                width,
+                lineHeight,
+                major ? MAP_GRID_MAJOR : MAP_GRID_MINOR
+            );
         }
     }
 
@@ -240,206 +288,33 @@ public class GameScene implements Scene {
 
     private void buildLevel(GameState state) {
         clearWorld();
+        levelBuilder = new LevelBuilder(world, currentLayout, LingoSession.get().getRandom());
+        levelBuilder.buildWalls();
+        player = levelBuilder.buildPlayer(
+            context.getInputManager(),
+            playerSpeed(),
+            entitySize(),
+            new PlayerCollisionListener()
+        );
+        ghostDirector.setBombDropCells(levelBuilder.collectBombDropCells());
+        ghostDirector.buildGhosts(currentLayout, state.getDifficulty(), player, ghostSpeed(state.getDifficulty()), entitySize());
 
-        buildWalls();
-        buildPlayer();
-        buildGhosts(state.getDifficulty());
-        bombDropCells.addAll(collectBombDropCells());
-        List<GridPoint2> itemCells = collectItemCells();
-        buildLetters(state.getTargetWord(), itemCells);
-        buildFreezePickup(itemCells);
-        buildShockPickup(itemCells);
+        List<GridPoint2> itemCells = levelBuilder.collectItemCells();
+        levelBuilder.buildLetters(state.getTargetWord(), itemCells, letterSize());
+
+        float pickupSize = Math.max(currentLayout.getTileSize() * 0.62f, 14f);
+        freezePickup = levelBuilder.buildFreezePickup(itemCells, pickupSize);
+        shockPickup = levelBuilder.buildShockPickup(itemCells, pickupSize);
     }
 
     private void clearWorld() {
-        ghosts.clear();
-        wallBombs.clear();
-        bossFireballs.clear();
-        ghostShotCooldowns.clear();
-        ghostLoadouts.clear();
-        ghostSpawnCells.clear();
-        bombDropCells.clear();
         freezePickup = null;
         shockPickup = null;
+        player = null;
+        if (ghostDirector != null) {
+            ghostDirector.clear();
+        }
         world.clear();
-    }
-
-    private void buildWalls() {
-        int id = 0;
-        for (int row = 0; row < currentLayout.getRows(); row++) {
-            for (int col = 0; col < currentLayout.getCols(); col++) {
-                if (!MazeLayout.isWall(currentLayout, col, row)) {
-                    continue;
-                }
-
-                float x = MazeLayout.toWorldX(currentLayout, col);
-                float y = MazeLayout.toWorldY(currentLayout, row);
-                WallEntity wall = new WallEntity("wall_" + id++, x, y, currentLayout.getTileSize());
-                world.addCollidableEntity(wall, null);
-            }
-        }
-    }
-
-    private void buildPlayer() {
-        GridPoint2 spawn = currentLayout.getPlayerSpawn();
-        float size = entitySize();
-        float x = MazeLayout.toWorldXCentered(currentLayout, spawn.x, size);
-        float y = MazeLayout.toWorldYCentered(currentLayout, spawn.y, size);
-        player = new PlayerEntity("player", context.getInputManager(), x, y, playerSpeed(), size);
-        world.addCollidableEntity(player, new PlayerCollisionListener());
-    }
-
-    private void buildGhosts(GameState.Difficulty difficulty) {
-        float speed = ghostSpeed(difficulty);
-        GridPoint2[] spawns = currentLayout.getGhostSpawns();
-        List<GhostLoadout> loadouts = buildGhostLoadouts(difficulty);
-        int pathSpawnIndex = 0;
-
-        for (int i = 0; i < loadouts.size(); i++) {
-            GhostLoadout loadout = loadouts.get(i);
-            GridPoint2 spawn = loadout.type == GhostEntity.GhostType.WALL_BOMBER
-                ? findWallBomberCell()
-                : spawns[pathSpawnIndex++ % spawns.length];
-            float size = entitySize() * loadout.sizeMultiplier;
-            float x = MazeLayout.toWorldXCentered(currentLayout, spawn.x, size);
-            float y = MazeLayout.toWorldYCentered(currentLayout, spawn.y, size);
-            GhostEntity ghost = new GhostEntity("ghost_" + i, loadout.type, loadout.color, x, y, size);
-            ghosts.add(ghost);
-            ghostLoadouts.put(ghost, loadout);
-            ghostSpawnCells.put(ghost, new GridPoint2(spawn));
-            if (loadout.type == GhostEntity.GhostType.WALL_BOMBER) {
-                world.addEntity(ghost);
-            } else {
-                world.addCollidableEntity(ghost, new EntityCollisionListenerAdapter(ghost));
-            }
-            MovementBehaviour behaviour = buildGhostBehaviour(loadout, speed);
-            if (behaviour != null) {
-                world.assignBehaviour(ghost, behaviour);
-            }
-            if (loadout.canShoot()) {
-                ghostShotCooldowns.put(ghost, initialShotCooldown(loadout, ghostShotCooldowns.size()));
-            }
-        }
-    }
-
-    private List<GridPoint2> collectItemCells() {
-        List<GridPoint2> openCells = MazeLayout.collectReachableOpenCells(currentLayout, currentLayout.getPlayerSpawn());
-        openCells.removeIf(this::isSpawnCell);
-        Collections.shuffle(openCells, LingoSession.get().getRandom());
-        return openCells;
-    }
-
-    private List<GridPoint2> collectBombDropCells() {
-        List<GridPoint2> openCells = MazeLayout.collectReachableOpenCells(currentLayout, currentLayout.getPlayerSpawn());
-        openCells.removeIf(this::isSpawnCell);
-        return openCells;
-    }
-
-    private void buildLetters(String targetWord, List<GridPoint2> openCells) {
-        if (targetWord == null || targetWord.isBlank()) {
-            return;
-        }
-
-        float size = letterSize();
-        for (int i = 0; i < targetWord.length(); i++) {
-            if (openCells == null || openCells.isEmpty()) {
-                break;
-            }
-
-            char letter = targetWord.charAt(i);
-            GridPoint2 cell = openCells.remove(0);
-            float x = MazeLayout.toWorldXCentered(currentLayout, cell.x, size);
-            float y = MazeLayout.toWorldYCentered(currentLayout, cell.y, size);
-            LetterEntity entity = new LetterEntity("letter_" + i, letter, x, y, size);
-            world.addCollidableEntity(entity, null);
-        }
-    }
-
-    private void buildFreezePickup(List<GridPoint2> openCells) {
-        if (openCells == null || openCells.isEmpty()) {
-            freezePickup = null;
-            return;
-        }
-
-        float size = Math.max(currentLayout.getTileSize() * 0.62f, 14f);
-        GridPoint2 cell = openCells.remove(0);
-        float x = MazeLayout.toWorldXCentered(currentLayout, cell.x, size);
-        float y = MazeLayout.toWorldYCentered(currentLayout, cell.y, size);
-        freezePickup = new FreezePickupEntity("freeze_pickup", x, y, size);
-        world.addCollidableEntity(freezePickup, null);
-    }
-
-    private void buildShockPickup(List<GridPoint2> openCells) {
-        if (openCells == null || openCells.isEmpty()) {
-            shockPickup = null;
-            return;
-        }
-
-        float size = Math.max(currentLayout.getTileSize() * 0.62f, 14f);
-        GridPoint2 cell = openCells.remove(0);
-        float x = MazeLayout.toWorldXCentered(currentLayout, cell.x, size);
-        float y = MazeLayout.toWorldYCentered(currentLayout, cell.y, size);
-        shockPickup = new ShockPickupEntity("shock_pickup", x, y, size);
-        world.addCollidableEntity(shockPickup, null);
-    }
-
-    private boolean isSpawnCell(GridPoint2 cell) {
-        if (cell == null) {
-            return false;
-        }
-        if (cell.equals(currentLayout.getPlayerSpawn())) {
-            return true;
-        }
-        for (GridPoint2 spawn : currentLayout.getGhostSpawns()) {
-            if (cell.equals(spawn)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private GridPoint2 findWallBomberCell() {
-        int centerCol = currentLayout.getCols() / 2;
-        int centerRow = currentLayout.getRows() / 2;
-        GridPoint2 best = null;
-        int bestScore = Integer.MAX_VALUE;
-
-        for (int row = 1; row < currentLayout.getRows() - 1; row++) {
-            for (int col = 1; col < currentLayout.getCols() - 1; col++) {
-                if (!MazeLayout.isWall(currentLayout, col, row)) {
-                    continue;
-                }
-                if (!hasAdjacentOpenCell(col, row)) {
-                    continue;
-                }
-
-                int score = Math.abs(col - centerCol) * 2 + Math.abs(row - centerRow);
-                if (score < bestScore) {
-                    bestScore = score;
-                    best = new GridPoint2(col, row);
-                }
-            }
-        }
-
-        return best == null ? new GridPoint2(centerCol, centerRow) : best;
-    }
-
-    private boolean hasAdjacentOpenCell(int col, int row) {
-        return MazeLayout.isOpen(currentLayout, col + 1, row)
-            || MazeLayout.isOpen(currentLayout, col - 1, row)
-            || MazeLayout.isOpen(currentLayout, col, row + 1)
-            || MazeLayout.isOpen(currentLayout, col, row - 1);
-    }
-
-    private MovementBehaviour buildGhostBehaviour(GhostLoadout loadout, float speed) {
-        float threshold = Math.max(2f, currentLayout.getTileSize() * 0.22f);
-        float adjustedSpeed = speed * (loadout == null ? 1f : loadout.speedMultiplier);
-        GhostMovePattern pattern = loadout == null ? GhostMovePattern.SEEK : loadout.movePattern;
-        return switch (pattern) {
-            case WANDER -> new MazeWanderBehaviour(currentLayout, adjustedSpeed);
-            case STATIONARY -> null;
-            default -> new MazeSeekBehaviour(currentLayout, player, adjustedSpeed);
-        };
     }
 
     private void resetPositions() {
@@ -452,60 +327,21 @@ public class GameScene implements Scene {
         player.clearShock();
         player.clearRespawnProtection();
         player.setRespawnProtection(RESPAWN_IMMUNITY_SECONDS);
-
-        clearBombs();
-        clearFireballs();
-
-        for (GhostEntity ghost : ghosts) {
-            resetGhostToSpawn(ghost);
-        }
-        resetGhostShotCooldowns();
+        ghostDirector.resetAfterPlayerHit(
+            currentLayout,
+            player,
+            ghostSpeed(LingoSession.get().getGameState().getDifficulty())
+        );
     }
 
     private void respawnGhost(GhostEntity ghost) {
-        resetGhostToSpawn(ghost);
-        ghost.setRespawnProtection(RESPAWN_IMMUNITY_SECONDS);
-
-        GhostLoadout loadout = ghostLoadouts.get(ghost);
-        if (loadout != null && loadout.canShoot()) {
-            ghostShotCooldowns.put(ghost, shotCooldown(loadout));
-        }
-    }
-
-    private void resetGhostToSpawn(GhostEntity ghost) {
-        if (ghost == null) {
-            return;
-        }
-
-        GridPoint2 spawn = ghostSpawnCells.get(ghost);
-        if (spawn == null) {
-            return;
-        }
-
-        ghost.setX(MazeLayout.toWorldXCentered(currentLayout, spawn.x, ghost.getWidth()));
-        ghost.setY(MazeLayout.toWorldYCentered(currentLayout, spawn.y, ghost.getHeight()));
-        ghost.setVx(0f);
-        ghost.setVy(0f);
-        ghost.clearFreeze();
-        ghost.clearThrowAnimation();
-        ghost.clearRespawnProtection();
-        refreshGhostBehaviour(ghost);
-    }
-
-    private void refreshGhostBehaviour(GhostEntity ghost) {
-        if (ghost == null) {
-            return;
-        }
-
-        MovementBehaviour behaviour = buildGhostBehaviour(
-            ghostLoadouts.get(ghost),
-            ghostSpeed(LingoSession.get().getGameState().getDifficulty())
+        ghostDirector.respawnGhost(
+            ghost,
+            currentLayout,
+            player,
+            ghostSpeed(LingoSession.get().getGameState().getDifficulty()),
+            RESPAWN_IMMUNITY_SECONDS
         );
-        if (behaviour != null) {
-            world.assignBehaviour(ghost, behaviour);
-        } else {
-            ghost.setMovementBehaviour(null);
-        }
     }
 
     private void handlePlayerHit() {
@@ -579,374 +415,8 @@ public class GameScene implements Scene {
         return currentLayout.getTileSize() * scale;
     }
 
-    private void updateGhostShooting(float deltaTime) {
-        if (ghostShotCooldowns.isEmpty() || invulnerableTimer > 0f || player == null) {
-            return;
-        }
-
-        for (GhostEntity ghost : ghosts) {
-            GhostLoadout loadout = ghostLoadouts.get(ghost);
-            if (!ghost.isActive() || ghost.isFrozen() || loadout == null || !ghostShotCooldowns.containsKey(ghost)) {
-                continue;
-            }
-
-            float remaining = ghostShotCooldowns.get(ghost) - deltaTime;
-            if (remaining > 0f) {
-                ghostShotCooldowns.put(ghost, remaining);
-                continue;
-            }
-
-            boolean spawned = spawnGhostAttack(ghost, loadout);
-            ghostShotCooldowns.put(ghost, spawned ? shotCooldown(loadout) : 0.45f);
-            if (spawned) {
-                break;
-            }
-        }
-    }
-
-    private boolean spawnGhostAttack(GhostEntity ghost, GhostLoadout loadout) {
-        if (ghost == null || loadout == null || !loadout.canShoot() || player == null) {
-            return false;
-        }
-        if (loadout.shotPattern == ShotPattern.BOMB_DROP) {
-            return spawnWallBomb(ghost);
-        }
-        if (loadout.shotPattern == ShotPattern.FIREBALL) {
-            return spawnBossFireball(ghost);
-        }
-        return false;
-    }
-
-    private boolean spawnWallBomb(GhostEntity bomber) {
-        if (bomber == null || bombDropCells.isEmpty() || hasActiveWallBomb()) {
-            return false;
-        }
-
-        GridPoint2 targetCell = selectBombTargetCell();
-        if (targetCell == null) {
-            return false;
-        }
-
-        float bombSize = Math.max(currentLayout.getTileSize() * 0.34f, 9f);
-        float blastSize = Math.max(currentLayout.getTileSize() * 0.84f, 16f);
-        Vector2 targetCenter = MazeLayout.toCellCenter(currentLayout, targetCell);
-        Vector2 throwOrigin = bomber.getThrowOrigin(targetCenter.x, targetCenter.y);
-        float startCenterX = throwOrigin.x;
-        float startCenterY = throwOrigin.y;
-
-        bomber.playThrowAnimation(BOMB_THROW_SECONDS, targetCenter.x, targetCenter.y);
-
-        WallBombEntity bomb = new WallBombEntity(
-            "wall_bomb_" + bombSequence++,
-            startCenterX,
-            startCenterY,
-            targetCenter.x,
-            targetCenter.y,
-            bombSize,
-            blastSize,
-            BOMB_THROW_SECONDS,
-            BOMB_BLAST_SECONDS
-        );
-        wallBombs.add(bomb);
-        world.addCollidableEntity(bomb, new WallBombCollisionListener(bomb));
-        return true;
-    }
-
-    private boolean spawnBossFireball(GhostEntity boss) {
-        if (boss == null || player == null || hasActiveBossFireball()) {
-            return false;
-        }
-
-        float playerCenterX = player.getX() + player.getWidth() * 0.5f;
-        float playerCenterY = player.getY() + player.getHeight() * 0.5f;
-        float bossCenterX = boss.getX() + boss.getWidth() * 0.5f;
-        float bossCenterY = boss.getY() + boss.getHeight() * 0.5f;
-        Vector2 direction = new Vector2(playerCenterX - bossCenterX, playerCenterY - bossCenterY);
-        float targetDistance = direction.len();
-        float attackRange = currentLayout.getTileSize() * FIREBALL_ATTACK_RANGE_TILES;
-        if (targetDistance > attackRange) {
-            return false;
-        }
-        if (direction.isZero(0.001f)) {
-            direction.set(1f, 0f);
-        } else {
-            direction.nor();
-        }
-
-        float startCenterX = bossCenterX + direction.x * boss.getWidth() * 0.40f;
-        float startCenterY = bossCenterY + direction.y * boss.getHeight() * 0.24f;
-        float fireballSize = Math.max(currentLayout.getTileSize() * 0.42f, 12f);
-        float fireballSpeed = Math.max(FIREBALL_SPEED, currentLayout.getTileSize() * 6.4f);
-
-        BossFireballEntity fireball = new BossFireballEntity(
-            "boss_fireball_" + fireballSequence++,
-            startCenterX,
-            startCenterY,
-            playerCenterX,
-            playerCenterY,
-            fireballSize,
-            fireballSpeed,
-            FIREBALL_LIFETIME_SECONDS
-        );
-        bossFireballs.add(fireball);
-        world.addCollidableEntity(fireball, new BossFireballCollisionListener(fireball));
-        // Option 4: assign ConstantVelocityBehaviour so MovementManager dispatches
-        // behaviour.move() and MovementPhysics integrates position each frame.
-        // The fireball's vx/vy were set in its constructor from the direction vector.
-        world.assignBehaviour(fireball,
-            new ConstantVelocityBehaviour(fireball.getVx(), fireball.getVy()));
-        return true;
-    }
-
-    private GridPoint2 selectBombTargetCell() {
-        Random rng = LingoSession.get().getRandom();
-        GridPoint2 playerCell = player == null
-            ? null
-            : MazeLayout.toCell(currentLayout, player.getX(), player.getY(), player.getWidth());
-        boolean canTargetPlayer = playerCell != null && MazeLayout.isOpen(currentLayout, playerCell.x, playerCell.y);
-
-        if (canTargetPlayer && rng.nextFloat() < BOMB_TARGET_PLAYER_CHANCE) {
-            return new GridPoint2(playerCell);
-        }
-
-        GridPoint2 nearbyPathCell = chooseNearbyBombTargetCell(playerCell, rng);
-        if (nearbyPathCell != null) {
-            return nearbyPathCell;
-        }
-
-        GridPoint2 randomOpenCell = chooseRandomBombTargetCell(playerCell, rng);
-        return randomOpenCell != null ? randomOpenCell : (canTargetPlayer ? new GridPoint2(playerCell) : null);
-    }
-
-    private GridPoint2 chooseNearbyBombTargetCell(GridPoint2 playerCell, Random rng) {
-        if (playerCell == null) {
-            return null;
-        }
-
-        List<GridPoint2> nearbyCells = new ArrayList<>();
-        List<GridPoint2> closestCells = new ArrayList<>();
-        int closestDistance = Integer.MAX_VALUE;
-
-        for (GridPoint2 cell : bombDropCells) {
-            if (cell == null || cell.equals(playerCell) || !MazeLayout.isOpen(currentLayout, cell.x, cell.y)) {
-                continue;
-            }
-
-            int distance = manhattanDistance(cell, playerCell);
-            if (distance <= BOMB_NEAR_PLAYER_RADIUS) {
-                nearbyCells.add(cell);
-            }
-            if (distance < closestDistance) {
-                closestDistance = distance;
-                closestCells.clear();
-                closestCells.add(cell);
-            } else if (distance == closestDistance) {
-                closestCells.add(cell);
-            }
-        }
-
-        if (!nearbyCells.isEmpty()) {
-            GridPoint2 chosen = nearbyCells.get(rng.nextInt(nearbyCells.size()));
-            return new GridPoint2(chosen);
-        }
-        if (!closestCells.isEmpty()) {
-            GridPoint2 chosen = closestCells.get(rng.nextInt(closestCells.size()));
-            return new GridPoint2(chosen);
-        }
-        return null;
-    }
-
-    private GridPoint2 chooseRandomBombTargetCell(GridPoint2 excludedCell, Random rng) {
-        List<GridPoint2> shuffled = new ArrayList<>(bombDropCells);
-        Collections.shuffle(shuffled, rng);
-        for (GridPoint2 cell : shuffled) {
-            if (cell == null || !MazeLayout.isOpen(currentLayout, cell.x, cell.y)) {
-                continue;
-            }
-            if (excludedCell != null && shuffled.size() > 1 && excludedCell.equals(cell)) {
-                continue;
-            }
-            return new GridPoint2(cell);
-        }
-        return null;
-    }
-
-    private int manhattanDistance(GridPoint2 a, GridPoint2 b) {
-        if (a == null || b == null) {
-            return Integer.MAX_VALUE;
-        }
-        return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
-    }
-
-    private void cleanupInactiveBombs() {
-        if (wallBombs.isEmpty()) {
-            return;
-        }
-
-        List<WallBombEntity> expired = new ArrayList<>();
-        for (WallBombEntity bomb : wallBombs) {
-            if (bomb == null || bomb.isActive()) {
-                continue;
-            }
-
-            expired.add(bomb);
-            world.removeEntity(bomb);
-        }
-
-        if (!expired.isEmpty()) {
-            wallBombs.removeAll(expired);
-        }
-    }
-
-    private void cleanupInactiveFireballs() {
-        if (bossFireballs.isEmpty()) {
-            return;
-        }
-
-        List<BossFireballEntity> expired = new ArrayList<>();
-        for (BossFireballEntity fireball : bossFireballs) {
-            if (fireball == null || fireball.isActive()) {
-                continue;
-            }
-
-            expired.add(fireball);
-            world.removeEntity(fireball);
-        }
-
-        if (!expired.isEmpty()) {
-            bossFireballs.removeAll(expired);
-        }
-    }
-
-    private boolean hasActiveWallBomb() {
-        for (WallBombEntity bomb : wallBombs) {
-            if (bomb != null && bomb.isActive()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean hasActiveBossFireball() {
-        for (BossFireballEntity fireball : bossFireballs) {
-            if (fireball != null && fireball.isActive()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void clearBombs() {
-        if (wallBombs.isEmpty()) {
-            return;
-        }
-
-        for (WallBombEntity bomb : new ArrayList<>(wallBombs)) {
-            bomb.expire();
-            world.removeEntity(bomb);
-        }
-        wallBombs.clear();
-    }
-
-    private void clearFireballs() {
-        if (bossFireballs.isEmpty()) {
-            return;
-        }
-
-        for (BossFireballEntity fireball : new ArrayList<>(bossFireballs)) {
-            fireball.expire();
-            world.removeEntity(fireball);
-        }
-        bossFireballs.clear();
-    }
-
-    private void resetGhostShotCooldowns() {
-        ghostShotCooldowns.clear();
-        int shooterIndex = 0;
-        for (GhostEntity ghost : ghosts) {
-            GhostLoadout loadout = ghostLoadouts.get(ghost);
-            if (loadout == null || !loadout.canShoot()) {
-                continue;
-            }
-            ghostShotCooldowns.put(ghost, initialShotCooldown(loadout, shooterIndex++));
-        }
-    }
-
-    private float initialShotCooldown(GhostLoadout loadout, int shooterIndex) {
-        return shotCooldown(loadout) + shooterIndex * 0.6f;
-    }
-
-    private float shotCooldown(GhostLoadout loadout) {
-        return loadout == null ? Float.POSITIVE_INFINITY : loadout.shotCooldownSeconds;
-    }
-
-    private List<GhostLoadout> buildGhostLoadouts(GameState.Difficulty difficulty) {
-        return switch (difficulty) {
-            case MEDIUM -> List.of(
-                new GhostLoadout(
-                    GhostEntity.GhostType.NORMAL,
-                    GhostMovePattern.SEEK,
-                    new Color(1.00f, 0.35f, 0.30f, 1f),
-                    1.00f,
-                    1.05f,
-                    ShotPattern.NONE,
-                    0f
-                ),
-                new GhostLoadout(
-                    GhostEntity.GhostType.WALL_BOMBER,
-                    GhostMovePattern.STATIONARY,
-                    new Color(0.65f, 0.48f, 0.78f, 1f),
-                    0f,
-                    1.04f,
-                    ShotPattern.BOMB_DROP,
-                    3.10f
-                )
-            );
-            case HARD -> List.of(
-                new GhostLoadout(
-                    GhostEntity.GhostType.BOSS,
-                    GhostMovePattern.SEEK,
-                    new Color(0.98f, 0.24f, 0.18f, 1f),
-                    1.12f,
-                    1.28f,
-                    ShotPattern.FIREBALL,
-                    2.20f
-                ),
-                new GhostLoadout(
-                    GhostEntity.GhostType.NORMAL,
-                    GhostMovePattern.WANDER,
-                    new Color(0.67f, 0.47f, 0.82f, 1f),
-                    0.96f,
-                    1.06f,
-                    ShotPattern.NONE,
-                    0f
-                ),
-                new GhostLoadout(
-                    GhostEntity.GhostType.WALL_BOMBER,
-                    GhostMovePattern.STATIONARY,
-                    new Color(0.65f, 0.48f, 0.78f, 1f),
-                    0f,
-                    1.02f,
-                    ShotPattern.BOMB_DROP,
-                    3.10f
-                )
-            );
-            default -> List.of(
-                new GhostLoadout(
-                    GhostEntity.GhostType.NORMAL,
-                    GhostMovePattern.SEEK,
-                    new Color(1.00f, 0.35f, 0.30f, 1f),
-                    1.00f,
-                    1.05f,
-                    ShotPattern.NONE,
-                    0f
-                )
-            );
-        };
-    }
-
     private void activateFreeze() {
-        for (GhostEntity ghost : ghosts) {
+        for (GhostEntity ghost : ghostDirector.getGhosts()) {
             ghost.freezeFor(FREEZE_SECONDS);
         }
         showStatus("Freeze!");
@@ -991,10 +461,24 @@ public class GameScene implements Scene {
                     return;
                 }
 
-                LingoSession.get().getGameState().collectLetter(letter.getLetter());
-                context.getAudioManager().playSound(LingoAudio.SFX_COLLECT_LETTER, false);
-                world.removeEntity(letter);
-                showStatus("Collected: " + letter.getLetter());
+                GameState state = LingoSession.get().getGameState();
+                char picked = Character.toUpperCase(letter.getLetter());
+
+                if (state.collectNextLetter(picked)) {
+                    context.getAudioManager().playSound(LingoAudio.SFX_COLLECT_LETTER, false);
+                    world.removeEntity(letter);
+                    showStatus("Correct: " + picked);
+                } else {
+                    context.getAudioManager().playSound(LingoAudio.SFX_WRONG_LETTER, false);
+                    letter.triggerWrongFlash();
+
+                    char expected = state.getNextExpectedLetter();
+                    if (expected != '\0') {
+                        showStatus("Wrong letter, find: " + expected);
+                    } else {
+                        showStatus("Wrong letter");
+                    }
+                }
             } else if (owner instanceof FreezePickupEntity pickup) {
                 if (!pickup.isActive()) {
                     return;
@@ -1002,7 +486,6 @@ public class GameScene implements Scene {
 
                 world.removeEntity(pickup);
                 freezePickup = null;
-                context.getAudioManager().playSound(LingoAudio.SFX_POWER_UP, false);
                 activateFreeze();
             } else if (owner instanceof ShockPickupEntity pickup) {
                 if (!pickup.isActive()) {
@@ -1011,7 +494,6 @@ public class GameScene implements Scene {
 
                 world.removeEntity(pickup);
                 shockPickup = null;
-                context.getAudioManager().playSound(LingoAudio.SFX_POWER_UP, false);
                 activateShock();
             } else if (owner instanceof GhostEntity ghost) {
                 handlePlayerGhostContact(ghost);
@@ -1062,15 +544,16 @@ public class GameScene implements Scene {
 
             Object owner = other.getOwner();
             if (owner instanceof PlayerEntity) {
-                bomb.expire();
-                world.removeEntity(bomb);
+                ghostDirector.removeWallBomb(bomb);
                 handlePlayerHit();
                 return;
             }
             if (!(owner instanceof GhostEntity ghost)) {
                 return;
             }
-            if (ghost.getType() != GhostEntity.GhostType.NORMAL && ghost.getType() != GhostEntity.GhostType.BOSS) {
+            if (ghost.getType() != GhostEntity.GhostType.NORMAL
+                && ghost.getType() != GhostEntity.GhostType.HELL_HOUND
+                && ghost.getType() != GhostEntity.GhostType.BOSS) {
                 return;
             }
             if (ghost.isRespawnProtected()) {
@@ -1078,8 +561,7 @@ public class GameScene implements Scene {
             }
 
             respawnGhost(ghost);
-            bomb.expire();
-            world.removeEntity(bomb);
+            ghostDirector.removeWallBomb(bomb);
             showStatus(ghost.isBoss() ? "Boss hit by bomb!" : "Ghost hit by bomb!");
         }
 
@@ -1113,13 +595,11 @@ public class GameScene implements Scene {
 
             Object owner = other.getOwner();
             if (owner instanceof WallEntity) {
-                fireball.expire();
-                world.removeEntity(fireball);
+                ghostDirector.removeBossFireball(fireball);
                 return;
             }
             if (owner instanceof PlayerEntity) {
-                fireball.expire();
-                world.removeEntity(fireball);
+                ghostDirector.removeBossFireball(fireball);
                 handlePlayerHit();
             }
         }
