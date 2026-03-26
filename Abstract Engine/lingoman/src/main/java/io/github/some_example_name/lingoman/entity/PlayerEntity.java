@@ -31,6 +31,7 @@ public class PlayerEntity extends DynamicEntity {
     private float facingRotationDegrees;
     private float respawnProtectionTimer;
     private float shockTimer;
+    private boolean facingLeft;
 
     public PlayerEntity(String id, InputManager input, float x, float y, float moveSpeed, float size) {
         super(id);
@@ -83,11 +84,22 @@ public class PlayerEntity extends DynamicEntity {
         }
 
         if (!isNearZero(vx, vy)) {
+<<<<<<< HEAD
             updateFacingDirection(vx, vy);
         }
 
         if (dashTimer > 0f) {
             updateFacingDirection(dashDirectionX, dashDirectionY);
+=======
+            float invLength = inverseLength(vx, vy);
+            lastMoveDirectionX = vx * invLength;
+            lastMoveDirectionY = vy * invLength;
+            updateFacingDirection(vx);
+        }
+
+        if (dashTimer > 0f) {
+            updateFacingDirection(dashDirectionX);
+>>>>>>> main
             setVx(dashDirectionX * moveSpeed * DASH_SPEED_MULTIPLIER);
             setVy(dashDirectionY * moveSpeed * DASH_SPEED_MULTIPLIER);
             return;
@@ -115,6 +127,7 @@ public class PlayerEntity extends DynamicEntity {
         float edgePadding = getWidth() * 0.10f;
         float rotation = facingRotationDegrees;
 
+<<<<<<< HEAD
         outputManager.drawTintedRotated(
             LingoSprites.player(),
             drawX + shadowOffsetX,
@@ -126,6 +139,11 @@ public class PlayerEntity extends DynamicEntity {
         );
         outputManager.drawTintedRotated(
             LingoSprites.player(),
+=======
+        drawPlayerSprite(outputManager, drawX + shadowOffsetX, drawY - shadowOffsetY, drawWidth, drawHeight, PLAYER_SHADOW);
+        drawPlayerSprite(
+            outputManager,
+>>>>>>> main
             drawX - glowPadding * 0.5f,
             drawY - glowPadding * 0.5f,
             drawWidth + glowPadding,
@@ -133,8 +151,13 @@ public class PlayerEntity extends DynamicEntity {
             rotation,
             isDashing() ? PLAYER_DASH_GLOW : PLAYER_GLOW
         );
+<<<<<<< HEAD
         outputManager.drawTintedRotated(
             LingoSprites.player(),
+=======
+        drawPlayerSprite(
+            outputManager,
+>>>>>>> main
             drawX - edgePadding * 0.5f,
             drawY - edgePadding * 0.5f,
             drawWidth + edgePadding,
@@ -145,13 +168,22 @@ public class PlayerEntity extends DynamicEntity {
         if (hasShockPower()) {
             renderShockEffect(outputManager, drawX, drawY, drawWidth, drawHeight, rotation);
         }
+<<<<<<< HEAD
         outputManager.drawRotated(LingoSprites.player(), drawX, drawY, drawWidth, drawHeight, rotation);
+=======
+        drawPlayerSprite(outputManager, drawX, drawY, drawWidth, drawHeight, null);
+>>>>>>> main
         if (hasShockPower()) {
             float bodyPulse = 0.70f + 0.30f * oscillate(shockTimer * 11f);
             float bodyPadding = getWidth() * 0.06f;
             Color bodyTint = withAlpha(PLAYER_SHOCK_BODY, PLAYER_SHOCK_BODY.a * bodyPulse);
+<<<<<<< HEAD
             outputManager.drawTintedRotated(
                 LingoSprites.player(),
+=======
+            drawPlayerSprite(
+                outputManager,
+>>>>>>> main
                 drawX - bodyPadding * 0.5f,
                 drawY - bodyPadding * 0.5f,
                 drawWidth + bodyPadding,
@@ -207,6 +239,7 @@ public class PlayerEntity extends DynamicEntity {
         return length <= 0.0001f ? 0f : 1f / length;
     }
 
+<<<<<<< HEAD
     private void updateFacingDirection(float directionX, float directionY) {
         if (isNearZero(directionX, directionY)) {
             return;
@@ -230,6 +263,27 @@ public class PlayerEntity extends DynamicEntity {
         float drawHeight,
         float rotationDegrees
     ) {
+=======
+    private void updateFacingDirection(float horizontalDirection) {
+        if (horizontalDirection < -0.001f) {
+            facingLeft = true;
+        } else if (horizontalDirection > 0.001f) {
+            facingLeft = false;
+        }
+    }
+
+    private void drawPlayerSprite(OutputManager outputManager, float x, float y, float width, float height, Color tint) {
+        float drawWidth = facingLeft ? -width : width;
+        float drawX = facingLeft ? x + width : x;
+        if (tint == null) {
+            outputManager.draw(LingoSprites.player(), drawX, y, drawWidth, height);
+            return;
+        }
+        outputManager.drawTinted(LingoSprites.player(), drawX, y, drawWidth, height, tint);
+    }
+
+    private void renderShockEffect(OutputManager outputManager, float drawX, float drawY, float drawWidth, float drawHeight) {
+>>>>>>> main
         float phase = shockTimer * 10f;
         float pulse = 0.55f + 0.45f * oscillate(phase);
         float orbit = getWidth() * (0.18f + 0.08f * pulse);

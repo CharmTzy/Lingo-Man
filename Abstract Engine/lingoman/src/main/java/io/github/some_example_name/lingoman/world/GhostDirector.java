@@ -21,7 +21,10 @@ import io.github.some_example_name.lingoman.entity.PlayerEntity;
 import io.github.some_example_name.lingoman.entity.WallBombEntity;
 import io.github.some_example_name.lingoman.level.MazeLayout;
 import io.github.some_example_name.lingoman.model.GameState;
+<<<<<<< HEAD
 import io.github.some_example_name.lingoman.movement.ConstantVelocityBehaviour;
+=======
+>>>>>>> main
 import io.github.some_example_name.lingoman.movement.GhostMovementGuard;
 import io.github.some_example_name.lingoman.movement.MazeSeekBehaviour;
 import io.github.some_example_name.lingoman.movement.MazeWanderBehaviour;
@@ -423,11 +426,14 @@ public final class GhostDirector {
         );
         bossFireballs.add(fireball);
         world.addCollidableEntity(fireball, createFireballListener(fireball));
+<<<<<<< HEAD
         // Option 4: register fireball with MovementManager via ConstantVelocityBehaviour.
         // MovementPhysics.integrate() will step position each frame; the fireball
         // no longer self-integrates in update().
         world.assignBehaviour(fireball,
             new ConstantVelocityBehaviour(fireball.getVx(), fireball.getVy()));
+=======
+>>>>>>> main
         return true;
     }
 

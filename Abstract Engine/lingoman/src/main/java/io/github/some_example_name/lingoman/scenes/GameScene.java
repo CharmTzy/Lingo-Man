@@ -34,6 +34,7 @@ import io.github.some_example_name.scenes.Scene;
 
 public class GameScene implements Scene {
 
+<<<<<<< HEAD
     private static final Color BACKGROUND_OUTER = new Color(0.01f, 0.04f, 0.12f, 1f);
     private static final Color MAP_BAND_0 = new Color(0.01f, 0.10f, 0.27f, 1f);
     private static final Color MAP_BAND_1 = new Color(0.01f, 0.12f, 0.31f, 1f);
@@ -45,6 +46,9 @@ public class GameScene implements Scene {
     private static final Color MAP_GRID_MAJOR = new Color(0.40f, 0.96f, 1.00f, 0.24f);
     private static final Color MAP_CORE_GLOW = new Color(0.14f, 0.78f, 1.00f, 0.10f);
     private static final Color MAP_ACCENT_GOLD = new Color(0.98f, 0.79f, 0.26f, 0.07f);
+=======
+    private static final Color BACKGROUND_OUTER = new Color(0f, 0f, 0f, 1f);
+>>>>>>> main
 
     private static final Color TEXT_PRIMARY = new Color(0.96f, 0.96f, 0.92f, 1f);
     private static final Color TEXT_MUTED = new Color(0.72f, 0.77f, 0.79f, 1f);
@@ -146,7 +150,10 @@ public class GameScene implements Scene {
     public void render() {
         context.getOutputManager().clearScreen(
             BACKGROUND_OUTER.r, BACKGROUND_OUTER.g, BACKGROUND_OUTER.b, BACKGROUND_OUTER.a);
+<<<<<<< HEAD
         drawMapBackdrop();
+=======
+>>>>>>> main
         world.render(context.getOutputManager());
  
         GameState state = LingoSession.get().getGameState();
@@ -181,6 +188,7 @@ public class GameScene implements Scene {
         if (!statusMessage.isBlank()) {
             context.getOutputManager().drawTextCenteredScaled(
                 statusMessage, 320f, 474f, TEXT_WARNING, 0.8f);
+<<<<<<< HEAD
         }
     }
 
@@ -245,6 +253,8 @@ public class GameScene implements Scene {
                 lineHeight,
                 major ? MAP_GRID_MAJOR : MAP_GRID_MINOR
             );
+=======
+>>>>>>> main
         }
     }
 

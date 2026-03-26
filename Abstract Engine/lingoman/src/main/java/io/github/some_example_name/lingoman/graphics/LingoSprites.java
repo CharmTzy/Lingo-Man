@@ -46,6 +46,7 @@ public final class LingoSprites {
     private static Texture fireballTexture;
     private static Texture wallBombTexture;
     private static Texture wallBlastTexture;
+    private static Texture startMenuTexture;
     private static final Texture[] HEDGE_WALL_TEXTURES = new Texture[HEDGE_VARIANTS];
 
     private LingoSprites() {
@@ -95,6 +96,13 @@ public final class LingoSprites {
             wallBlastTexture = createWallBlastTexture();
         }
         return wallBlastTexture;
+    }
+
+    public static Texture startMenu() {
+        if (startMenuTexture == null) {
+            startMenuTexture = createStartMenuTexture();
+        }
+        return startMenuTexture;
     }
 
     public static Texture ghost(Color color) {
@@ -160,6 +168,10 @@ public final class LingoSprites {
         if (fireballTexture != null)     { fireballTexture.dispose();     fireballTexture = null; }
         if (wallBombTexture != null)     { wallBombTexture.dispose();     wallBombTexture = null; }
         if (wallBlastTexture != null)    { wallBlastTexture.dispose();    wallBlastTexture = null; }
+<<<<<<< HEAD
+=======
+        if (startMenuTexture != null)    { startMenuTexture.dispose();    startMenuTexture = null; }
+>>>>>>> main
 
         for (int i = 0; i < HEDGE_WALL_TEXTURES.length; i++) {
             if (HEDGE_WALL_TEXTURES[i] != null) {
@@ -188,8 +200,13 @@ public final class LingoSprites {
     // -------------------------------------------------------------------------
 
     private static Texture createPlayerTexture() {
+<<<<<<< HEAD
         Texture heroTexture = tryLoadAssetTexture("lingoman/player_hero.png");
         return heroTexture != null ? heroTexture : loadAssetTexture("lingoman/player_iggle.png");
+=======
+        Texture texture = tryLoadAssetTexture("lingoman/player_hero.png");
+        return texture != null ? texture : loadAssetTexture("lingoman/player_iggle.png");
+>>>>>>> main
     }
 
     private static Texture getGhostTexture(Map<Integer, Texture> cache, Color color, GhostStyle style) {
@@ -302,6 +319,10 @@ public final class LingoSprites {
 
     private static Texture createWallBombTexture()  { return loadAssetTexture("lingoman/wall_bomb.png"); }
     private static Texture createWallBlastTexture() { return loadAssetTexture("lingoman/wall_blast.png"); }
+<<<<<<< HEAD
+=======
+    private static Texture createStartMenuTexture() { return loadAssetTexture("lingoman/startmenu.png"); }
+>>>>>>> main
 
     // -------------------------------------------------------------------------
     // NEW: Word icon dispatch + per-word drawing methods
@@ -761,8 +782,13 @@ public final class LingoSprites {
         drawGrassCloud(pixmap, 6, 8, 0.90f);
         drawGrassCloud(pixmap, 13, 11, 0.82f);
         drawGrassCloud(pixmap, 19, 7, 0.78f);
+<<<<<<< HEAD
         drawLeafCluster(pixmap, 9, 15, new Color(0.03f,0.22f,0.48f,1f), new Color(0.33f,0.79f,1.00f,1f));
         drawLeafCluster(pixmap, 17, 8, new Color(0.05f,0.26f,0.56f,1f), new Color(0.26f,0.66f,0.95f,1f));
+=======
+        drawLeafCluster(pixmap, 9, 15, new Color(0.08f,0.27f,0.04f,1f), new Color(0.38f,0.70f,0.18f,1f));
+        drawLeafCluster(pixmap, 17, 8, new Color(0.11f,0.32f,0.05f,1f), new Color(0.31f,0.62f,0.14f,1f));
+>>>>>>> main
         addHedgeDecoration(pixmap, variant);
         return toTexture(pixmap);
     }
@@ -819,7 +845,11 @@ public final class LingoSprites {
         fillCircle(p,cx-2,cy+1,2,light); fillCircle(p,cx+2,cy+2,2,light); fillCircle(p,cx,cy-2,2,light);
     }
     private static void drawGrassCloud(Pixmap p,int x,int y,float alpha) {
+<<<<<<< HEAD
         Color s = withAlpha(new Color(0.04f,0.27f,0.56f,1f),alpha);
+=======
+        Color s = withAlpha(new Color(0.08f,0.24f,0.04f,1f),alpha);
+>>>>>>> main
         fillCircle(p,x,y,10,s); fillCircle(p,x+9,y+2,9,s); fillCircle(p,x-5,y+3,8,s);
     }
     private static void addHedgeDecoration(Pixmap p,int variant) {

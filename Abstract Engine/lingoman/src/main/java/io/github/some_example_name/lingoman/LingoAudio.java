@@ -10,6 +10,7 @@ public final class LingoAudio {
     public static final String SFX_HURT = "lingoman.sfx.hurt";
     public static final String SFX_MENU_NAVIGATE = "lingoman.sfx.menu_navigate";
 
+    public static final String BGM_MENU = "lingoman.bgm.menu";
     public static final String BGM_GAME = "lingoman.bgm.game";
 
     public static final String PATH_SFX_COLLECT_LETTER = "audio/collect_letter.ogg";
@@ -20,6 +21,7 @@ public final class LingoAudio {
     public static final String PATH_SFX_HURT = "audio/hurt.ogg";
     public static final String PATH_SFX_MENU_NAVIGATE = "audio/menu.mp3";
 
+    public static final String PATH_BGM_MENU = "audio/mainmenu.mp3";
     public static final String PATH_BGM_GAME = "audio/game_bgm.ogg";
 
     private LingoAudio() {
