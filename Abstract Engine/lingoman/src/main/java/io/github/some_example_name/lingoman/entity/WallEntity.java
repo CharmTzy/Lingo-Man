@@ -7,9 +7,11 @@ import io.github.some_example_name.managers.OutputManager;
 public class WallEntity extends Entity {
 
     private static final com.badlogic.gdx.graphics.Color HEDGE_SHADOW =
-        new com.badlogic.gdx.graphics.Color(0.04f, 0.10f, 0.03f, 0.34f);
+        new com.badlogic.gdx.graphics.Color(0.01f, 0.08f, 0.22f, 0.36f);
     private static final com.badlogic.gdx.graphics.Color HEDGE_TOP_LIGHT =
-        new com.badlogic.gdx.graphics.Color(0.82f, 0.94f, 0.72f, 0.10f);
+        new com.badlogic.gdx.graphics.Color(0.48f, 0.94f, 1.00f, 0.20f);
+    private static final com.badlogic.gdx.graphics.Color HEDGE_BOTTOM_GOLD =
+        new com.badlogic.gdx.graphics.Color(0.98f, 0.80f, 0.28f, 0.12f);
 
     public WallEntity(String id, float x, float y, float size) {
         super(id);
@@ -50,6 +52,13 @@ public class WallEntity extends Entity {
             getWidth() * 0.76f,
             Math.max(1.2f, getHeight() * 0.10f),
             HEDGE_TOP_LIGHT
+        );
+        outputManager.drawRect(
+            getX() + getWidth() * 0.10f,
+            getY() + getHeight() * 0.08f,
+            getWidth() * 0.80f,
+            Math.max(1.0f, getHeight() * 0.08f),
+            HEDGE_BOTTOM_GOLD
         );
     }
 }

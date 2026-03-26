@@ -30,10 +30,10 @@ public final class LingoSprites {
     private static final Color PLAYER_EYE = new Color(0.97f, 0.99f, 1f, 1f);
     private static final Color GHOST_EYE = new Color(0.96f, 0.98f, 1f, 1f);
     private static final Color GHOST_PUPIL = new Color(0.08f, 0.16f, 0.24f, 1f);
-    private static final Color FLOOR_GRASS_DARK = new Color(0.10f, 0.30f, 0.04f, 1f);
-    private static final Color FLOWER_BLUE = new Color(0.66f, 0.90f, 1.00f, 1f);
-    private static final Color FLOWER_YELLOW = new Color(1.00f, 0.88f, 0.40f, 1f);
-    private static final Color FLOWER_WHITE = new Color(0.96f, 0.99f, 0.98f, 1f);
+    private static final Color FLOOR_GRASS_DARK = new Color(0.02f, 0.15f, 0.35f, 1f);
+    private static final Color FLOWER_BLUE = new Color(0.42f, 0.96f, 1.00f, 1f);
+    private static final Color FLOWER_YELLOW = new Color(0.99f, 0.80f, 0.24f, 1f);
+    private static final Color FLOWER_WHITE = new Color(0.90f, 0.98f, 1.00f, 1f);
 
     private static final Map<Integer, Texture> GHOST_TEXTURES = new HashMap<>();
     private static final Map<Integer, Texture> BOSS_GHOST_TEXTURES = new HashMap<>();
@@ -188,7 +188,8 @@ public final class LingoSprites {
     // -------------------------------------------------------------------------
 
     private static Texture createPlayerTexture() {
-        return loadAssetTexture("lingoman/player_iggle.png");
+        Texture heroTexture = tryLoadAssetTexture("lingoman/player_hero.png");
+        return heroTexture != null ? heroTexture : loadAssetTexture("lingoman/player_iggle.png");
     }
 
     private static Texture getGhostTexture(Map<Integer, Texture> cache, Color color, GhostStyle style) {
@@ -272,9 +273,17 @@ public final class LingoSprites {
     }
 
     private static Texture createHedgeWallTexture(int variant) {
-        String path = "lingoman/hedge_wall_" + Math.floorMod(variant, HEDGE_VARIANTS) + ".png";
-        Texture texture = tryLoadAssetTexture(path);
-        return texture != null ? texture : createProceduralHedgeWallTexture(variant);
+        int index = Math.floorMod(variant, HEDGE_VARIANTS);
+
+        String themedPath = "lingoman/hedge_wall_logo_" + index + ".png";
+        Texture texture = tryLoadAssetTexture(themedPath);
+        if (texture != null) {
+            return texture;
+        }
+
+        String path = "lingoman/hedge_wall_" + index + ".png";
+        texture = tryLoadAssetTexture(path);
+        return texture != null ? texture : createProceduralHedgeWallTexture(index);
     }
 
     private static Texture createFreezePickupTexture() {
@@ -752,8 +761,8 @@ public final class LingoSprites {
         drawGrassCloud(pixmap, 6, 8, 0.90f);
         drawGrassCloud(pixmap, 13, 11, 0.82f);
         drawGrassCloud(pixmap, 19, 7, 0.78f);
-        drawLeafCluster(pixmap, 9, 15, new Color(0.08f,0.27f,0.04f,1f), new Color(0.38f,0.70f,0.18f,1f));
-        drawLeafCluster(pixmap, 17, 8, new Color(0.11f,0.32f,0.05f,1f), new Color(0.31f,0.62f,0.14f,1f));
+        drawLeafCluster(pixmap, 9, 15, new Color(0.03f,0.22f,0.48f,1f), new Color(0.33f,0.79f,1.00f,1f));
+        drawLeafCluster(pixmap, 17, 8, new Color(0.05f,0.26f,0.56f,1f), new Color(0.26f,0.66f,0.95f,1f));
         addHedgeDecoration(pixmap, variant);
         return toTexture(pixmap);
     }
@@ -810,7 +819,7 @@ public final class LingoSprites {
         fillCircle(p,cx-2,cy+1,2,light); fillCircle(p,cx+2,cy+2,2,light); fillCircle(p,cx,cy-2,2,light);
     }
     private static void drawGrassCloud(Pixmap p,int x,int y,float alpha) {
-        Color s = withAlpha(new Color(0.08f,0.24f,0.04f,1f),alpha);
+        Color s = withAlpha(new Color(0.04f,0.27f,0.56f,1f),alpha);
         fillCircle(p,x,y,10,s); fillCircle(p,x+9,y+2,9,s); fillCircle(p,x-5,y+3,8,s);
     }
     private static void addHedgeDecoration(Pixmap p,int variant) {

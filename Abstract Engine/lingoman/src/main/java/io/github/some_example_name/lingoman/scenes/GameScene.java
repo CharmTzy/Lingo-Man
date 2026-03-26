@@ -34,7 +34,17 @@ import io.github.some_example_name.scenes.Scene;
 
 public class GameScene implements Scene {
 
-    private static final Color BACKGROUND_OUTER = new Color(0f, 0f, 0f, 1f);
+    private static final Color BACKGROUND_OUTER = new Color(0.01f, 0.04f, 0.12f, 1f);
+    private static final Color MAP_BAND_0 = new Color(0.01f, 0.10f, 0.27f, 1f);
+    private static final Color MAP_BAND_1 = new Color(0.01f, 0.12f, 0.31f, 1f);
+    private static final Color MAP_BAND_2 = new Color(0.02f, 0.14f, 0.34f, 1f);
+    private static final Color MAP_BAND_3 = new Color(0.02f, 0.16f, 0.37f, 1f);
+    private static final Color MAP_BAND_4 = new Color(0.02f, 0.18f, 0.40f, 1f);
+    private static final Color MAP_BAND_5 = new Color(0.02f, 0.20f, 0.43f, 1f);
+    private static final Color MAP_GRID_MINOR = new Color(0.25f, 0.89f, 1.00f, 0.14f);
+    private static final Color MAP_GRID_MAJOR = new Color(0.40f, 0.96f, 1.00f, 0.24f);
+    private static final Color MAP_CORE_GLOW = new Color(0.14f, 0.78f, 1.00f, 0.10f);
+    private static final Color MAP_ACCENT_GOLD = new Color(0.98f, 0.79f, 0.26f, 0.07f);
 
     private static final Color TEXT_PRIMARY = new Color(0.96f, 0.96f, 0.92f, 1f);
     private static final Color TEXT_MUTED = new Color(0.72f, 0.77f, 0.79f, 1f);
@@ -136,6 +146,7 @@ public class GameScene implements Scene {
     public void render() {
         context.getOutputManager().clearScreen(
             BACKGROUND_OUTER.r, BACKGROUND_OUTER.g, BACKGROUND_OUTER.b, BACKGROUND_OUTER.a);
+        drawMapBackdrop();
         world.render(context.getOutputManager());
  
         GameState state = LingoSession.get().getGameState();
@@ -170,6 +181,70 @@ public class GameScene implements Scene {
         if (!statusMessage.isBlank()) {
             context.getOutputManager().drawTextCenteredScaled(
                 statusMessage, 320f, 474f, TEXT_WARNING, 0.8f);
+        }
+    }
+
+    private void drawMapBackdrop() {
+        if (currentLayout == null) {
+            return;
+        }
+
+        float left = currentLayout.getOffsetX();
+        float bottom = currentLayout.getOffsetY();
+        float width = currentLayout.getCols() * currentLayout.getTileSize();
+        float height = currentLayout.getRows() * currentLayout.getTileSize();
+        float bandHeight = height / 6f;
+
+        context.getOutputManager().drawRect(left, bottom + bandHeight * 0f, width, bandHeight + 1f, MAP_BAND_0);
+        context.getOutputManager().drawRect(left, bottom + bandHeight * 1f, width, bandHeight + 1f, MAP_BAND_1);
+        context.getOutputManager().drawRect(left, bottom + bandHeight * 2f, width, bandHeight + 1f, MAP_BAND_2);
+        context.getOutputManager().drawRect(left, bottom + bandHeight * 3f, width, bandHeight + 1f, MAP_BAND_3);
+        context.getOutputManager().drawRect(left, bottom + bandHeight * 4f, width, bandHeight + 1f, MAP_BAND_4);
+        context.getOutputManager().drawRect(left, bottom + bandHeight * 5f, width, bandHeight + 1f, MAP_BAND_5);
+
+        context.getOutputManager().drawRect(
+            left + width * 0.16f,
+            bottom + height * 0.12f,
+            width * 0.68f,
+            height * 0.70f,
+            MAP_CORE_GLOW
+        );
+        context.getOutputManager().drawRect(
+            left + width * 0.24f,
+            bottom + height * 0.22f,
+            width * 0.52f,
+            height * 0.48f,
+            MAP_ACCENT_GOLD
+        );
+
+        int cols = currentLayout.getCols();
+        int rows = currentLayout.getRows();
+        float tile = currentLayout.getTileSize();
+
+        for (int col = 0; col <= cols; col++) {
+            float x = left + col * tile;
+            boolean major = (col % 4) == 0;
+            float lineWidth = major ? 1.8f : 0.9f;
+            context.getOutputManager().drawRect(
+                x - lineWidth * 0.5f,
+                bottom,
+                lineWidth,
+                height,
+                major ? MAP_GRID_MAJOR : MAP_GRID_MINOR
+            );
+        }
+
+        for (int row = 0; row <= rows; row++) {
+            float y = bottom + row * tile;
+            boolean major = (row % 4) == 0;
+            float lineHeight = major ? 1.8f : 0.9f;
+            context.getOutputManager().drawRect(
+                left,
+                y - lineHeight * 0.5f,
+                width,
+                lineHeight,
+                major ? MAP_GRID_MAJOR : MAP_GRID_MINOR
+            );
         }
     }
 
