@@ -2,11 +2,11 @@ package io.github.some_example_name.lingoman.entity;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
-import io.github.some_example_name.entity.Entity;
+import io.github.some_example_name.entity.DynamicEntity;
 import io.github.some_example_name.lingoman.graphics.LingoSprites;
 import io.github.some_example_name.managers.OutputManager;
 
-public class BossFireballEntity extends Entity {
+public class BossFireballEntity extends DynamicEntity {
 
     private static final Color FIREBALL_GLOW = new Color(1.00f, 0.42f, 0.12f, 0.34f);
     private static final Color FIREBALL_TRAIL = new Color(1.00f, 0.78f, 0.40f, 0.18f);
@@ -57,8 +57,8 @@ public class BossFireballEntity extends Entity {
             return;
         }
 
-        setX(getX() + getVx() * dt);
-        setY(getY() + getVy() * dt);
+        // Position integration is now handled by MovementPhysics via MovementManager.
+        // ConstantVelocityBehaviour re-applies vx/vy each frame so speed stays exact.
         rotationDegrees += 540f * dt;
     }
 

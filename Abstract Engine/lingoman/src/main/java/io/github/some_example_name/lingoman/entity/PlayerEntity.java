@@ -28,9 +28,9 @@ public class PlayerEntity extends DynamicEntity {
     private float dashDirectionY;
     private float lastMoveDirectionX;
     private float lastMoveDirectionY;
+    private boolean facingLeft;
     private float respawnProtectionTimer;
     private float shockTimer;
-    private boolean facingLeft;
 
     public PlayerEntity(String id, InputManager input, float x, float y, float moveSpeed, float size) {
         super(id);
@@ -117,7 +117,14 @@ public class PlayerEntity extends DynamicEntity {
         float glowPadding = getWidth() * (isDashing() ? 0.26f : 0.20f);
         float edgePadding = getWidth() * 0.10f;
 
-        drawPlayerSprite(outputManager, drawX + shadowOffsetX, drawY - shadowOffsetY, drawWidth, drawHeight, PLAYER_SHADOW);
+        drawPlayerSprite(
+            outputManager,
+            drawX + shadowOffsetX,
+            drawY - shadowOffsetY,
+            drawWidth,
+            drawHeight,
+            PLAYER_SHADOW
+        );
         drawPlayerSprite(
             outputManager,
             drawX - glowPadding * 0.5f,
@@ -206,17 +213,30 @@ public class PlayerEntity extends DynamicEntity {
         }
     }
 
-    private void drawPlayerSprite(OutputManager outputManager, float x, float y, float width, float height, Color tint) {
-        float drawWidth = facingLeft ? -width : width;
-        float drawX = facingLeft ? x + width : x;
+    private void drawPlayerSprite(
+        OutputManager outputManager,
+        float x,
+        float y,
+        float width,
+        float height,
+        Color tint
+    ) {
+        float spriteWidth = facingLeft ? -width : width;
+        float spriteX = facingLeft ? x + width : x;
         if (tint == null) {
-            outputManager.draw(LingoSprites.player(), drawX, y, drawWidth, height);
+            outputManager.draw(LingoSprites.player(), spriteX, y, spriteWidth, height);
             return;
         }
-        outputManager.drawTinted(LingoSprites.player(), drawX, y, drawWidth, height, tint);
+        outputManager.drawTinted(LingoSprites.player(), spriteX, y, spriteWidth, height, tint);
     }
 
-    private void renderShockEffect(OutputManager outputManager, float drawX, float drawY, float drawWidth, float drawHeight) {
+    private void renderShockEffect(
+        OutputManager outputManager,
+        float drawX,
+        float drawY,
+        float drawWidth,
+        float drawHeight
+    ) {
         float phase = shockTimer * 10f;
         float pulse = 0.55f + 0.45f * oscillate(phase);
         float orbit = getWidth() * (0.18f + 0.08f * pulse);
@@ -231,8 +251,8 @@ public class PlayerEntity extends DynamicEntity {
             drawHeight + haloPadding,
             withAlpha(PLAYER_SHOCK_HALO, PLAYER_SHOCK_HALO.a * (0.75f + 0.25f * pulse))
         );
-        outputManager.drawTinted(
-            LingoSprites.player(),
+        drawPlayerSprite(
+            outputManager,
             drawX - haloPadding * 0.28f,
             drawY - haloPadding * 0.28f,
             drawWidth + haloPadding * 0.56f,

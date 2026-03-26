@@ -12,6 +12,7 @@ public final class LingoSprites {
 
     private enum GhostStyle {
         NORMAL,
+        HELL_HOUND,
         BOSS,
         WALL_BOMBER
     }
@@ -30,12 +31,13 @@ public final class LingoSprites {
     private static final Color PLAYER_EYE = new Color(0.97f, 0.99f, 1f, 1f);
     private static final Color GHOST_EYE = new Color(0.96f, 0.98f, 1f, 1f);
     private static final Color GHOST_PUPIL = new Color(0.08f, 0.16f, 0.24f, 1f);
-    private static final Color FLOOR_GRASS_DARK = new Color(0.10f, 0.30f, 0.04f, 1f);
-    private static final Color FLOWER_BLUE = new Color(0.66f, 0.90f, 1.00f, 1f);
-    private static final Color FLOWER_YELLOW = new Color(1.00f, 0.88f, 0.40f, 1f);
-    private static final Color FLOWER_WHITE = new Color(0.96f, 0.99f, 0.98f, 1f);
+    private static final Color FLOOR_GRASS_DARK = new Color(0.02f, 0.15f, 0.35f, 1f);
+    private static final Color FLOWER_BLUE = new Color(0.42f, 0.96f, 1.00f, 1f);
+    private static final Color FLOWER_YELLOW = new Color(0.99f, 0.80f, 0.24f, 1f);
+    private static final Color FLOWER_WHITE = new Color(0.90f, 0.98f, 1.00f, 1f);
 
     private static final Map<Integer, Texture> GHOST_TEXTURES = new HashMap<>();
+    private static final Map<Integer, Texture> HELL_HOUND_TEXTURES = new HashMap<>();
     private static final Map<Integer, Texture> BOSS_GHOST_TEXTURES = new HashMap<>();
     private static final Map<Integer, Texture> WALL_BOMBER_GHOST_TEXTURES = new HashMap<>();
     private static final Map<String, Texture> WORD_ICON_TEXTURES = new HashMap<>();
@@ -113,6 +115,10 @@ public final class LingoSprites {
         return getGhostTexture(BOSS_GHOST_TEXTURES, color, GhostStyle.BOSS);
     }
 
+    public static Texture hellHoundGhost(Color color) {
+        return getGhostTexture(HELL_HOUND_TEXTURES, color, GhostStyle.HELL_HOUND);
+    }
+
     public static Texture wallBomberGhost(Color color) {
         return getGhostTexture(WALL_BOMBER_GHOST_TEXTURES, color, GhostStyle.WALL_BOMBER);
     }
@@ -177,6 +183,7 @@ public final class LingoSprites {
             }
         }
         disposeMap(GHOST_TEXTURES);
+        disposeMap(HELL_HOUND_TEXTURES);
         disposeMap(BOSS_GHOST_TEXTURES);
         disposeMap(WALL_BOMBER_GHOST_TEXTURES);
         disposeWordIconMap();
@@ -213,6 +220,7 @@ public final class LingoSprites {
 
     private static Texture createGhostTexture(Color bodyColor, GhostStyle style) {
         return switch (style) {
+            case HELL_HOUND   -> createHellHoundTexture(bodyColor);
             case BOSS         -> createBossFireTexture(bodyColor);
             case WALL_BOMBER  -> createWallBomberTexture(bodyColor);
             default           -> createCloudGhostTexture(bodyColor);
@@ -220,6 +228,15 @@ public final class LingoSprites {
     }
 
     private static Texture createCloudGhostTexture(Color bodyColor) {
+        Texture texture = tryLoadGhastlyGhostTexture(
+            "lingoman/GhastlyGhost.png",
+            "lingoman/ghastlyghost.png",
+            "lingoman/enemy_ghastlyghost.png"
+        );
+        if (texture != null) {
+            return texture;
+        }
+
         Pixmap pixmap = newTransparentPixmap();
         Color body    = mix(bodyColor, new Color(0.77f, 0.62f, 0.90f, 1f), 0.45f);
         Color outline = shade(body, 0.34f);
@@ -235,56 +252,135 @@ public final class LingoSprites {
         return toTexture(pixmap);
     }
 
-    private static Texture createBossFireTexture(Color bodyColor) {
+    private static Texture createHellHoundTexture(Color bodyColor) {
+        Texture texture = tryLoadNamedTexture("lingoman/hellhound.png", "lingoman/enemy_hellhound.png");
+        if (texture != null) {
+            return texture;
+        }
+
         Pixmap pixmap = newTransparentPixmap();
-        Color body    = mix(bodyColor, new Color(0.98f, 0.22f, 0.16f, 1f), 0.35f);
-        Color outline = new Color(0.39f, 0.05f, 0.03f, 1f);
-        Color hot     = new Color(1.00f, 0.84f, 0.62f, 0.52f);
-        fillCircle(pixmap, 32, 35, 18, outline);
-        fillCircle(pixmap, 20, 31, 10, outline);
-        fillCircle(pixmap, 44, 31, 10, outline);
-        fillTriangle(pixmap, 17,41,10,56,23,48, outline);
-        fillTriangle(pixmap, 47,41,54,56,41,48, outline);
-        fillTriangle(pixmap, 22,46,27,63,31,47, outline);
-        fillTriangle(pixmap, 33,47,38,63,43,47, outline);
-        fillCircle(pixmap, 32, 35, 16, body);
-        fillCircle(pixmap, 22, 31,  8, body);
-        fillCircle(pixmap, 42, 31,  8, body);
-        fillTriangle(pixmap, 19,43,23,58,29,44, body);
-        fillTriangle(pixmap, 35,44,41,58,45,43, body);
-        fillCircle(pixmap, 26, 44, 8, hot);
-        fillTriangle(pixmap, 18,41,22,55,25,41, new Color(0.95f,0.86f,0.74f,1f));
-        fillTriangle(pixmap, 39,41,42,55,46,41, new Color(0.95f,0.86f,0.74f,1f));
-        fillCircle(pixmap, 31, 34,  8, GHOST_EYE);
-        fillCircle(pixmap, 37, 34,  8, GHOST_EYE);
-        fillTriangle(pixmap, 31,29,35,36,27,35, GHOST_PUPIL);
-        fillTriangle(pixmap, 38,29,42,35,34,36, GHOST_PUPIL);
+        Color outline = new Color(0.96f, 0.18f, 0.24f, 1f);
+        Color frame = mix(bodyColor, new Color(0.30f, 0.44f, 0.60f, 1f), 0.72f);
+        Color plate = new Color(0.14f, 0.20f, 0.30f, 1f);
+        Color accent = new Color(0.70f, 0.84f, 0.94f, 1f);
+        Color eye = new Color(1.00f, 0.56f, 0.26f, 1f);
+
+        fillRect(pixmap, 8, 26, 44, 14, outline);
+        fillRect(pixmap, 12, 28, 36, 10, frame);
+        fillRect(pixmap, 46, 30, 12, 9, outline);
+        fillRect(pixmap, 47, 31, 10, 7, frame);
+        fillRect(pixmap, 6, 35, 14, 4, outline);
+        fillRect(pixmap, 8, 36, 11, 2, frame);
+
+        fillRect(pixmap, 14, 16, 8, 14, outline);
+        fillRect(pixmap, 15, 17, 6, 12, plate);
+        fillRect(pixmap, 28, 13, 8, 17, outline);
+        fillRect(pixmap, 29, 14, 6, 15, plate);
+        fillRect(pixmap, 40, 16, 8, 14, outline);
+        fillRect(pixmap, 41, 17, 6, 12, plate);
+        fillRect(pixmap, 24, 14, 5, 10, outline);
+        fillRect(pixmap, 25, 15, 3, 8, plate);
+
+        fillRect(pixmap, 19, 28, 10, 2, accent);
+        fillRect(pixmap, 32, 28, 8, 2, accent);
+        fillRect(pixmap, 50, 33, 3, 2, eye);
+        fillRect(pixmap, 52, 31, 3, 2, eye);
+        return toTexture(pixmap);
+    }
+
+    private static Texture createBossFireTexture(Color bodyColor) {
+        Texture texture = tryLoadNamedTexture("lingoman/firelord.png", "lingoman/enemy_firelord.png");
+        if (texture != null) {
+            return texture;
+        }
+
+        Pixmap pixmap = newTransparentPixmap();
+        Color outline = new Color(0.22f, 0.06f, 0.02f, 1f);
+        Color armor = mix(bodyColor, new Color(0.25f, 0.25f, 0.28f, 1f), 0.70f);
+        Color ember = new Color(0.98f, 0.38f, 0.11f, 1f);
+        Color flame = new Color(1.00f, 0.84f, 0.28f, 1f);
+        Color glow = withAlpha(ember, 0.36f);
+
+        fillCircle(pixmap, 32, 32, 24, glow);
+        fillRect(pixmap, 24, 18, 16, 24, outline);
+        fillRect(pixmap, 26, 20, 12, 20, armor);
+        fillRect(pixmap, 14, 20, 10, 20, outline);
+        fillRect(pixmap, 15, 22, 8, 16, armor);
+        fillRect(pixmap, 40, 20, 10, 20, outline);
+        fillRect(pixmap, 41, 22, 8, 16, armor);
+        fillRect(pixmap, 19, 6, 26, 14, outline);
+        fillRect(pixmap, 21, 8, 22, 10, armor);
+        fillTriangle(pixmap, 24, 18, 20, 10, 26, 16, ember);
+        fillTriangle(pixmap, 40, 18, 44, 10, 38, 16, ember);
+
+        fillCircle(pixmap, 32, 30, 9, outline);
+        fillCircle(pixmap, 32, 30, 7, ember);
+        fillCircle(pixmap, 32, 30, 4, flame);
+        fillRect(pixmap, 27, 12, 4, 3, flame);
+        fillRect(pixmap, 34, 12, 4, 3, flame);
+
+        fillRect(pixmap, 22, 42, 8, 14, outline);
+        fillRect(pixmap, 23, 44, 6, 10, armor);
+        fillRect(pixmap, 34, 42, 8, 14, outline);
+        fillRect(pixmap, 35, 44, 6, 10, armor);
+        fillRect(pixmap, 23, 24, 4, 2, ember);
+        fillRect(pixmap, 37, 24, 4, 2, ember);
         return toTexture(pixmap);
     }
 
     private static Texture createWallBomberTexture(Color bodyColor) {
+        Texture texture = tryLoadNamedTexture(
+            "lingoman/madmortar.png",
+            "lingoman/enemy_madmortar.png",
+            "lingoman/mortarman.png",
+            "lingoman/enemy_mortarman.png"
+        );
+        if (texture != null) {
+            return texture;
+        }
+
         Pixmap pixmap = newTransparentPixmap();
-        Color body    = mix(bodyColor, new Color(0.67f, 0.54f, 0.81f, 1f), 0.35f);
-        Color outline = shade(body, 0.42f);
-        Color panel   = new Color(0.39f, 0.27f, 0.51f, 1f);
-        fillRect(pixmap, 14, 16, 36, 36, outline);
-        fillRect(pixmap, 17, 19, 30, 30, body);
-        fillRect(pixmap, 22, 24, 20, 20, panel);
-        fillCircle(pixmap, 18, 34, 4, outline);
-        fillCircle(pixmap, 46, 34, 4, outline);
-        fillCircle(pixmap, 32, 18, 4, outline);
-        fillCircle(pixmap, 32, 50, 4, outline);
-        fillCircle(pixmap, 32, 34, 10, GHOST_EYE);
-        fillCircle(pixmap, 35, 33,  4, GHOST_PUPIL);
-        fillRect(pixmap, 25, 24, 14, 2, outline);
-        fillRect(pixmap, 25, 43, 14, 2, outline);
+        Color outline = new Color(0.14f, 0.18f, 0.22f, 1f);
+        Color shell = mix(bodyColor, new Color(0.62f, 0.66f, 0.70f, 1f), 0.72f);
+        Color dark = new Color(0.30f, 0.34f, 0.38f, 1f);
+        Color accent = new Color(0.96f, 0.56f, 0.15f, 1f);
+        Color glow = withAlpha(accent, 0.28f);
+
+        fillCircle(pixmap, 32, 30, 23, glow);
+        fillRect(pixmap, 18, 18, 28, 24, outline);
+        fillRect(pixmap, 20, 20, 24, 20, shell);
+        fillRect(pixmap, 28, 34, 8, 22, outline);
+        fillRect(pixmap, 30, 36, 4, 18, dark);
+        fillRect(pixmap, 24, 42, 16, 8, outline);
+        fillRect(pixmap, 25, 43, 14, 6, dark);
+
+        fillRect(pixmap, 28, 8, 10, 16, outline);
+        fillRect(pixmap, 30, 10, 6, 12, dark);
+        fillCircle(pixmap, 33, 20, 3, outline);
+        fillCircle(pixmap, 33, 20, 2, Color.BLACK);
+
+        fillRect(pixmap, 18, 30, 8, 12, outline);
+        fillRect(pixmap, 19, 31, 6, 10, dark);
+        fillRect(pixmap, 46, 30, 8, 12, outline);
+        fillRect(pixmap, 47, 31, 6, 10, dark);
+        fillRect(pixmap, 26, 26, 4, 2, accent);
+        fillRect(pixmap, 32, 26, 4, 2, accent);
+        fillRect(pixmap, 38, 26, 4, 2, accent);
         return toTexture(pixmap);
     }
 
     private static Texture createHedgeWallTexture(int variant) {
-        String path = "lingoman/hedge_wall_" + Math.floorMod(variant, HEDGE_VARIANTS) + ".png";
-        Texture texture = tryLoadAssetTexture(path);
-        return texture != null ? texture : createProceduralHedgeWallTexture(variant);
+        int index = Math.floorMod(variant, HEDGE_VARIANTS);
+
+        String themedPath = "lingoman/hedge_wall_logo_" + index + ".png";
+        Texture texture = tryLoadAssetTexture(themedPath);
+        if (texture != null) {
+            return texture;
+        }
+
+        String path = "lingoman/hedge_wall_" + index + ".png";
+        texture = tryLoadAssetTexture(path);
+        return texture != null ? texture : createProceduralHedgeWallTexture(index);
     }
 
     private static Texture createFreezePickupTexture() {
@@ -757,14 +853,191 @@ public final class LingoSprites {
         return Gdx.files.internal(path).exists() ? loadAssetTexture(path) : null;
     }
 
+    private static Texture tryLoadNamedTexture(String... paths) {
+        if (paths == null) {
+            return null;
+        }
+        for (String path : paths) {
+            Texture texture = tryLoadAssetTexture(path);
+            if (texture != null) {
+                return texture;
+            }
+        }
+        return null;
+    }
+
+    private static Texture tryLoadGhastlyGhostTexture(String... paths) {
+        if (paths == null || Gdx.files == null) {
+            return null;
+        }
+        for (String path : paths) {
+            if (path == null || !Gdx.files.internal(path).exists()) {
+                continue;
+            }
+
+            Pixmap source = new Pixmap(Gdx.files.internal(path));
+            stripCheckerboardBackground(source);
+            Pixmap cropped = cropToOpaqueBounds(source, 2);
+            if (cropped != source) {
+                source.dispose();
+            }
+            return toTexture(cropped);
+        }
+        return null;
+    }
+
+    private static void stripCheckerboardBackground(Pixmap pixmap) {
+        if (pixmap == null) {
+            return;
+        }
+
+        int width = pixmap.getWidth();
+        int height = pixmap.getHeight();
+        if (width <= 0 || height <= 0) {
+            return;
+        }
+
+        boolean[] visited = new boolean[width * height];
+        int[] queue = new int[width * height];
+        int head = 0;
+        int tail = 0;
+
+        for (int x = 0; x < width; x++) {
+            tail = enqueueBackgroundPixel(pixmap, x, 0, width, visited, queue, tail);
+            tail = enqueueBackgroundPixel(pixmap, x, height - 1, width, visited, queue, tail);
+        }
+        for (int y = 1; y < height - 1; y++) {
+            tail = enqueueBackgroundPixel(pixmap, 0, y, width, visited, queue, tail);
+            tail = enqueueBackgroundPixel(pixmap, width - 1, y, width, visited, queue, tail);
+        }
+
+        while (head < tail) {
+            int index = queue[head++];
+            int x = index % width;
+            int y = index / width;
+
+            if (x > 0) {
+                tail = enqueueBackgroundPixel(pixmap, x - 1, y, width, visited, queue, tail);
+            }
+            if (x < width - 1) {
+                tail = enqueueBackgroundPixel(pixmap, x + 1, y, width, visited, queue, tail);
+            }
+            if (y > 0) {
+                tail = enqueueBackgroundPixel(pixmap, x, y - 1, width, visited, queue, tail);
+            }
+            if (y < height - 1) {
+                tail = enqueueBackgroundPixel(pixmap, x, y + 1, width, visited, queue, tail);
+            }
+        }
+
+        pixmap.setBlending(Pixmap.Blending.None);
+        int transparent = transparentPixel();
+        for (int i = 0; i < visited.length; i++) {
+            if (!visited[i]) {
+                continue;
+            }
+            int x = i % width;
+            int y = i / width;
+            pixmap.drawPixel(x, y, transparent);
+        }
+        pixmap.setBlending(Pixmap.Blending.SourceOver);
+    }
+
+    private static int enqueueBackgroundPixel(
+        Pixmap pixmap,
+        int x,
+        int y,
+        int width,
+        boolean[] visited,
+        int[] queue,
+        int tail
+    ) {
+        int index = (y * width) + x;
+        if (visited[index]) {
+            return tail;
+        }
+        if (!isCheckerboardBackgroundPixel(pixmap.getPixel(x, y))) {
+            return tail;
+        }
+        visited[index] = true;
+        queue[tail] = index;
+        return tail + 1;
+    }
+
+    private static boolean isCheckerboardBackgroundPixel(int pixel) {
+        float alpha = (pixel & 0xff) / 255f;
+        if (alpha <= 0.02f) {
+            return true;
+        }
+
+        float red = ((pixel >>> 24) & 0xff) / 255f;
+        float green = ((pixel >>> 16) & 0xff) / 255f;
+        float blue = ((pixel >>> 8) & 0xff) / 255f;
+        float max = Math.max(red, Math.max(green, blue));
+        float min = Math.min(red, Math.min(green, blue));
+        float saturation = max <= 0f ? 0f : (max - min) / max;
+        float brightness = (red + green + blue) / 3f;
+
+        return saturation < 0.24f && brightness >= 0.05f && brightness <= 0.99f;
+    }
+
+    private static Pixmap cropToOpaqueBounds(Pixmap source, int padding) {
+        int width = source.getWidth();
+        int height = source.getHeight();
+        int minX = width;
+        int minY = height;
+        int maxX = -1;
+        int maxY = -1;
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int alpha = source.getPixel(x, y) & 0xff;
+                if (alpha <= 0x10) {
+                    continue;
+                }
+                if (x < minX) {
+                    minX = x;
+                }
+                if (y < minY) {
+                    minY = y;
+                }
+                if (x > maxX) {
+                    maxX = x;
+                }
+                if (y > maxY) {
+                    maxY = y;
+                }
+            }
+        }
+
+        if (maxX < minX || maxY < minY) {
+            return source;
+        }
+
+        minX = Math.max(0, minX - padding);
+        minY = Math.max(0, minY - padding);
+        maxX = Math.min(width - 1, maxX + padding);
+        maxY = Math.min(height - 1, maxY + padding);
+
+        int croppedWidth = maxX - minX + 1;
+        int croppedHeight = maxY - minY + 1;
+        Pixmap cropped = newTransparentPixmap(croppedWidth, croppedHeight);
+        cropped.drawPixmap(source, 0, 0, minX, minY, croppedWidth, croppedHeight);
+        return cropped;
+    }
+
+    private static int transparentPixel() {
+        return 0x00000000;
+    }
+
     private static Texture createProceduralHedgeWallTexture(int variant) {
         Pixmap pixmap = newTransparentPixmap(HEDGE_TILE_SIZE, HEDGE_TILE_SIZE);
         fillRect(pixmap, 0, 0, HEDGE_TILE_SIZE, HEDGE_TILE_SIZE, FLOOR_GRASS_DARK);
         drawGrassCloud(pixmap, 6, 8, 0.90f);
         drawGrassCloud(pixmap, 13, 11, 0.82f);
         drawGrassCloud(pixmap, 19, 7, 0.78f);
-        drawLeafCluster(pixmap, 9, 15, new Color(0.08f,0.27f,0.04f,1f), new Color(0.38f,0.70f,0.18f,1f));
-        drawLeafCluster(pixmap, 17, 8, new Color(0.11f,0.32f,0.05f,1f), new Color(0.31f,0.62f,0.14f,1f));
+        drawLeafCluster(pixmap, 9, 15, new Color(0.03f,0.22f,0.48f,1f), new Color(0.33f,0.79f,1.00f,1f));
+        drawLeafCluster(pixmap, 17, 8, new Color(0.05f,0.26f,0.56f,1f), new Color(0.26f,0.66f,0.95f,1f));
         addHedgeDecoration(pixmap, variant);
         return toTexture(pixmap);
     }
@@ -821,7 +1094,7 @@ public final class LingoSprites {
         fillCircle(p,cx-2,cy+1,2,light); fillCircle(p,cx+2,cy+2,2,light); fillCircle(p,cx,cy-2,2,light);
     }
     private static void drawGrassCloud(Pixmap p,int x,int y,float alpha) {
-        Color s = withAlpha(new Color(0.08f,0.24f,0.04f,1f),alpha);
+        Color s = withAlpha(new Color(0.04f,0.27f,0.56f,1f),alpha);
         fillCircle(p,x,y,10,s); fillCircle(p,x+9,y+2,9,s); fillCircle(p,x-5,y+3,8,s);
     }
     private static void addHedgeDecoration(Pixmap p,int variant) {

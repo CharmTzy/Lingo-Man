@@ -107,6 +107,44 @@ public class OutputManager implements Disposable {
     }
 
     /**
+     * Draws a texture with specified size, tint, and rotation around its center.
+     */
+    public void drawTintedRotated(
+        Texture texture,
+        float x,
+        float y,
+        float width,
+        float height,
+        float rotationDegrees,
+        Color tint
+    ) {
+        if (texture == null || tint == null) return;
+
+        Color prev = batch.getColor();
+        float pr = prev.r, pg = prev.g, pb = prev.b, pa = prev.a;
+        batch.setColor(tint);
+        batch.draw(
+            texture,
+            x,
+            y,
+            width * 0.5f,
+            height * 0.5f,
+            width,
+            height,
+            1f,
+            1f,
+            rotationDegrees,
+            0,
+            0,
+            texture.getWidth(),
+            texture.getHeight(),
+            false,
+            false
+        );
+        batch.setColor(pr, pg, pb, pa);
+    }
+
+    /**
      * Draws a filled rectangle using a shared 1x1 white pixel texture.
      */
     public void drawRect(float x, float y, float width, float height, Color color) {

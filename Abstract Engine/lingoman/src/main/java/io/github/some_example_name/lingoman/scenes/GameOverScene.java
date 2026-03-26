@@ -11,13 +11,15 @@ import io.github.some_example_name.scenes.Scene;
 
 public class GameOverScene implements Scene {
 
-    private static final Color BACKGROUND = new Color(0.09f, 0.08f, 0.10f, 1f);
-    private static final Color PANEL_FILL = new Color(0.10f, 0.10f, 0.12f, 0.96f);
-    private static final Color PANEL_BORDER = new Color(0.96f, 0.80f, 0.34f, 1f);
-    private static final Color SUCCESS = new Color(0.62f, 0.92f, 0.55f, 1f);
-    private static final Color FAILURE = new Color(1.00f, 0.62f, 0.47f, 1f);
-    private static final Color TEXT_PRIMARY = new Color(0.95f, 0.95f, 0.90f, 1f);
-    private static final Color TEXT_MUTED = new Color(0.72f, 0.72f, 0.70f, 1f);
+    private static final Color BACKGROUND = new Color(0.02f, 0.04f, 0.12f, 1f);
+    private static final Color BACKDROP_BAND = new Color(0.04f, 0.16f, 0.32f, 0.42f);
+    private static final Color BACKDROP_STRIPE = new Color(1.00f, 0.76f, 0.22f, 0.20f);
+    private static final Color PANEL_FILL = new Color(0.04f, 0.09f, 0.19f, 0.96f);
+    private static final Color PANEL_BORDER = new Color(0.34f, 0.91f, 1.00f, 1f);
+    private static final Color SUCCESS = new Color(1.00f, 0.84f, 0.30f, 1f);
+    private static final Color FAILURE = new Color(1.00f, 0.55f, 0.40f, 1f);
+    private static final Color TEXT_PRIMARY = new Color(0.95f, 0.98f, 1.00f, 1f);
+    private static final Color TEXT_MUTED = new Color(0.70f, 0.86f, 0.95f, 1f);
 
     private EngineContext context;
 
@@ -64,7 +66,9 @@ public class GameOverScene implements Scene {
         boolean success = "WORD COMPLETE".equalsIgnoreCase(result);
         Color resultColor = success ? SUCCESS : FAILURE;
 
-        context.getOutputManager().drawRect(0f, 332f, 640f, 148f, new Color(0.18f, 0.10f, 0.08f, 0.35f));
+        context.getOutputManager().drawRect(0f, 338f, 640f, 142f, BACKDROP_BAND);
+        context.getOutputManager().drawRect(52f, 334f, 536f, 10f, BACKDROP_STRIPE);
+        context.getOutputManager().drawRect(52f, 124f, 536f, 10f, BACKDROP_STRIPE);
         context.getOutputManager().drawPanel(108f, 134f, 424f, 190f, PANEL_FILL, PANEL_BORDER);
         context.getOutputManager().drawTextCenteredWithShadow("ROUND OVER", 320f, 298f, TEXT_MUTED);
         context.getOutputManager().drawTextCenteredWithShadow(result, 320f, 262f, resultColor);
