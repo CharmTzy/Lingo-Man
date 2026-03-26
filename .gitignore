@@ -6,6 +6,7 @@
 .gradle/
 gradle-app.setting
 /Abstract Engine/*/build/
+/Abstract Engine/*/build/libs/*.jar
 /Abstract Engine/build/
 /Abstract Engine/android/build/
 /Abstract Engine/core/build/

@@ -24,7 +24,7 @@ public class LingoCollisionFilter implements ICollisionFilter {
             return false;
         }
 
-        if (isFrozenGhostPlayerPair(oa, ob)) {
+        if (isNonBlockingGhostPlayerPair(oa, ob)) {
             return false;
         }
 
@@ -84,10 +84,18 @@ public class LingoCollisionFilter implements ICollisionFilter {
         return true;
     }
 
-    private boolean isFrozenGhostPlayerPair(Object a, Object b) {
-        return (a instanceof GhostEntity ghostA && ghostA.isFrozen()
-            && b instanceof PlayerEntity playerB && !playerB.hasShockPower())
-            || (b instanceof GhostEntity ghostB && ghostB.isFrozen()
-            && a instanceof PlayerEntity playerA && !playerA.hasShockPower());
+    private boolean isNonBlockingGhostPlayerPair(Object a, Object b) {
+        return (a instanceof GhostEntity ghostA
+            && b instanceof PlayerEntity playerB
+            && shouldIgnoreGhostPlayerCollision(ghostA, playerB))
+            || (b instanceof GhostEntity ghostB
+            && a instanceof PlayerEntity playerA
+            && shouldIgnoreGhostPlayerCollision(ghostB, playerA));
+    }
+
+    private boolean shouldIgnoreGhostPlayerCollision(GhostEntity ghost, PlayerEntity player) {
+        return ghost.isRespawnProtected()
+            || player.isRespawnProtected()
+            || (ghost.isFrozen() && !player.hasShockPower());
     }
 }
