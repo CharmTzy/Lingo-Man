@@ -1,5 +1,6 @@
 package io.github.some_example_name.demo.entity;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.badlogic.gdx.graphics.Color;
@@ -27,7 +28,7 @@ public class ChasingBoxEntity extends NPCEntity {
 
     private final Color color;
     private final Movable target;
-    private final List<Vector2> route = List.of(
+    private final List<Vector2> route = Arrays.asList(
         new Vector2(96f, 96f),
         new Vector2(544f, 96f),
         new Vector2(544f, 384f),

@@ -3,6 +3,7 @@ package io.github.some_example_name.lingoman.scenes;
 import java.util.List;
 import java.util.Random;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.GridPoint2;
 
@@ -83,17 +84,26 @@ public class GameScene implements Scene {
 
     @Override
     public void enter() {
-        if (LingoSession.get().consumeGameResumeRequest()) {
-            moveLoopPlaying = false;
-            context.getAudioManager().resumeSuspendedMusic();
-            System.out.println("[LingoMan] Game resumed");
-            return;
-        }
+        try {
+            if (LingoSession.get().consumeGameResumeRequest()) {
+                moveLoopPlaying = false;
+                context.getAudioManager().resumeSuspendedMusic();
+                System.out.println("[LingoMan] Game resumed");
+                return;
+            }
 
-        startNewGame();
-        moveLoopPlaying = false;
-        context.getAudioManager().playMusic(LingoAudio.BGM_GAME, true);
-        System.out.println("[LingoMan] Game started");
+            startNewGame();
+            moveLoopPlaying = false;
+            context.getAudioManager().playMusic(LingoAudio.BGM_GAME, true);
+            System.out.println("[LingoMan] Game started");
+        } catch (Throwable throwable) {
+            stopGameplayAudio();
+            System.out.println("[LingoMan] Failed to enter game scene: " + throwable.getMessage());
+            if (Gdx.app != null) {
+                Gdx.app.error("LingoMan", "Failed to enter game scene", throwable);
+            }
+            context.getSceneManager().setActiveScene(LingoSceneIds.MENU);
+        }
     }
 
     @Override

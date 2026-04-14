@@ -2,6 +2,7 @@ package io.github.some_example_name.lingoman.level;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
@@ -144,7 +145,7 @@ public final class MazeLayout {
 
     public static List<GridPoint2> getOpenNeighbors(Layout layout, GridPoint2 cell) {
         if (layout == null || cell == null) {
-            return List.of();
+            return Collections.emptyList();
         }
 
         List<GridPoint2> neighbors = new ArrayList<>(4);
@@ -284,7 +285,7 @@ public final class MazeLayout {
             carveSpawnBuffer(grid, ghostSpawn);
         }
 
-        List<GridPoint2> route = List.of(
+        List<GridPoint2> route = Arrays.asList(
             new GridPoint2(1, 1),
             new GridPoint2(cols - 2, 1),
             new GridPoint2(cols - 2, rows - 2),

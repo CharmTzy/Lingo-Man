@@ -1,6 +1,7 @@
 package io.github.some_example_name.lingoman.world;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -617,7 +618,7 @@ public final class GhostDirector {
 
     private List<GhostLoadout> buildGhostLoadouts(GameState.Difficulty difficulty) {
         return switch (difficulty) {
-            case MEDIUM -> List.of(
+            case MEDIUM -> Arrays.asList(
                 new GhostLoadout(
                     GhostEntity.GhostType.NORMAL,
                     GhostMovePattern.SEEK,
@@ -637,7 +638,7 @@ public final class GhostDirector {
                     3.10f
                 )
             );
-            case HARD -> List.of(
+            case HARD -> Arrays.asList(
                 new GhostLoadout(
                     GhostEntity.GhostType.BOSS,
                     GhostMovePattern.SEEK,
@@ -666,7 +667,7 @@ public final class GhostDirector {
                     3.10f
                 )
             );
-            default -> List.of(
+            default -> Arrays.asList(
                 new GhostLoadout(
                     GhostEntity.GhostType.NORMAL,
                     GhostMovePattern.SEEK,
