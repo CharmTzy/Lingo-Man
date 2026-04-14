@@ -1,12 +1,16 @@
 package io.github.some_example_name.managers;
 
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 
 /**
  * Abstract Engine Output Manager.
@@ -14,10 +18,17 @@ import com.badlogic.gdx.utils.Disposable;
  */
 public class OutputManager implements Disposable {
 
+    private static final float VIRTUAL_WIDTH = 640f;
+    private static final float VIRTUAL_HEIGHT = 480f;
+
     private SpriteBatch batch;
     private BitmapFont font;
     private Texture pixel;
     private GlyphLayout glyphLayout;
+    private OrthographicCamera camera;
+    private FitViewport viewport;
+    private int appliedScreenWidth = -1;
+    private int appliedScreenHeight = -1;
     
     // Abstract Engine requirement: Encapsulate the "How" (LibGDX Batch) 
     // from the "What" (Draw this texture).
@@ -27,15 +38,21 @@ public class OutputManager implements Disposable {
         this.font = new BitmapFont(); // Default font
         this.font.getData().setScale(1.0f);
         this.glyphLayout = new GlyphLayout();
+        this.camera = new OrthographicCamera();
+        this.viewport = new FitViewport(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, camera);
         Pixmap pm = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         pm.setColor(1f, 1f, 1f, 1f);
         pm.fill();
         this.pixel = new Texture(pm);
         pm.dispose();
+        updateViewportIfNeeded();
     }
 
     /** call this at the start of the render loop */
     public void begin() {
+        updateViewportIfNeeded();
+        viewport.apply();
+        batch.setProjectionMatrix(camera.combined);
         batch.begin();
     }
 
@@ -253,6 +270,19 @@ public class OutputManager implements Disposable {
         com.badlogic.gdx.utils.ScreenUtils.clear(r, g, b, a);
     }
 
+    public Vector2 screenToWorld(float screenX, float screenY) {
+        updateViewportIfNeeded();
+        return viewport.unproject(new Vector2(screenX, screenY));
+    }
+
+    public float getVirtualWidth() {
+        return VIRTUAL_WIDTH;
+    }
+
+    public float getVirtualHeight() {
+        return VIRTUAL_HEIGHT;
+    }
+
     @Override
     public void dispose() {
         batch.dispose();
@@ -265,5 +295,19 @@ public class OutputManager implements Disposable {
         return batch;
     }
 
+    private void updateViewportIfNeeded() {
+        int screenWidth = Gdx.graphics.getWidth();
+        int screenHeight = Gdx.graphics.getHeight();
+        if (screenWidth <= 0 || screenHeight <= 0) {
+            return;
+        }
+        if (screenWidth == appliedScreenWidth && screenHeight == appliedScreenHeight) {
+            return;
+        }
+
+        viewport.update(screenWidth, screenHeight, true);
+        appliedScreenWidth = screenWidth;
+        appliedScreenHeight = screenHeight;
+    }
 
 }

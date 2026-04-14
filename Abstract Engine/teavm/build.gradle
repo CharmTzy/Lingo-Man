@@ -1,0 +1,26 @@
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+eclipse.project.name = appName + '-teavm'
+
+dependencies {
+  implementation "com.github.xpenatan.gdx-teavm:backend-web:$gdxTeaVMVersion"
+  implementation project(':lingoman')
+}
+
+tasks.register('buildWeb', JavaExec) {
+  dependsOn classes
+  group = 'application'
+  description = 'Builds the TeaVM browser version into teavm/build/dist.'
+  mainClass.set('io.github.some_example_name.teavm.BuildLingoManWeb')
+  classpath = sourceSets.main.runtimeClasspath
+  workingDir = project.projectDir
+}
+
+tasks.register('previewWeb', JavaExec) {
+  dependsOn classes
+  group = 'application'
+  description = 'Builds the TeaVM browser version and serves it locally on port 8080.'
+  mainClass.set('io.github.some_example_name.teavm.BuildLingoManWeb')
+  classpath = sourceSets.main.runtimeClasspath
+  workingDir = project.projectDir
+  args '--serve'
+}

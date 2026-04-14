@@ -128,8 +128,9 @@ public class MainMenuScene implements Scene {
         }
 
         Vector2 mouse = context.getInputManager().getMousePosition();
-        float worldX = mouse.x;
-        float worldY = SCREEN_HEIGHT - mouse.y;
+        Vector2 worldMouse = context.getOutputManager().screenToWorld(mouse.x, mouse.y);
+        float worldX = worldMouse.x;
+        float worldY = worldMouse.y;
         return worldX >= START_BUTTON_X
             && worldX <= START_BUTTON_X + START_BUTTON_WIDTH
             && worldY >= START_BUTTON_Y

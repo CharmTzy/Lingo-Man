@@ -1,0 +1,4 @@
+[build]
+  base = "Abstract Engine"
+  command = "./gradlew :teavm:buildWeb --console=plain"
+  publish = "teavm/build/dist/webapp"

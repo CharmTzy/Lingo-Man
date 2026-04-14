@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.Vector2;
 
 import io.github.some_example_name.EngineContext;
 import io.github.some_example_name.lingoman.LingoAudio;
@@ -19,6 +20,12 @@ import io.github.some_example_name.save.SaveData;
 import io.github.some_example_name.scenes.Scene;
 
 public class MenuScene implements Scene, ISaveable {
+
+    private static final float OPTION_X = 132f;
+    private static final float OPTION_WIDTH = 376f;
+    private static final float OPTION_HEIGHT = 32f;
+    private static final float OPTION_TOP_Y = 268f;
+    private static final float OPTION_GAP = 40f;
 
     private static final Color BACKGROUND = new Color(0.02f, 0.05f, 0.14f, 1f);
     private static final Color BACKDROP_TOP = new Color(0.05f, 0.19f, 0.36f, 0.52f);
@@ -76,18 +83,14 @@ public class MenuScene implements Scene, ISaveable {
             context.getAudioManager().playSound(LingoAudio.SFX_MENU_NAVIGATE, false);
         }
         if (context.getInputManager().isActionJustPressed(LingoInputActions.MENU_CONFIRM)) {
-            MenuOption selected = options[selectedIndex];
-            if (selected.difficulty != null) {
-                LingoSession.get().getGameState().setDifficulty(selected.difficulty);
-                context.getSceneManager().setActiveScene(LingoSceneIds.GAME);
-            } else if (selected.targetSceneId != null) {
-                if (LingoSceneIds.SETTINGS.equals(selected.targetSceneId)) {
-                    LingoSession.get().setSettingsReturnSceneId(LingoSceneIds.MENU);
-                }
-                context.getSceneManager().setActiveScene(selected.targetSceneId);
-            } else {
-                Gdx.app.exit();
-            }
+            activateOption(selectedIndex);
+        }
+
+        int clickedIndex = getClickedOptionIndex();
+        if (clickedIndex >= 0) {
+            selectedIndex = clickedIndex;
+            context.getAudioManager().playSound(LingoAudio.SFX_MENU_NAVIGATE, false);
+            activateOption(clickedIndex);
         }
     }
 
@@ -158,6 +161,48 @@ public class MenuScene implements Scene, ISaveable {
         }
 
         LingoSession.get().getGameState().setFoundWords(words);
+    }
+
+    private void activateOption(int optionIndex) {
+        if (optionIndex < 0 || optionIndex >= options.length) {
+            return;
+        }
+
+        MenuOption selected = options[optionIndex];
+        if (selected.difficulty != null) {
+            LingoSession.get().getGameState().setDifficulty(selected.difficulty);
+            context.getSceneManager().setActiveScene(LingoSceneIds.GAME);
+        } else if (selected.targetSceneId != null) {
+            if (LingoSceneIds.SETTINGS.equals(selected.targetSceneId)) {
+                LingoSession.get().setSettingsReturnSceneId(LingoSceneIds.MENU);
+            }
+            context.getSceneManager().setActiveScene(selected.targetSceneId);
+        } else {
+            Gdx.app.exit();
+        }
+    }
+
+    private int getClickedOptionIndex() {
+        if (!context.getInputManager().isMouseClicked()) {
+            return -1;
+        }
+
+        Vector2 mouse = context.getInputManager().getMousePosition();
+        Vector2 worldMouse = context.getOutputManager().screenToWorld(mouse.x, mouse.y);
+        float worldX = worldMouse.x;
+        float worldY = worldMouse.y;
+
+        if (worldX < OPTION_X || worldX > OPTION_X + OPTION_WIDTH) {
+            return -1;
+        }
+
+        for (int i = 0; i < options.length; i++) {
+            float optionY = OPTION_TOP_Y - (i * OPTION_GAP);
+            if (worldY >= optionY && worldY <= optionY + OPTION_HEIGHT) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     private static final class MenuOption {
