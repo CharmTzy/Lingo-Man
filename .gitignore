@@ -150,6 +150,7 @@ nb-configuration.xml
 
 ## OS-Specific:
 .DS_Store
+**/.DS_Store
 Thumbs.db
 
 ## Miscellaneous:
