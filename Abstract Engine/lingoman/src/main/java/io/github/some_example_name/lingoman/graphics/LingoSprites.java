@@ -228,7 +228,7 @@ public final class LingoSprites {
     }
 
     private static Texture createCloudGhostTexture(Color bodyColor) {
-        Texture texture = tryLoadGhastlyGhostTexture(
+        Texture texture = tryLoadNamedTexture(
             "lingoman/GhastlyGhost.png",
             "lingoman/ghastlyghost.png",
             "lingoman/enemy_ghastlyghost.png"
