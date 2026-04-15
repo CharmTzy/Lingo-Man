@@ -228,7 +228,7 @@ public final class LingoSprites {
     }
 
     private static Texture createCloudGhostTexture(Color bodyColor) {
-        Texture texture = tryLoadNamedTexture(
+        Texture texture = tryLoadGhastlyGhostTexture(
             "lingoman/GhastlyGhost.png",
             "lingoman/ghastlyghost.png",
             "lingoman/enemy_ghastlyghost.png"
@@ -876,10 +876,14 @@ public final class LingoSprites {
             }
 
             Pixmap source = new Pixmap(Gdx.files.internal(path));
-            stripCheckerboardBackground(source);
-            Pixmap cropped = cropToOpaqueBounds(source, 2);
-            if (cropped != source) {
+            Pixmap focused = cropToColorfulBounds(source, 18);
+            if (focused != source) {
                 source.dispose();
+            }
+            stripCheckerboardBackground(focused);
+            Pixmap cropped = cropToOpaqueBounds(focused, 2);
+            if (cropped != focused) {
+                focused.dispose();
             }
             return toTexture(cropped);
         }
@@ -1024,6 +1028,66 @@ public final class LingoSprites {
         Pixmap cropped = newTransparentPixmap(croppedWidth, croppedHeight);
         cropped.drawPixmap(source, 0, 0, minX, minY, croppedWidth, croppedHeight);
         return cropped;
+    }
+
+    private static Pixmap cropToColorfulBounds(Pixmap source, int padding) {
+        int width = source.getWidth();
+        int height = source.getHeight();
+        int minX = width;
+        int minY = height;
+        int maxX = -1;
+        int maxY = -1;
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                if (!isColorfulGhostPixel(source.getPixel(x, y))) {
+                    continue;
+                }
+                if (x < minX) {
+                    minX = x;
+                }
+                if (y < minY) {
+                    minY = y;
+                }
+                if (x > maxX) {
+                    maxX = x;
+                }
+                if (y > maxY) {
+                    maxY = y;
+                }
+            }
+        }
+
+        if (maxX < minX || maxY < minY) {
+            return source;
+        }
+
+        minX = Math.max(0, minX - padding);
+        minY = Math.max(0, minY - padding);
+        maxX = Math.min(width - 1, maxX + padding);
+        maxY = Math.min(height - 1, maxY + padding);
+
+        int croppedWidth = maxX - minX + 1;
+        int croppedHeight = maxY - minY + 1;
+        Pixmap cropped = newTransparentPixmap(croppedWidth, croppedHeight);
+        cropped.drawPixmap(source, 0, 0, minX, minY, croppedWidth, croppedHeight);
+        return cropped;
+    }
+
+    private static boolean isColorfulGhostPixel(int pixel) {
+        float alpha = (pixel & 0xff) / 255f;
+        if (alpha <= 0.02f) {
+            return false;
+        }
+
+        float red = ((pixel >>> 24) & 0xff) / 255f;
+        float green = ((pixel >>> 16) & 0xff) / 255f;
+        float blue = ((pixel >>> 8) & 0xff) / 255f;
+        float max = Math.max(red, Math.max(green, blue));
+        float min = Math.min(red, Math.min(green, blue));
+        float saturation = max <= 0f ? 0f : (max - min) / max;
+
+        return saturation >= 0.25f;
     }
 
     private static int transparentPixel() {
