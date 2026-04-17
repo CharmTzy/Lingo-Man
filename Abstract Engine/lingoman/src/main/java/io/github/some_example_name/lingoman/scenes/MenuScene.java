@@ -8,6 +8,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 
+import io.github.some_example_name.BrowserBridge;
 import io.github.some_example_name.EngineContext;
 import io.github.some_example_name.lingoman.LingoAudio;
 import io.github.some_example_name.lingoman.LingoInputActions;
@@ -178,7 +179,9 @@ public class MenuScene implements Scene, ISaveable {
             }
             context.getSceneManager().setActiveScene(selected.targetSceneId);
         } else {
-            Gdx.app.exit();
+            if (!BrowserBridge.requestExit()) {
+                Gdx.app.exit();
+            }
         }
     }
 
