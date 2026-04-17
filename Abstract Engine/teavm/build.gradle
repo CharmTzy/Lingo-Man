@@ -7,7 +7,7 @@ dependencies {
 }
 
 tasks.register('buildWeb', JavaExec) {
-  dependsOn classes
+  dependsOn ':core:jar', ':lingoman:jar', classes
   group = 'application'
   description = 'Builds the TeaVM browser version into teavm/build/dist.'
   mainClass.set('io.github.some_example_name.teavm.BuildLingoManWeb')
@@ -16,7 +16,7 @@ tasks.register('buildWeb', JavaExec) {
 }
 
 tasks.register('previewWeb', JavaExec) {
-  dependsOn classes
+  dependsOn ':core:jar', ':lingoman:jar', classes
   group = 'application'
   description = 'Builds the TeaVM browser version and serves it locally on port 8080.'
   mainClass.set('io.github.some_example_name.teavm.BuildLingoManWeb')
