@@ -65,6 +65,7 @@ public final class LingoBootstrap implements EngineBootstrap {
         audio.loadSound(LingoAudio.SFX_COLLECT_LETTER, LingoAudio.PATH_SFX_COLLECT_LETTER);
         audio.loadSound(LingoAudio.SFX_WRONG_LETTER, LingoAudio.PATH_SFX_WRONG_LETTER);
         audio.loadSound(LingoAudio.SFX_MOVE, LingoAudio.PATH_SFX_MOVE);
+        audio.setSoundVolume(LingoAudio.SFX_MOVE, 0.26f);
         audio.loadSound(LingoAudio.SFX_GAME_OVER, LingoAudio.PATH_SFX_GAME_OVER);
         audio.loadSound(LingoAudio.SFX_VICTORY, LingoAudio.PATH_SFX_VICTORY);
         audio.loadSound(LingoAudio.SFX_HURT, LingoAudio.PATH_SFX_HURT);

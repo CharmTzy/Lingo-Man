@@ -85,7 +85,7 @@ public final class MazeLayout {
         }
     }
 
-    private static final Layout EASY_LAYOUT = createLayout(23, 17, 24, 101L, 8, 2);
+    private static final Layout EASY_LAYOUT = createInspiredEasyLayout();
     private static final Layout MEDIUM_LAYOUT = createLayout(27, 19, 20, 202L, 18, 5);
     private static final Layout HARD_LAYOUT = createLayout(29, 21, 18, 303L, 30, 8);
 
@@ -296,6 +296,72 @@ public final class MazeLayout {
         );
 
         return new Layout(cols, rows, tileSize, offsetX, offsetY, toStrings(grid), playerSpawn, ghostSpawns, route);
+    }
+
+    private static Layout createInspiredEasyLayout() {
+        String[] map = {
+            "#######################",
+            "#...#.............#...#",
+            "#...#.###...###...#...#",
+            "#...#.............#...#",
+            "#.....###...###.....#.#",
+            "#.###...........###...#",
+            "#....###.#.#.###......#",
+            "#.##.###.#.#.###.##...#",
+            "#.....................#",
+            "#...##.###.#.###.##...#",
+            "#......###.#.###....#.#",
+            "#...###...........###.#",
+            "#.#.....###...###.....#",
+            "#...#.............#...#",
+            "#...#.###...###...#...#",
+            "#...#.............#...#",
+            "#######################"
+        };
+
+        GridPoint2 playerSpawn = new GridPoint2(2, 13);
+        GridPoint2[] ghostSpawns = {
+            new GridPoint2(20, 3),
+            new GridPoint2(2, 1),
+            new GridPoint2(20, 15),
+            new GridPoint2(11, 8)
+        };
+
+        List<GridPoint2> route = Arrays.asList(
+            new GridPoint2(2, 13),
+            new GridPoint2(5, 8),
+            new GridPoint2(11, 8),
+            new GridPoint2(17, 8),
+            new GridPoint2(20, 3),
+            new GridPoint2(18, 14),
+            new GridPoint2(4, 2)
+        );
+
+        return createFixedLayout(map, 24, playerSpawn, ghostSpawns, route);
+    }
+
+    private static Layout createFixedLayout(
+        String[] map,
+        int tileSize,
+        GridPoint2 playerSpawn,
+        GridPoint2[] ghostSpawns,
+        List<GridPoint2> waypointRoute
+    ) {
+        if (map == null || map.length == 0) {
+            throw new IllegalArgumentException("map cannot be empty");
+        }
+
+        int rows = map.length;
+        int cols = map[0].length();
+        for (String row : map) {
+            if (row == null || row.length() != cols) {
+                throw new IllegalArgumentException("all map rows must share the same width");
+            }
+        }
+
+        float offsetX = (640f - cols * tileSize) * 0.5f;
+        float offsetY = (480f - rows * tileSize) * 0.5f;
+        return new Layout(cols, rows, tileSize, offsetX, offsetY, map.clone(), playerSpawn, ghostSpawns, waypointRoute);
     }
 
     private static char[][] generateMaze(int cols, int rows, long seed) {

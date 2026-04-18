@@ -368,7 +368,7 @@ public class GameScene implements Scene {
     }
 
     private void updateMovementAudio() {
-        boolean shouldPlayMoveLoop = isMovementInputPressed();
+        boolean shouldPlayMoveLoop = isPlayerMoving();
         if (shouldPlayMoveLoop == moveLoopPlaying) {
             return;
         }
@@ -381,12 +381,12 @@ public class GameScene implements Scene {
         }
     }
 
-    private boolean isMovementInputPressed() {
-        return (player != null && player.isDashing())
-            || context.getInputManager().isActionPressed(LingoInputActions.MOVE_LEFT)
-            || context.getInputManager().isActionPressed(LingoInputActions.MOVE_RIGHT)
-            || context.getInputManager().isActionPressed(LingoInputActions.MOVE_UP)
-            || context.getInputManager().isActionPressed(LingoInputActions.MOVE_DOWN);
+    private boolean isPlayerMoving() {
+        return player != null && (
+            player.isDashing()
+                || Math.abs(player.getVx()) > 0.01f
+                || Math.abs(player.getVy()) > 0.01f
+        );
     }
 
     private void stopMovementAudio() {

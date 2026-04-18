@@ -15,7 +15,7 @@ public final class LingoAudio {
 
     public static final String PATH_SFX_COLLECT_LETTER = "audio/collect_letter.ogg";
     public static final String PATH_SFX_WRONG_LETTER = "audio/wrong_letter.ogg";
-    public static final String PATH_SFX_MOVE = "audio/move.mp3";
+    public static final String PATH_SFX_MOVE = "audio/move_fps_loop.mp3";
     public static final String PATH_SFX_GAME_OVER = "audio/gameover.mp3";
     public static final String PATH_SFX_VICTORY = "audio/victory.ogg";
     public static final String PATH_SFX_HURT = "audio/hurt.ogg";
