@@ -19,12 +19,8 @@ public final class BuildLingoManWeb {
     private static final String LOADING_MARKUP = """
         <div id="loading-overlay">
             <div id="loading-panel">
-                <div class="loading-title">Lingo-Man</div>
-                <div class="loading-subtitle">Loading web game...</div>
-                <div class="loading-bar">
-                    <div class="loading-bar-fill"></div>
-                </div>
-                <div class="loading-hint">The first load can take a few seconds while assets are prepared.</div>
+                <img class="loading-art" src="assets/lingoman/startmenu.png" alt="Lingo-Man start screen" />
+                <div class="loading-chip">Preparing game...</div>
             </div>
         </div>
         <div>
@@ -37,7 +33,7 @@ public final class BuildLingoManWeb {
             display: flex;
             justify-content: center;
             align-items: center;
-            background: radial-gradient(circle at center, #123a74 0%, #071733 58%, #020813 100%);
+            background: #081427;
             height: 100vh;
             margin: 0;
             padding: 0;
@@ -53,7 +49,7 @@ public final class BuildLingoManWeb {
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(2, 8, 19, 0.82);
+            background: #081427;
             z-index: 10;
             transition: opacity 0.25s ease;
         }
@@ -62,49 +58,33 @@ public final class BuildLingoManWeb {
             pointer-events: none;
         }
         #loading-panel {
-            width: min(460px, 86vw);
-            padding: 28px 30px;
-            border: 3px solid rgba(103, 234, 255, 0.92);
-            background: rgba(9, 26, 58, 0.94);
-            box-shadow: 0 0 0 8px rgba(13, 48, 92, 0.34);
-            text-align: center;
-            color: #e8fbff;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: min(960px, 92vw);
+            max-height: 88vh;
         }
-        .loading-title {
-            font-size: 42px;
-            line-height: 1;
-            font-weight: 700;
-            letter-spacing: 1px;
-            color: #ffbf40;
-            text-shadow: 0 0 14px rgba(255, 167, 44, 0.28);
+        .loading-art {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-height: 88vh;
+            object-fit: contain;
+            image-rendering: auto;
         }
-        .loading-subtitle {
-            margin-top: 12px;
-            font-size: 20px;
-            color: #8fe9ff;
-        }
-        .loading-bar {
-            margin-top: 22px;
-            height: 14px;
-            overflow: hidden;
-            border: 2px solid rgba(103, 234, 255, 0.7);
-            background: rgba(16, 48, 89, 0.92);
-        }
-        .loading-bar-fill {
-            width: 40%;
-            height: 100%;
-            background: linear-gradient(90deg, #ffb533 0%, #67eaff 100%);
-            animation: loading-slide 1.15s ease-in-out infinite alternate;
-        }
-        .loading-hint {
-            margin-top: 16px;
-            font-size: 14px;
-            line-height: 1.45;
-            color: rgba(230, 245, 255, 0.8);
-        }
-        @keyframes loading-slide {
-            from { transform: translateX(-55%); }
-            to { transform: translateX(150%); }
+        .loading-chip {
+            position: absolute;
+            left: 50%;
+            bottom: 4.5%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            border: 2px solid rgba(111, 235, 255, 0.9);
+            background: rgba(8, 35, 78, 0.92);
+            color: #d7f6ff;
+            font-size: clamp(16px, 2vw, 24px);
+            letter-spacing: 0.6px;
+            box-shadow: 0 0 16px rgba(86, 214, 255, 0.18);
         }
         """;
 
