@@ -2,3 +2,6 @@
   base = "Abstract Engine"
   command = "./gradlew clean :teavm:buildWeb --console=plain"
   publish = "teavm/build/dist/webapp"
+
+[build.environment]
+  JAVA_VERSION = "17"

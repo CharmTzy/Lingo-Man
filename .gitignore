@@ -151,6 +151,7 @@ nb-configuration.xml
 ## OS-Specific:
 .DS_Store
 **/.DS_Store
+Abstract Engine/gradle/gradle-daemon-jvm.properties
 Thumbs.db
 
 ## Miscellaneous:
