@@ -21,6 +21,7 @@ public class Main extends ApplicationAdapter {
     public void create() {
         context = new EngineContext();
         bootstrap.initialize(context);
+        BrowserBridge.signalReady();
     }
 
     @Override

@@ -5,6 +5,7 @@ import com.github.xpenatan.gdx.teavm.backends.web.WebApplicationConfiguration;
 import io.github.some_example_name.BrowserBridge;
 import io.github.some_example_name.Main;
 import io.github.some_example_name.lingoman.LingoBootstrap;
+import org.teavm.jso.JSBody;
 import org.teavm.jso.browser.Location;
 import org.teavm.jso.browser.Window;
 
@@ -46,6 +47,8 @@ public final class LingoManWebLauncher {
             return true;
         });
 
+        BrowserBridge.setReadyHandler(LingoManWebLauncher::hideLoadingOverlay);
+
         WebApplicationConfiguration config = new WebApplicationConfiguration("canvas");
         config.width = 0;
         config.height = 0;
@@ -56,4 +59,13 @@ public final class LingoManWebLauncher {
 
         new WebApplication(new Main(new LingoBootstrap()), config);
     }
+
+    @JSBody(script =
+        "var overlay = document.getElementById('loading-overlay');" +
+        "if (!overlay) return;" +
+        "overlay.classList.add('ready');" +
+        "setTimeout(function() {" +
+        "  if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);" +
+        "}, 250);")
+    private static native void hideLoadingOverlay();
 }

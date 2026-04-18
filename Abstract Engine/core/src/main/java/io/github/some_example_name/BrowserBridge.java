@@ -11,7 +11,13 @@ public final class BrowserBridge {
         boolean requestExit();
     }
 
+    @FunctionalInterface
+    public interface ReadyHandler {
+        void onReady();
+    }
+
     private static ExitHandler exitHandler;
+    private static ReadyHandler readyHandler;
 
     private BrowserBridge() {
     }
@@ -22,5 +28,15 @@ public final class BrowserBridge {
 
     public static boolean requestExit() {
         return exitHandler != null && exitHandler.requestExit();
+    }
+
+    public static void setReadyHandler(ReadyHandler handler) {
+        readyHandler = handler;
+    }
+
+    public static void signalReady() {
+        if (readyHandler != null) {
+            readyHandler.onReady();
+        }
     }
 }
