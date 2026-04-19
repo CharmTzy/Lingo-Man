@@ -52,16 +52,9 @@ public final class LingoManWebLauncher {
     private static native void hideLoadingOverlay();
 
     @JSBody(script =
-        "window.__lingoQuitInProgress = true;" +
-        "window.addEventListener('error', function (event) {" +
-        "  var message = String((event && event.message) || '');" +
-        "  if (window.__lingoQuitInProgress && message.indexOf(\"$pause\") !== -1) {" +
-        "    event.preventDefault();" +
-        "    return false;" +
-        "  }" +
-        "}, { once: true });" +
+        "try { window.opener = null; } catch (e) {}" +
+        "try { window.open('', '_self'); } catch (e) {}" +
         "try { window.close(); } catch (e) {}" +
-        "  try { location.replace('about:blank'); } catch (ignored) {}" +
         "return true;")
     private static native boolean attemptBrowserExit();
 }
