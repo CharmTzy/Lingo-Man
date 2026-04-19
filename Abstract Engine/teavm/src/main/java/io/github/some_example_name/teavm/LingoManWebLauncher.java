@@ -20,6 +20,7 @@ public final class LingoManWebLauncher {
     }
 
     public static void main(String[] args) {
+        BrowserBridge.setBrowserEnvironment(true);
         BrowserBridge.setExitHandler(() -> {
             Window window = Window.current();
             if (window == null) {
@@ -51,19 +52,19 @@ public final class LingoManWebLauncher {
     private static native void hideLoadingOverlay();
 
     @JSBody(script =
-        "try { window.opener = null; } catch (e) {}" +
-        "try {" +
-        "  var reopened = window.open('', '_self');" +
-        "  if (reopened) {" +
-        "    try { reopened.opener = null; } catch (ignored) {}" +
-        "    try { reopened.close(); } catch (ignored) {}" +
+        "window.__lingoQuitInProgress = true;" +
+        "window.addEventListener('error', function (event) {" +
+        "  var message = String((event && event.message) || '');" +
+        "  if (window.__lingoQuitInProgress && message.indexOf(\"$pause\") !== -1) {" +
+        "    event.preventDefault();" +
+        "    return false;" +
         "  }" +
-        "} catch (e) {}" +
+        "}, { once: true });" +
         "try { window.close(); } catch (e) {}" +
         "setTimeout(function () {" +
         "  if (window.closed) return;" +
         "  try { location.replace('about:blank'); } catch (ignored) {}" +
-        "}, 40);" +
+        "}, 120);" +
         "return true;")
     private static native boolean attemptBrowserExit();
 }

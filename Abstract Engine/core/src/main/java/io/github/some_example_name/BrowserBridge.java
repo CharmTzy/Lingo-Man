@@ -18,6 +18,7 @@ public final class BrowserBridge {
 
     private static ExitHandler exitHandler;
     private static ReadyHandler readyHandler;
+    private static boolean browserEnvironment;
 
     private BrowserBridge() {
     }
@@ -38,5 +39,13 @@ public final class BrowserBridge {
         if (readyHandler != null) {
             readyHandler.onReady();
         }
+    }
+
+    public static void setBrowserEnvironment(boolean browserEnvironment) {
+        BrowserBridge.browserEnvironment = browserEnvironment;
+    }
+
+    public static boolean isBrowserEnvironment() {
+        return browserEnvironment;
     }
 }

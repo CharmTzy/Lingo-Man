@@ -2,6 +2,7 @@ package io.github.some_example_name.lingoman;
 
 import com.badlogic.gdx.Input;
 
+import io.github.some_example_name.BrowserBridge;
 import io.github.some_example_name.EngineBootstrap;
 import io.github.some_example_name.EngineContext;
 import io.github.some_example_name.lingoman.audio.LingoAudioSettingsSaveable;
@@ -58,7 +59,7 @@ public final class LingoBootstrap implements EngineBootstrap {
         sceneManager.registerScene(LingoSceneIds.GAME, new GameScene());
         sceneManager.registerScene(LingoSceneIds.PAUSE, new PauseScene());
         sceneManager.registerScene(LingoSceneIds.GAME_OVER, new GameOverScene());
-        sceneManager.setActiveScene(LingoSceneIds.MAIN_MENU);
+        sceneManager.setActiveScene(BrowserBridge.isBrowserEnvironment() ? LingoSceneIds.MENU : LingoSceneIds.MAIN_MENU);
     }
 
     private void configureAudio(AudioManager audio) {
