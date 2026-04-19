@@ -61,6 +61,8 @@ public final class LingoManWebLauncher {
         "  }" +
         "}, { once: true });" +
         "try { window.close(); } catch (e) {}" +
+        "  if (window.closed) return;" +
+        "  try { location.replace('about:blank'); } catch (ignored) {}" +
         "return true;")
     private static native boolean attemptBrowserExit();
 }
